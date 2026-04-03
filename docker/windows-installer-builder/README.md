@@ -1,4 +1,4 @@
-# Windows Installer Builder Scaffold
+# Windows Installer Builder Surface
 
 This directory is reserved for the Windows container build lane that will produce the public installer for `vi-history-suite`.
 
@@ -15,6 +15,10 @@ The container build lane is not the final user-proof surface.
 - stage the NSIS project inputs
 - build the versioned Windows installer artifact
 - retain bounded build metadata
+
+Current authoritative release input:
+
+- [releases/v0.2.0/release-ingestion.json](../../releases/v0.2.0/release-ingestion.json)
 
 ## Not Yet Implemented
 

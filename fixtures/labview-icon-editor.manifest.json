@@ -1,11 +1,18 @@
 {
-  "fixtureId": "labview-icon-editor-canonical",
+  "fixtureId": "ni-labview-icon-editor-develop-e8945de7",
   "repositoryName": "labview-icon-editor",
-  "provisioningSource": "pinned-private-source",
+  "repositoryUrl": "https://github.com/ni/labview-icon-editor.git",
+  "reference": {
+    "branch": "develop",
+    "commitSha": "e8945de7e07feba4b87daf7b41d546f10e9d714c",
+    "commitSummary": "Rename jobs that build Lvlibp (#516)"
+  },
+  "provisioningSource": "clone-exact-commit-from-canonical-public-repo",
   "selectionPath": "Tooling/deployment/VIP_Pre-Install Custom Action.vi",
+  "selectionCommitVerified": true,
   "notes": [
-    "Use a pinned immutable repo identity when the acceptance harness is implemented.",
+    "Use this exact canonical public repo identity for Windows 11 acceptance and manual right-click proof.",
     "Do not bundle the proof repository into installer v1 by default."
   ],
-  "status": "scaffold"
+  "status": "pinned"
 }

@@ -4,7 +4,8 @@ Use this checklist on the fresh Windows 11 acceptance VM after the automated ins
 
 ## Canonical Target
 
-- repository: `labview-icon-editor`
+- repository: `ni/labview-icon-editor`
+- commit: `e8945de7e07feba4b87daf7b41d546f10e9d714c`
 - VI: `Tooling/deployment/VIP_Pre-Install Custom Action.vi`
 
 ## Checklist
@@ -24,5 +25,6 @@ Use this checklist on the fresh Windows 11 acceptance VM after the automated ins
 - installed extension version
 - Visual Studio Code version
 - pinned proof-repo identity
+- release contract id
 - pass/fail notes for each checklist item
 - screenshots for any UX defect or ambiguity

@@ -1,11 +1,18 @@
-# Windows 11 Acceptance Scaffold
+# Windows 11 Acceptance
 
-This directory is reserved for the installed-user acceptance lane for `vi-history-suite`.
+This directory defines the installed-user acceptance lane for `vi-history-suite`.
 
 ## Intended Split
 
 - automation: PowerShell + Visual Studio Code CLI
 - human gate: manual right-click review flow on the canonical VI
+
+## Current Acceptance Inputs
+
+- immutable release contract:
+  [releases/v0.2.0/release-ingestion.json](../../releases/v0.2.0/release-ingestion.json)
+- canonical fixture manifest:
+  [fixtures/labview-icon-editor.manifest.json](../../fixtures/labview-icon-editor.manifest.json)
 
 ## Planned Automated Proof
 

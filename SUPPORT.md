@@ -9,6 +9,7 @@ Internal implementation work, governed requirements, and private engineering evi
 ## Before Filing An Issue
 
 Please include:
+- release contract id, for example `v0.2.0`
 - VS Code version
 - operating system
 - installed extension version
@@ -27,7 +28,7 @@ code --list-extensions --show-versions
 
 ## Planned Acceptance Split
 
-The intended post-release acceptance split is:
+The intended acceptance split for the first public installer lane is:
 - automation via PowerShell and VS Code CLI for install, version verification, and workspace launch
 - a human manual right-click pass on a fresh Windows 11 VM for the final UX gate
 
@@ -50,3 +51,8 @@ That split exists because VS Code CLI can verify installation and launch surface
 ## Future Support Direction
 
 Planned future hardening includes an extension-side support-bundle export so issue reports can include bounded product evidence without requiring private repo access.
+
+Current immutable reference for support and future installer work:
+
+- [releases/v0.2.0/release-ingestion.json](releases/v0.2.0/release-ingestion.json)
+- [fixtures/labview-icon-editor.manifest.json](fixtures/labview-icon-editor.manifest.json)

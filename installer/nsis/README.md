@@ -1,10 +1,14 @@
-# NSIS Installer Scaffold
+# NSIS Installer Surface
 
 This directory is reserved for the public Windows installer project for `vi-history-suite`.
 
 ## Intended Source Truth
 
 The installer must consume only an immutable released VSIX artifact.
+
+Current authoritative installer input:
+
+- [releases/v0.2.0/release-ingestion.json](../../releases/v0.2.0/release-ingestion.json)
 
 It must not consume:
 - a working tree

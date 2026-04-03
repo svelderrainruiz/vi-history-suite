@@ -12,9 +12,18 @@ This repository is not the private engineering source of truth. Internal source,
 
 ## Current Status
 
-`vi-history-suite` is under active product and release hardening.
+An immutable `vi-history-suite` release now exists:
 
-Public SemVer releases for extension users are planned for this repository, but a public release has not been published here yet.
+- release tag: `v0.2.0`
+- package version: `0.2.0`
+- authoritative VSIX: `vi-history-suite-0.2.0.vsix`
+- SHA-256: `dd9585dbd684939ce71eeed01ca435685bb8da305b601e4d2bde15dfb54c4cf3`
+- current public state: the release contract is ingested here, but a public GitHub release has not been published yet
+
+Machine-readable public ingestion contract:
+
+- [releases/v0.2.0/release-ingestion.json](releases/v0.2.0/release-ingestion.json)
+- [releases/v0.2.0/README.md](releases/v0.2.0/README.md)
 
 ## Planned User Flows
 
@@ -29,6 +38,7 @@ Public SemVer releases for extension users are planned for this repository, but 
 
 - [Install](INSTALL.md)
 - [Support](SUPPORT.md)
+- [Release Ingestion](releases/v0.2.0/README.md)
 - [Windows Installer Build Scaffold](docker/windows-installer-builder/README.md)
 - [NSIS Installer Scaffold](installer/nsis/README.md)
 - [Windows 11 Acceptance Scaffold](acceptance/windows11/README.md)

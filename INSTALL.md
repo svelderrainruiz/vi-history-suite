@@ -2,13 +2,19 @@
 
 ## Current Public Release State
 
-No public `vi-history-suite` release has been published from this repository yet.
+The first immutable release has been ingested into this public facade repo:
 
-When public releases begin, this page will document:
-- the current released version
-- the release source
-- the supported installation path
-- upgrade guidance
+- release tag: `v0.2.0`
+- package version: `0.2.0`
+- commit: `3fcd02c398fe162480e9fdb0bfc432277302fd5f`
+- exact VSIX: `vi-history-suite-0.2.0.vsix`
+- SHA-256: `dd9585dbd684939ce71eeed01ca435685bb8da305b601e4d2bde15dfb54c4cf3`
+
+Current limitation:
+
+- a public GitHub release artifact has not been published here yet
+- the authoritative release still lives on the private GitLab control plane
+- the public installer lane must consume the immutable contract in `releases/v0.2.0/`
 
 ## Planned Install Surfaces
 
@@ -16,11 +22,15 @@ When public releases begin, this page will document:
 - GitHub Releases with versioned `.vsix` artifacts
 - GitHub Releases with a Windows installer built from an immutable released `.vsix`
 
+Until a public GitHub release exists, treat this repo as the public
+documentation and support surface, not yet as the public binary download
+surface.
+
 ## Planned VS Code CLI Verification
 
 The VS Code CLI is expected to be part of the public install and support workflow.
 
-Examples:
+Examples for future public release use:
 
 ```bash
 code --install-extension vi-history-suite-<version>.vsix
@@ -36,6 +46,10 @@ The first public Windows installer lane is planned to:
 - assume Visual Studio Code is already installed on the acceptance VM unless later requirements say otherwise
 
 The installer build lane is not the installed-user proof lane. Installed-user proof is planned for a separate fresh Windows 11 VM flow.
+
+Authoritative installer input for the current release:
+
+- [releases/v0.2.0/release-ingestion.json](releases/v0.2.0/release-ingestion.json)
 
 ## Planned Trust Model
 

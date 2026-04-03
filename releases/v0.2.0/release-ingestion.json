@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "status": "ingested-not-yet-publicly-published",
+  "sourceTruth": {
+    "provider": "private-gitlab-release",
+    "projectPath": "svelderrainruiz/vi-history-suite",
+    "shipId": "SHIP-0001",
+    "releaseTag": "v0.2.0",
+    "releaseUrl": "https://gitlab.com/svelderrainruiz/vi-history-suite/-/releases/v0.2.0",
+    "tagPipelineId": 2428809456,
+    "releaseJobId": 13779604462,
+    "releaseManifest": {
+      "shipId": "SHIP-0001",
+      "tag": "v0.2.0",
+      "packageVersion": "0.2.0",
+      "commitSha": "3fcd02c398fe162480e9fdb0bfc432277302fd5f",
+      "vsixArtifact": {
+        "fileName": "vi-history-suite-0.2.0.vsix",
+        "path": "release-evidence/vi-history-suite-0.2.0.vsix",
+        "sha256": "dd9585dbd684939ce71eeed01ca435685bb8da305b601e4d2bde15dfb54c4cf3"
+      },
+      "retainedEvidence": [
+        "release-evidence/coverage/",
+        "release-evidence/coverage.xml",
+        "release-evidence/release-record.md",
+        "release-evidence/release-manifest.json"
+      ]
+    }
+  },
+  "publicFacadeState": {
+    "githubRepository": "https://github.com/svelderrainruiz/vi-history-suite",
+    "githubReleasePublished": false,
+    "intendedPublicAssets": [
+      "GitHub release notes",
+      "Exact released VSIX payload",
+      "Checksum evidence",
+      "Future Windows installer built from the exact released VSIX"
+    ],
+    "notes": [
+      "This public repo has ingested the immutable v0.2.0 release contract but does not yet publish a public GitHub release asset.",
+      "Installer and Windows 11 acceptance work must consume only the identities retained here."
+    ]
+  }
+}
