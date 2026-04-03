@@ -14,6 +14,7 @@ When public releases begin, this page will document:
 
 - VS Code Marketplace
 - GitHub Releases with versioned `.vsix` artifacts
+- GitHub Releases with a Windows installer built from an immutable released `.vsix`
 
 ## Planned VS Code CLI Verification
 
@@ -26,6 +27,15 @@ code --install-extension vi-history-suite-<version>.vsix
 code --install-extension vi-history-suite-<version>.vsix --force
 code --list-extensions --show-versions
 ```
+
+## Planned Windows Installer Direction
+
+The first public Windows installer lane is planned to:
+- consume only immutable released VSIX artifacts
+- be built through a Windows Docker + NSIS build lane
+- assume Visual Studio Code is already installed on the acceptance VM unless later requirements say otherwise
+
+The installer build lane is not the installed-user proof lane. Installed-user proof is planned for a separate fresh Windows 11 VM flow.
 
 ## Planned Trust Model
 

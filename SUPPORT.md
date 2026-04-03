@@ -25,6 +25,14 @@ code --version
 code --list-extensions --show-versions
 ```
 
+## Planned Acceptance Split
+
+The intended post-release acceptance split is:
+- automation via PowerShell and VS Code CLI for install, version verification, and workspace launch
+- a human manual right-click pass on a fresh Windows 11 VM for the final UX gate
+
+That split exists because VS Code CLI can verify installation and launch surfaces, but cannot replace the real right-click interaction proof.
+
 ## Good Issue Topics
 
 - extension command behavior

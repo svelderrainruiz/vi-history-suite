@@ -1,0 +1,11 @@
+{
+  "fixtureId": "labview-icon-editor-canonical",
+  "repositoryName": "labview-icon-editor",
+  "provisioningSource": "pinned-private-source",
+  "selectionPath": "Tooling/deployment/VIP_Pre-Install Custom Action.vi",
+  "notes": [
+    "Use a pinned immutable repo identity when the acceptance harness is implemented.",
+    "Do not bundle the proof repository into installer v1 by default."
+  ],
+  "status": "scaffold"
+}
