@@ -1,0 +1,29 @@
+name: Feature request
+description: Propose a public-facing product improvement.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for user-facing product improvements. Keep the request bounded to public product behavior rather than private implementation details.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or friction
+      description: What user problem should this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed improvement
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+    validations:
+      required: false

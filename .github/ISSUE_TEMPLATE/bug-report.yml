@@ -1,0 +1,69 @@
+name: Bug report
+description: Report a user-facing defect in the installed extension.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for installed-extension defects only. Do not include private repository content that should not be disclosed publicly.
+  - type: input
+    id: extension_version
+    attributes:
+      label: Extension version
+      description: The installed `vi-history-suite` version.
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: vscode_version
+    attributes:
+      label: VS Code version
+      description: Output from `code --version`.
+    validations:
+      required: true
+  - type: input
+    id: operating_system
+    attributes:
+      label: Operating system
+      placeholder: Windows 11 / Ubuntu 24.04 / macOS 15
+    validations:
+      required: true
+  - type: dropdown
+    id: workspace_trust
+    attributes:
+      label: Workspace trust
+      options:
+        - Trusted
+        - Untrusted
+        - Unknown
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Command or action used
+      description: Which extension action you used and on which kind of VI/repo state.
+      placeholder: Right-click eligible VI -> VI History -> Open dashboard
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Optional diagnostics
+      description: Include relevant `code --list-extensions --show-versions` output or bounded error text if available.
+    validations:
+      required: false
