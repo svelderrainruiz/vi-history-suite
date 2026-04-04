@@ -81,6 +81,28 @@ function Stage-LocalFileForWindowsInvocation {
   return $destinationPath
 }
 
+function Resolve-WindowsInvocationPath {
+  param([string]$Path)
+
+  if (-not $Path) {
+    return ""
+  }
+
+  if ($Path -match '^[A-Za-z]:\\') {
+    return $Path
+  }
+
+  if (Test-Path -LiteralPath $Path) {
+    return (wslpath -w (Resolve-Path -LiteralPath $Path).Path)
+  }
+
+  if ($Path.StartsWith('/')) {
+    return (wslpath -w $Path)
+  }
+
+  return $Path
+}
+
 function Assert-PathPresent {
   param(
     [string]$Path,
@@ -313,7 +335,7 @@ if (-not $isWindowsPlatform) {
     '-ExecutionTarget', $ExecutionTarget,
     '-SetupMode', $SetupMode,
     '-ReleaseTag', $ReleaseTag,
-    '-WorkRoot', "$stagingRootWindows\\acceptance-work-root"
+    '-WorkRoot', $(if ($WorkRoot) { Resolve-WindowsInvocationPath -Path $WorkRoot } else { "$stagingRootWindows\\acceptance-work-root" })
   )
 
   if ($stagedManifestPath) {
