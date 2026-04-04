@@ -1,0 +1,40 @@
+name: Container Public Release-Kit Smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Release tag to verify
+        required: false
+        default: v0.2.0
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build container smoke image
+        run: docker build docker/public-release-kit-smoke -t vi-history-suite-public-release-kit-smoke:local
+
+      - name: Run container smoke
+        env:
+          VIHS_RELEASE_TAG: ${{ inputs.release_tag }}
+          VIHS_GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          mkdir -p artifacts/container-public-release-kit-smoke
+          docker run --rm \
+            -e VIHS_RELEASE_TAG \
+            -e VIHS_GITHUB_REPOSITORY \
+            -v "$PWD/artifacts/container-public-release-kit-smoke:/workspace/output" \
+            vi-history-suite-public-release-kit-smoke:local
+
+      - name: Upload smoke artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: container-public-release-kit-smoke
+          path: artifacts/container-public-release-kit-smoke/

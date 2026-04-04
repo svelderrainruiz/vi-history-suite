@@ -42,6 +42,7 @@ Scaffold status:
 - public binary publication is complete through the GitHub workflow
 - automated Windows 11 host-machine proof is the active acceptance lane
 - future reproducible automation is intended to move to a published container image
+- a container public-release-kit smoke recipe is now scaffolded for the future automation lane
 
 ## Planned User Flows
 
@@ -61,6 +62,7 @@ Scaffold status:
 - [Windows 11 Acceptance Scaffold](acceptance/windows11/README.md)
 - [Scaffold Validation Script](scripts/Validate-PublicFacadeScaffold.ps1)
 - [Publish Public Release Kit Workflow](.github/workflows/publish-public-release-kit.yml)
+- [Container Public Release-Kit Smoke Workflow](.github/workflows/container-public-release-kit-smoke.yml)
 - [Sync Pinned Fixture Bundle](scripts/Sync-PinnedFixtureBundle.ps1)
 
 ## Public Support Scope
@@ -92,6 +94,7 @@ Trust boundary:
 - the GitHub workflow now publishes the release kit only and deletes retired legacy installer assets when present
 - the current Windows 11 host machine is the active installed-user proof surface
 - a future published container image is the preferred reproducible automation follow-on
+- the public repo now includes a scaffolded container smoke recipe at `docker/public-release-kit-smoke/` while published-image automation remains a follow-on
 - public GitHub issues are supplemental field feedback, not the proof gate
 
 Current scaffold entrypoints:
@@ -103,4 +106,5 @@ Current scaffold entrypoints:
 - sync pinned fixture bundle: `pwsh -File scripts/Sync-PinnedFixtureBundle.ps1`
 - Windows 11 acceptance: `pwsh -File acceptance/windows11/Invoke-Windows11Acceptance.ps1 -ExecutionTarget host-machine`
 - Windows 11 human gate: `pwsh -File acceptance/windows11/Invoke-Windows11HumanGate.ps1 -Action prepare|complete`
+- container smoke: `docker build docker/public-release-kit-smoke -t vi-history-suite-public-release-kit-smoke:local`
 - publish workflow: `.github/workflows/publish-public-release-kit.yml`

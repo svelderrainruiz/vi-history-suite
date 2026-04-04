@@ -17,7 +17,7 @@ Current state:
 - private requirements and design-gate artifacts are not published in this repo
 - the public GitHub release kit is the active publication surface
 - Windows 11 host-machine acceptance is the active proof lane
-- a future published container image is the intended reproducible automation follow-on
+- a scaffolded public release-kit container smoke recipe exists, and a future published container image remains the intended reproducible automation follow-on
 
 ## Planned Install Surfaces
 
@@ -31,6 +31,7 @@ Current direct public setup direction:
 - Linux: `setup-vi-history-suite.sh`
 - both adapters consume `public-setup-manifest.json`
 - Docker is not part of the default public setup path
+- container automation is scaffolded separately as an optional reproducible smoke lane
 
 Current direct-release download commands:
 

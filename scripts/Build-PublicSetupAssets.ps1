@@ -121,7 +121,6 @@ $checksumLines = foreach ($relativePath in @(
   "labview-icon-editor.manifest.json",
   "labview-icon-editor-develop-e8945de7.bundle",
   "labview-icon-editor-develop-e8945de7.json",
-  "setup/README.md",
   "setup/windows/Setup-VIHistorySuite.ps1",
   "setup/linux/setup-vi-history-suite.sh",
   "acceptance/windows11/Invoke-Windows11Acceptance.ps1",

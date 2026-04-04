@@ -261,6 +261,10 @@ $requiredPaths = @(
   "INSTALL.md",
   "SUPPORT.md",
   ".github/workflows/publish-public-release-kit.yml",
+  ".github/workflows/container-public-release-kit-smoke.yml",
+  "docker/public-release-kit-smoke/README.md",
+  "docker/public-release-kit-smoke/Dockerfile",
+  "docker/public-release-kit-smoke/verify-public-release-kit.sh",
   "setup/README.md",
   "setup/windows/Setup-VIHistorySuite.ps1",
   "setup/linux/setup-vi-history-suite.sh",
@@ -299,6 +303,7 @@ foreach ($ps1RelativePath in @(
 }
 
 Test-BashSyntax -Path (Join-Path $repoRootPath "setup/linux/setup-vi-history-suite.sh")
+Test-BashSyntax -Path (Join-Path $repoRootPath "docker/public-release-kit-smoke/verify-public-release-kit.sh")
 
 if ($fixtureManifest.status -ne "pinned") {
   throw "Fixture manifest must remain pinned."
@@ -328,6 +333,19 @@ foreach ($token in @(
 )) {
   if ($workflowContent -notmatch [regex]::Escape($token)) {
     throw "Publish workflow must retain token '$token'."
+  }
+}
+
+$containerWorkflowPath = Join-Path $repoRootPath ".github/workflows/container-public-release-kit-smoke.yml"
+$containerWorkflowContent = Get-Content -LiteralPath $containerWorkflowPath -Raw
+foreach ($token in @(
+  "docker build docker/public-release-kit-smoke -t vi-history-suite-public-release-kit-smoke:local",
+  "vi-history-suite-public-release-kit-smoke:local",
+  "actions/upload-artifact@v4",
+  "artifacts/container-public-release-kit-smoke"
+)) {
+  if ($containerWorkflowContent -notmatch [regex]::Escape($token)) {
+    throw "Container smoke workflow must retain token '$token'."
   }
 }
 

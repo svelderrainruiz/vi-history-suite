@@ -61,7 +61,8 @@
     "notes": [
       "This public repo now treats the release kit as the only active publication surface.",
       "Legacy NSIS assets are retired from the workflow and are deleted during release publication when present.",
-      "Host-machine setup and acceptance continue consuming only the exact released VSIX identities retained here."
+      "Host-machine setup and acceptance continue consuming only the exact released VSIX identities retained here.",
+      "A scaffolded container public-release-kit smoke lane now exists in the public repo while published-image automation remains a follow-on."
     ],
     "scopeNotes": [
       "This public manifest is limited to release, setup, and support metadata.",
@@ -135,10 +136,15 @@
     },
     "futureAutomationLane": {
       "intendedSurface": "published-container-image",
-      "status": "planned-not-implemented",
+      "status": "scaffolded-not-published",
+      "scaffold": {
+        "dockerfilePath": "docker/public-release-kit-smoke/Dockerfile",
+        "smokeScriptPath": "docker/public-release-kit-smoke/verify-public-release-kit.sh",
+        "workflowPath": ".github/workflows/container-public-release-kit-smoke.yml"
+      },
       "notes": [
         "A future published container image is intended to mirror the public setup contract for reproducible automation.",
-        "Container automation is not a default end-user prerequisite."
+        "The current first slice is a scaffolded Linux container smoke lane that verifies the public release-kit contract without becoming a default end-user prerequisite."
       ]
     },
     "acceptanceProof": {

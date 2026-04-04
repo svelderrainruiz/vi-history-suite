@@ -31,4 +31,5 @@ Public release-kit surfaces tied to this release:
 - [fixtures/labview-icon-editor.manifest.json](../../fixtures/labview-icon-editor.manifest.json)
 - [acceptance/windows11/Invoke-Windows11Acceptance.ps1](../../acceptance/windows11/Invoke-Windows11Acceptance.ps1)
 - [acceptance/windows11/Invoke-Windows11HumanGate.ps1](../../acceptance/windows11/Invoke-Windows11HumanGate.ps1)
+- [docker/public-release-kit-smoke/README.md](../../docker/public-release-kit-smoke/README.md)
 - [release-evidence/README.md](./release-evidence/README.md)

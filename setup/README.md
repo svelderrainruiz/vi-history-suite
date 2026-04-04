@@ -9,6 +9,7 @@ Current direction:
 - cross-OS setup surface
 - no default Docker requirement
 - no reliance on NSIS as the primary public path
+- optional container automation scaffolded separately from the default setup path
 
 Primary entrypoints:
 
