@@ -92,11 +92,14 @@ function Test-BashSyntax {
 $repoRootPath = Resolve-PublicRepoRoot -Path $RepoRoot
 $releaseDir = Join-Path $repoRootPath "releases/v0.2.0"
 $releaseContractPath = Join-Path $releaseDir "release-ingestion.json"
-$publicSetupManifestPath = Join-Path $releaseDir "public-setup-manifest.json"
+$sourcePublicSetupManifestPath = Join-Path $releaseDir "public-setup-manifest.json"
+$builtPublicSetupManifestPath = Join-Path $repoRootPath "artifacts/public-setup/public-setup-manifest.json"
+$publicSetupManifestPath = if (Test-Path -LiteralPath $builtPublicSetupManifestPath) { $builtPublicSetupManifestPath } else { $sourcePublicSetupManifestPath }
 $fixtureManifestPath = Join-Path $repoRootPath "fixtures/labview-icon-editor.manifest.json"
 
 Assert-PathPresent -Path $releaseContractPath -Message "Missing public release ledger at $releaseContractPath."
-Assert-PathPresent -Path $publicSetupManifestPath -Message "Missing public setup manifest at $publicSetupManifestPath."
+Assert-PathPresent -Path $sourcePublicSetupManifestPath -Message "Missing source public setup manifest at $sourcePublicSetupManifestPath."
+Assert-PathPresent -Path $publicSetupManifestPath -Message "Missing effective public setup manifest at $publicSetupManifestPath."
 Assert-PathPresent -Path $fixtureManifestPath -Message "Missing pinned fixture manifest at $fixtureManifestPath."
 
 $releaseContract = Read-JsonFile -Path $releaseContractPath

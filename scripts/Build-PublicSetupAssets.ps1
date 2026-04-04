@@ -41,6 +41,15 @@ function Get-Sha256 {
   return ([System.BitConverter]::ToString($hashBytes).Replace("-", "").ToLowerInvariant())
 }
 
+function Write-JsonFile {
+  param(
+    [string]$Path,
+    [object]$Value
+  )
+
+  $Value | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $Path -Encoding ASCII
+}
+
 $repoRootPath = Resolve-PublicRepoRoot -Path $RepoRoot
 $outputRootPath = if ($OutputRoot) {
   [IO.Path]::GetFullPath($OutputRoot)
@@ -74,13 +83,21 @@ Ensure-Directory -Path $outputRootPath
 Ensure-Directory -Path (Join-Path $outputRootPath "setup/windows")
 Ensure-Directory -Path (Join-Path $outputRootPath "setup/linux")
 
-Copy-Item -LiteralPath $manifestPath -Destination (Join-Path $outputRootPath "public-setup-manifest.json") -Force
 Copy-Item -LiteralPath $fixtureManifestPath -Destination (Join-Path $outputRootPath "labview-icon-editor.manifest.json") -Force
 Copy-Item -LiteralPath $bundlePath -Destination (Join-Path $outputRootPath "labview-icon-editor-develop-e8945de7.bundle") -Force
 Copy-Item -LiteralPath $bundleMetadataPath -Destination (Join-Path $outputRootPath "labview-icon-editor-develop-e8945de7.json") -Force
 Copy-Item -LiteralPath $windowsSetupPath -Destination (Join-Path $outputRootPath "setup/windows/Setup-VIHistorySuite.ps1") -Force
 Copy-Item -LiteralPath $linuxSetupPath -Destination (Join-Path $outputRootPath "setup/linux/setup-vi-history-suite.sh") -Force
 Copy-Item -LiteralPath $setupReadmePath -Destination (Join-Path $outputRootPath "setup/README.md") -Force
+
+$manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
+$manifest.assets.vsix.sha256 = Get-Sha256 -Path (Join-Path $repoRootPath ("releases/{0}/release-evidence/{1}" -f $manifest.release.tag, $manifest.assets.vsix.fileName))
+$manifest.assets.windowsSetupScript.sha256 = Get-Sha256 -Path $windowsSetupPath
+$manifest.assets.linuxSetupScript.sha256 = Get-Sha256 -Path $linuxSetupPath
+$manifest.fixture.manifest.sha256 = Get-Sha256 -Path $fixtureManifestPath
+$manifest.fixture.bundle.sha256 = Get-Sha256 -Path $bundlePath
+$manifest.fixture.metadata.sha256 = Get-Sha256 -Path $bundleMetadataPath
+Write-JsonFile -Path (Join-Path $outputRootPath "public-setup-manifest.json") -Value $manifest
 
 $checksumLines = foreach ($relativePath in @(
   "public-setup-manifest.json",

@@ -65,10 +65,15 @@ function Stage-LocalFileForWindowsInvocation {
 }
 
 $repoRootPath = Resolve-PublicRepoRoot -Path $RepoRoot
-$manifestPath = Join-Path $repoRootPath "releases/v0.2.0/public-setup-manifest.json"
+$manifestPath = Join-Path $repoRootPath "artifacts/public-setup/public-setup-manifest.json"
+$fallbackManifestPath = Join-Path $repoRootPath "releases/v0.2.0/public-setup-manifest.json"
 $setupScriptPath = Join-Path $repoRootPath "setup/windows/Setup-VIHistorySuite.ps1"
 $vsixPath = Join-Path $repoRootPath "releases/v0.2.0/release-evidence/vi-history-suite-0.2.0.vsix"
 $bundlePath = Join-Path $repoRootPath "artifacts/fixtures/labview-icon-editor-develop-e8945de7.bundle"
+
+if (-not (Test-Path -LiteralPath $manifestPath)) {
+  $manifestPath = $fallbackManifestPath
+}
 
 Assert-PathPresent -Path $manifestPath -Message "Public setup manifest was not found at $manifestPath."
 Assert-PathPresent -Path $setupScriptPath -Message "Windows setup script was not found at $setupScriptPath."
