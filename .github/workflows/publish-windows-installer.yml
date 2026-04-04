@@ -1,0 +1,94 @@
+name: Publish Windows Installer
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    env:
+      VI_HISTORY_SUITE_GITLAB_API_TOKEN: ${{ secrets.VI_HISTORY_SUITE_GITLAB_API_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate release secret
+        shell: pwsh
+        run: |
+          if (-not $env:VI_HISTORY_SUITE_GITLAB_API_TOKEN) {
+            throw "Repository secret VI_HISTORY_SUITE_GITLAB_API_TOKEN is required."
+          }
+
+      - name: Sync immutable release evidence
+        shell: pwsh
+        run: ./scripts/Sync-ImmutableReleaseEvidence.ps1
+
+      - name: Fetch pinned bootstrap inputs
+        shell: pwsh
+        run: ./docker/windows-installer-builder/Fetch-WorkflowBootstrapInputs.ps1
+
+      - name: Validate public facade scaffold
+        shell: pwsh
+        run: ./scripts/Validate-PublicFacadeScaffold.ps1
+
+      - name: Build Windows installer
+        shell: pwsh
+        run: ./docker/windows-installer-builder/Invoke-InstallerBuild.ps1
+
+      - name: Publish release assets
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          $contract = Get-Content -LiteralPath "releases/v0.2.0/release-ingestion.json" -Raw | ConvertFrom-Json
+          $tag = $contract.sourceTruth.releaseTag
+          $version = $contract.sourceTruth.releaseManifest.packageVersion
+          $installerPath = $contract.builderContract.installerBuild.defaultOutputRelativePath
+          $buildMetadataPath = $contract.builderContract.installerBuild.defaultBuildMetadataRelativePath
+          $checksumPath = "artifacts/windows-installer/SHA256SUMS.txt"
+          $vsixPath = "releases/v0.2.0/release-evidence/vi-history-suite-$version.vsix"
+          $vsixChecksumPath = "releases/v0.2.0/release-evidence/vi-history-suite-$version.vsix.sha256"
+          $releaseManifestPath = "releases/v0.2.0/release-evidence/release-manifest.json"
+          $releaseRecordPath = "releases/v0.2.0/release-evidence/release-record.md"
+          $notesPath = "artifacts/windows-installer/github-release-notes.md"
+
+          @(
+            "# VI History Suite $tag",
+            "",
+            "- Exact VSIX source: retained GitLab release job $($contract.sourceTruth.releaseJobId)",
+            "- Exact VSIX SHA-256: $($contract.sourceTruth.releaseManifest.vsixArtifact.sha256)",
+            "- Windows installer: vi-history-suite-setup-$version.exe",
+            "- Installer built from the exact retained VSIX through the public GitHub facade workflow."
+          ) | Set-Content -LiteralPath $notesPath -Encoding ASCII
+
+          $assets = @(
+            $vsixPath,
+            $vsixChecksumPath,
+            $releaseManifestPath,
+            $releaseRecordPath,
+            $installerPath,
+            $checksumPath,
+            $buildMetadataPath
+          )
+
+          gh release view $tag --repo $env:GITHUB_REPOSITORY *> $null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $tag @assets --repo $env:GITHUB_REPOSITORY --title "VI History Suite $tag" --notes-file $notesPath --target $env:GITHUB_SHA
+          } else {
+            gh release upload $tag @assets --repo $env:GITHUB_REPOSITORY --clobber
+            gh release edit $tag --repo $env:GITHUB_REPOSITORY --title "VI History Suite $tag" --notes-file $notesPath
+          }
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer-v0.2.0
+          path: |
+            artifacts/windows-installer/
+            releases/v0.2.0/release-evidence/vi-history-suite-0.2.0.vsix
+            releases/v0.2.0/release-evidence/vi-history-suite-0.2.0.vsix.sha256
+            releases/v0.2.0/release-evidence/release-manifest.json
+            releases/v0.2.0/release-evidence/release-record.md

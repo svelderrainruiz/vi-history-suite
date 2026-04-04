@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 3,
   "status": "ingested-not-yet-publicly-published",
   "sourceTruth": {
     "provider": "private-gitlab-release",
@@ -40,5 +40,91 @@
       "This public repo has ingested the immutable v0.2.0 release contract but does not yet publish a public GitHub release asset.",
       "Installer and Windows 11 acceptance work must consume only the identities retained here."
     ]
+  },
+  "builderContract": {
+    "releaseContractId": "v0.2.0",
+    "packageVersion": "0.2.0",
+    "extensionIdentifier": "svelderrainruiz.vi-history-suite",
+    "windowsVmAssumptions": [
+      "The Windows 11 acceptance VM may be a fresh install with neither Visual Studio Code nor Git preinstalled.",
+      "The canonical proof repo is provisioned separately from the installer.",
+      "The installer bootstraps pinned Visual Studio Code and Git installers, then uses the Visual Studio Code CLI to install the exact released VSIX and verify the public proof surface."
+    ],
+    "stagingRequirements": {
+      "releaseEvidenceRoot": "releases/v0.2.0/release-evidence",
+      "requiredBeforeInstallerBuild": [
+        {
+          "id": "release-evidence-root",
+          "relativePath": "releases/v0.2.0/release-evidence",
+          "required": true
+        },
+        {
+          "id": "release-evidence-readme",
+          "relativePath": "releases/v0.2.0/release-evidence/README.md",
+          "required": true
+        }
+      ],
+      "forbiddenSources": [
+        "working tree outputs",
+        "preview artifacts",
+        "unpublished package versions"
+      ]
+    },
+    "installerBuild": {
+      "dockerContext": "docker/windows-installer-builder",
+      "dockerfile": "docker/windows-installer-builder/Dockerfile",
+      "builderEntrypoint": "docker/windows-installer-builder/Invoke-InstallerBuild.ps1",
+      "nsisProject": "installer/nsis/vi-history-suite-installer.nsi",
+      "defaultOutputRelativePath": "artifacts/windows-installer/vi-history-suite-setup-0.2.0.exe",
+      "defaultBuildMetadataRelativePath": "artifacts/windows-installer/vi-history-suite-setup-0.2.0-build.json",
+      "installerContents": [
+        "Exact released VSIX payload",
+        "Pinned Visual Studio Code bootstrap installer",
+        "Pinned Git for Windows bootstrap installer",
+        "README.md",
+        "INSTALL.md",
+        "SUPPORT.md",
+        "LICENSE",
+        "release-ingestion.json"
+      ]
+    },
+    "runtimeBootstrapInstallers": {
+      "vscode": {
+        "productName": "Visual Studio Code",
+        "version": "1.109.3",
+        "fileName": "VSCodeSetup-x64-1.109.3.exe",
+        "sha256": "ef2ffa7f7589209a6ce452955b0dacd842be4f960b3a92c0d275180b0e74874d",
+        "downloadUrl": "https://update.code.visualstudio.com/1.109.3/win32-x64/stable",
+        "stageEntrypoint": "docker/windows-installer-builder/Stage-VsCodeBootstrap.ps1",
+        "vendorRelativePath": "docker/windows-installer-builder/vendor/VSCodeSetup-x64-1.109.3.exe"
+      },
+      "git": {
+        "productName": "Git for Windows",
+        "version": "2.53.0",
+        "fileName": "Git-2.53.0-64-bit.exe",
+        "sha256": "3b4e1b127dbebea2931f2ae9dfafa0c2343a488a1222009debfe78d5d335e6a9",
+        "downloadUrl": "https://github.com/git-for-windows/git/releases/download/v2.53.0.windows.1/Git-2.53.0-64-bit.exe",
+        "stageEntrypoint": "docker/windows-installer-builder/Stage-GitBootstrap.ps1",
+        "vendorRelativePath": "docker/windows-installer-builder/vendor/Git-2.53.0-64-bit.exe"
+      }
+    },
+    "toolchainReferences": {
+      "nsis": {
+        "version": "3.11",
+        "bootstrapInstaller": {
+          "fileName": "nsis-3.11-setup.exe",
+          "sha256": "38d49f8fe09b1c332b01d0940e57b7258f4447733643273a01c59959ad9d3b0a",
+          "downloadUrl": "https://downloads.sourceforge.net/project/nsis/NSIS%203/3.11/nsis-3.11-setup.exe",
+          "stageEntrypoint": "docker/windows-installer-builder/Stage-NsisBootstrap.ps1",
+          "vendorRelativePath": "docker/windows-installer-builder/vendor/nsis-3.11-setup.exe"
+        }
+      }
+    },
+    "acceptanceProof": {
+      "automationEntrypoint": "acceptance/windows11/Invoke-Windows11Acceptance.ps1",
+      "manualChecklistPath": "acceptance/windows11/manual-right-click-checklist.md",
+      "acceptanceRecordTemplatePath": "acceptance/windows11/acceptance-record.template.json",
+      "fixtureManifestPath": "fixtures/labview-icon-editor.manifest.json"
+    }
   }
 }

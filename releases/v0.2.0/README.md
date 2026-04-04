@@ -16,3 +16,13 @@ Current truth:
 
 Use [release-ingestion.json](./release-ingestion.json) as the machine-readable
 source for installer and Windows acceptance work in this public facade repo.
+
+Staging and scaffold surfaces tied to this release contract:
+
+- [release-evidence/README.md](./release-evidence/README.md)
+- [docker/windows-installer-builder/Invoke-InstallerBuild.ps1](../../docker/windows-installer-builder/Invoke-InstallerBuild.ps1)
+- [docker/windows-installer-builder/Stage-NsisBootstrap.ps1](../../docker/windows-installer-builder/Stage-NsisBootstrap.ps1)
+- [docker/windows-installer-builder/Stage-VsCodeBootstrap.ps1](../../docker/windows-installer-builder/Stage-VsCodeBootstrap.ps1)
+- [docker/windows-installer-builder/Stage-GitBootstrap.ps1](../../docker/windows-installer-builder/Stage-GitBootstrap.ps1)
+- [installer/nsis/vi-history-suite-installer.nsi](../../installer/nsis/vi-history-suite-installer.nsi)
+- [acceptance/windows11/Invoke-Windows11Acceptance.ps1](../../acceptance/windows11/Invoke-Windows11Acceptance.ps1)

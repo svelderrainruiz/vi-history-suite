@@ -11,6 +11,7 @@ Internal implementation work, governed requirements, and private engineering evi
 Please include:
 - release contract id, for example `v0.2.0`
 - VS Code version
+- Git version
 - operating system
 - installed extension version
 - whether the workspace was trusted
@@ -24,15 +25,27 @@ Useful VS Code CLI output:
 ```bash
 code --version
 code --list-extensions --show-versions
+git --version
 ```
 
 ## Planned Acceptance Split
 
 The intended acceptance split for the first public installer lane is:
-- automation via PowerShell and VS Code CLI for install, version verification, and workspace launch
+- automation via PowerShell plus pinned prerequisite bootstrap installers and
+  VS Code CLI for install, version verification, and workspace launch
 - a human manual right-click pass on a fresh Windows 11 VM for the final UX gate
 
 That split exists because VS Code CLI can verify installation and launch surfaces, but cannot replace the real right-click interaction proof.
+
+Current scaffold entrypoints:
+
+- [docker/windows-installer-builder/Stage-NsisBootstrap.ps1](docker/windows-installer-builder/Stage-NsisBootstrap.ps1)
+- [docker/windows-installer-builder/Stage-VsCodeBootstrap.ps1](docker/windows-installer-builder/Stage-VsCodeBootstrap.ps1)
+- [docker/windows-installer-builder/Stage-GitBootstrap.ps1](docker/windows-installer-builder/Stage-GitBootstrap.ps1)
+- [docker/windows-installer-builder/Invoke-InstallerBuild.ps1](docker/windows-installer-builder/Invoke-InstallerBuild.ps1)
+- [acceptance/windows11/Invoke-Windows11Acceptance.ps1](acceptance/windows11/Invoke-Windows11Acceptance.ps1)
+- [acceptance/windows11/manual-right-click-checklist.md](acceptance/windows11/manual-right-click-checklist.md)
+- [acceptance/windows11/acceptance-record.template.json](acceptance/windows11/acceptance-record.template.json)
 
 ## Good Issue Topics
 

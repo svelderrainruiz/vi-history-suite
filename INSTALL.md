@@ -15,6 +15,7 @@ Current limitation:
 - a public GitHub release artifact has not been published here yet
 - the authoritative release still lives on the private GitLab control plane
 - the public installer lane must consume the immutable contract in `releases/v0.2.0/`
+- the scaffolded installer build expects the exact VSIX to be staged under `releases/v0.2.0/release-evidence/`
 
 ## Planned Install Surfaces
 
@@ -28,7 +29,8 @@ surface.
 
 ## Planned VS Code CLI Verification
 
-The VS Code CLI is expected to be part of the public install and support workflow.
+The VS Code CLI remains the authoritative extension install, verification, and
+workspace-launch surface for the public Windows flow.
 
 Examples for future public release use:
 
@@ -42,14 +44,43 @@ code --list-extensions --show-versions
 
 The first public Windows installer lane is planned to:
 - consume only immutable released VSIX artifacts
-- be built through a Windows Docker + NSIS build lane
-- assume Visual Studio Code is already installed on the acceptance VM unless later requirements say otherwise
+- be built and published through the GitHub repo workflow, using the Windows Docker + NSIS build lane contract
+- treat the Windows 11 proof VM as a fresh install with no preinstalled Visual Studio Code or Git
+- bootstrap pinned Visual Studio Code and Git installers before using the VS Code CLI to install the exact released extension
 
 The installer build lane is not the installed-user proof lane. Installed-user proof is planned for a separate fresh Windows 11 VM flow.
 
 Authoritative installer input for the current release:
 
 - [releases/v0.2.0/release-ingestion.json](releases/v0.2.0/release-ingestion.json)
+- [releases/v0.2.0/release-evidence/README.md](releases/v0.2.0/release-evidence/README.md)
+- [.github/workflows/publish-windows-installer.yml](.github/workflows/publish-windows-installer.yml)
+- [docker/windows-installer-builder/Stage-NsisBootstrap.ps1](docker/windows-installer-builder/Stage-NsisBootstrap.ps1)
+- [docker/windows-installer-builder/Stage-VsCodeBootstrap.ps1](docker/windows-installer-builder/Stage-VsCodeBootstrap.ps1)
+- [docker/windows-installer-builder/Stage-GitBootstrap.ps1](docker/windows-installer-builder/Stage-GitBootstrap.ps1)
+- [docker/windows-installer-builder/Invoke-InstallerBuild.ps1](docker/windows-installer-builder/Invoke-InstallerBuild.ps1)
+- [installer/nsis/vi-history-suite-installer.nsi](installer/nsis/vi-history-suite-installer.nsi)
+
+Pinned bootstrap references for the Windows builder scaffold:
+
+- file: `nsis-3.11-setup.exe`
+- SHA-256:
+  `38d49f8fe09b1c332b01d0940e57b7258f4447733643273a01c59959ad9d3b0a`
+- file: `VSCodeSetup-x64-1.109.3.exe`
+- SHA-256:
+  `ef2ffa7f7589209a6ce452955b0dacd842be4f960b3a92c0d275180b0e74874d`
+- file: `Git-2.53.0-64-bit.exe`
+- SHA-256:
+  `3b4e1b127dbebea2931f2ae9dfafa0c2343a488a1222009debfe78d5d335e6a9`
+
+Example scaffold command on a Windows host with NSIS available:
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File docker/windows-installer-builder/Stage-NsisBootstrap.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File docker/windows-installer-builder/Stage-VsCodeBootstrap.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File docker/windows-installer-builder/Stage-GitBootstrap.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File docker/windows-installer-builder/Invoke-InstallerBuild.ps1
+```
 
 ## Planned Trust Model
 

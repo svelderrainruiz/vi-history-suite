@@ -1,6 +1,8 @@
 # Manual Right-Click Checklist
 
-Use this checklist on the fresh Windows 11 acceptance VM after the automated installer and Visual Studio Code CLI setup steps succeed.
+Use this checklist on the fresh Windows 11 acceptance VM after the automated
+installer, prerequisite bootstrap, and Visual Studio Code CLI verification
+steps succeed.
 
 ## Canonical Target
 
@@ -11,6 +13,7 @@ Use this checklist on the fresh Windows 11 acceptance VM after the automated ins
 ## Checklist
 
 - confirm Visual Studio Code opens the pinned proof workspace
+- confirm Git-backed workspace state is available on the fresh VM
 - confirm the workspace is trusted before review actions are exercised
 - locate the canonical VI in the Explorer tree
 - right-click the VI and confirm `VI History` is present
@@ -24,7 +27,9 @@ Use this checklist on the fresh Windows 11 acceptance VM after the automated ins
 
 - installed extension version
 - Visual Studio Code version
+- Git version
 - pinned proof-repo identity
 - release contract id
 - pass/fail notes for each checklist item
 - screenshots for any UX defect or ambiguity
+- the generated automation record at `artifacts/windows11-acceptance/acceptance-record.json`

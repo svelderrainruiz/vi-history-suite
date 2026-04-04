@@ -25,6 +25,17 @@ Machine-readable public ingestion contract:
 - [releases/v0.2.0/release-ingestion.json](releases/v0.2.0/release-ingestion.json)
 - [releases/v0.2.0/README.md](releases/v0.2.0/README.md)
 
+Scaffold status:
+
+- immutable release contract is retained here for `v0.2.0`
+- pinned NSIS 3.11 bootstrap reference is retained in the release/build contract
+- pinned Visual Studio Code and Git bootstrap references are retained for fresh
+  Windows 11 VM proof
+- Windows Docker builder entrypoint is scaffolded
+- NSIS installer entrypoint is scaffolded
+- Windows 11 acceptance harness and manual checklist are scaffolded
+- public binary publication and executed Windows proof gates remain open
+
 ## Planned User Flows
 
 - Install a released `.vsix` from GitHub Releases or the VS Code Marketplace.
@@ -42,6 +53,11 @@ Machine-readable public ingestion contract:
 - [Windows Installer Build Scaffold](docker/windows-installer-builder/README.md)
 - [NSIS Installer Scaffold](installer/nsis/README.md)
 - [Windows 11 Acceptance Scaffold](acceptance/windows11/README.md)
+- [Scaffold Validation Script](scripts/Validate-PublicFacadeScaffold.ps1)
+- [Publish Windows Installer Workflow](.github/workflows/publish-windows-installer.yml)
+- [Stage NSIS Bootstrap](docker/windows-installer-builder/Stage-NsisBootstrap.ps1)
+- [Stage Visual Studio Code Bootstrap](docker/windows-installer-builder/Stage-VsCodeBootstrap.ps1)
+- [Stage Git Bootstrap](docker/windows-installer-builder/Stage-GitBootstrap.ps1)
 
 ## Public Support Scope
 
@@ -57,6 +73,7 @@ Do not use this repository to request private engineering artifacts, internal ga
 
 This facade repo is the intended public surface for:
 - Windows installer artifacts built from immutable released VSIX packages
+- pinned prerequisite bootstrap installers for fresh-machine proof
 - release-facing documentation
 - installed-user acceptance guidance
 
@@ -65,3 +82,13 @@ Trust boundary:
 - this public repo is the consumer-facing distribution and support facade
 - Windows Docker is the installer build surface
 - a fresh Windows 11 VM is the installed-user proof surface
+
+Current scaffold entrypoints:
+
+- build validation: `pwsh -File scripts/Validate-PublicFacadeScaffold.ps1`
+- publish workflow: `.github/workflows/publish-windows-installer.yml`
+- stage NSIS bootstrap: `pwsh -File docker/windows-installer-builder/Stage-NsisBootstrap.ps1`
+- stage Visual Studio Code bootstrap: `pwsh -File docker/windows-installer-builder/Stage-VsCodeBootstrap.ps1`
+- stage Git bootstrap: `pwsh -File docker/windows-installer-builder/Stage-GitBootstrap.ps1`
+- Windows installer build: `pwsh -File docker/windows-installer-builder/Invoke-InstallerBuild.ps1`
+- Windows 11 acceptance: `pwsh -File acceptance/windows11/Invoke-Windows11Acceptance.ps1`

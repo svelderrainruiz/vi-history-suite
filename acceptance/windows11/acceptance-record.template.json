@@ -1,0 +1,38 @@
+{
+  "releaseContractId": "v0.2.0",
+  "expectedExtension": {
+    "identifier": "svelderrainruiz.vi-history-suite",
+    "version": "0.2.0"
+  },
+  "installer": {
+    "path": "",
+    "sha256": "",
+    "executed": false
+  },
+  "fixture": {
+    "fixtureId": "ni-labview-icon-editor-develop-e8945de7",
+    "repositoryUrl": "https://github.com/ni/labview-icon-editor.git",
+    "commitSha": "e8945de7e07feba4b87daf7b41d546f10e9d714c",
+    "selectionPath": "Tooling/deployment/VIP_Pre-Install Custom Action.vi"
+  },
+  "automation": {
+    "codeCommand": "",
+    "gitCommand": "",
+    "codeVersionLogPath": "",
+    "gitVersionLogPath": "",
+    "installedExtensionToken": "svelderrainruiz.vi-history-suite@0.2.0",
+    "extensionsLogPath": "",
+    "workspaceLaunchExitCode": 0,
+    "workspaceLaunchLogPath": "",
+    "selectionLaunchExitCode": 0,
+    "selectionLaunchLogPath": ""
+  },
+  "humanGate": {
+    "checklistPath": "acceptance/windows11/manual-right-click-checklist.md",
+    "reviewer": "",
+    "status": "pending-human-review",
+    "notes": [],
+    "screenshots": []
+  },
+  "generatedAtUtc": ""
+}
