@@ -42,6 +42,14 @@ jobs:
         shell: pwsh
         run: ./scripts/Validate-PublicFacadeScaffold.ps1
 
+      - name: Test harness bootstrap regression guards
+        shell: pwsh
+        run: ./scripts/Test-HarnessBootstrapRegression.ps1
+
+      - name: Smoke test harness fixture bootstrap
+        shell: pwsh
+        run: ./scripts/Test-HarnessFixtureBootstrap.ps1
+
       - name: Build Windows installer
         shell: pwsh
         run: ./docker/windows-installer-builder/Invoke-InstallerBuild.ps1

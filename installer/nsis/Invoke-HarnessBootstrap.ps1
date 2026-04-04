@@ -4,7 +4,8 @@ param(
   [string]$ReleaseContractPath = "",
   [string]$FixtureManifestPath = "",
   [string]$GitCommand = "",
-  [string]$LogRoot = ""
+  [string]$LogRoot = "",
+  [switch]$SkipDockerDesktopPreparation
 )
 
 Set-StrictMode -Version Latest
@@ -412,8 +413,17 @@ try {
 
   Set-BootstrapStage -Stage "prepare-fixture-workspace"
   $fixtureResult = Ensure-FixtureWorkspace -GitCommand $gitCommandPath -FixtureManifest $fixtureManifest -InstallRoot $installRootPath -LogPath (Join-Path $logRootPath "fixture-workspace.txt")
-  Set-BootstrapStage -Stage "prepare-docker-desktop-and-image"
-  $dockerResult = Ensure-DockerDesktopAndImage -ReleaseContract $releaseContract -InstallRoot $installRootPath -LogRoot $logRootPath
+  if ($SkipDockerDesktopPreparation.IsPresent) {
+    Set-BootstrapStage -Stage "skip-docker-desktop-preparation"
+    $dockerResult = [pscustomobject][ordered]@{
+      Skipped = $true
+      RebootRequired = $false
+      InstallExitCode = 0
+    }
+  } else {
+    Set-BootstrapStage -Stage "prepare-docker-desktop-and-image"
+    $dockerResult = Ensure-DockerDesktopAndImage -ReleaseContract $releaseContract -InstallRoot $installRootPath -LogRoot $logRootPath
+  }
 
   Set-BootstrapStage -Stage "write-bootstrap-summary"
   $summary = [ordered]@{
@@ -427,6 +437,7 @@ try {
       selectionPath = $fixtureResult.SelectionPath
     }
     docker = [ordered]@{
+      skipped = [bool](Get-PropertyValueOrDefault -InputObject $dockerResult -PropertyName "Skipped" -DefaultValue "False")
       rebootRequired = $dockerResult.RebootRequired
       installExitCode = $dockerResult.InstallExitCode
       dockerCommand = Get-PropertyValueOrDefault -InputObject $dockerResult -PropertyName "DockerCommand"
@@ -442,6 +453,11 @@ try {
   if ($dockerResult.RebootRequired) {
     Write-Host "Docker Desktop requested a Windows restart before the harness can finish preparing the Windows container engine."
     exit $dockerResult.InstallExitCode
+  }
+
+  if ($SkipDockerDesktopPreparation.IsPresent) {
+    Write-Host "Harness bootstrap completed with Docker Desktop preparation skipped. Summary: $summaryPath"
+    exit 0
   }
 
   Write-Host "Harness bootstrap completed. Summary: $summaryPath"
