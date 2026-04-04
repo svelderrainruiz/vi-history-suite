@@ -66,9 +66,17 @@ function Invoke-Git {
     [string[]]$CommandArgs
   )
 
-  & $GitCommand @CommandArgs
-  if ($LASTEXITCODE -ne 0) {
-    throw "$GitCommand $($CommandArgs -join ' ') failed with exit code $LASTEXITCODE."
+  $mergedOutput = & $GitCommand @CommandArgs 2>&1
+  $exitCode = $LASTEXITCODE
+
+  foreach ($line in @($mergedOutput)) {
+    if ($null -ne $line -and "$line".Length -gt 0) {
+      Write-Host $line
+    }
+  }
+
+  if ($exitCode -ne 0) {
+    throw "$GitCommand $($CommandArgs -join ' ') failed with exit code $exitCode."
   }
 }
 
@@ -97,7 +105,7 @@ if ((-not $Force.IsPresent) -and (Test-Path -LiteralPath $bundleOutputPath) -and
     $metadata.repositoryUrl -eq $fixtureManifest.repositoryUrl
   ) {
     Write-Host "Pinned fixture bundle already staged at $bundleOutputPath"
-    exit 0
+    return
   }
 }
 
