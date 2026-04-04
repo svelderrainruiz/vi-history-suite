@@ -20,7 +20,7 @@ An immutable `vi-history-suite` release now exists:
 - SHA-256: `dd9585dbd684939ce71eeed01ca435685bb8da305b601e4d2bde15dfb54c4cf3`
 - public GitHub release: `https://github.com/svelderrainruiz/vi-history-suite/releases/tag/v0.2.0`
 - Windows installer asset: `vi-history-suite-setup-0.2.0.exe`
-- installer SHA-256: `b1d057b5fd4ca4ba5076e49217ebc28168d4984a28e0b6ecb08ec738044c06e0`
+- installer SHA-256: `d969495919b6e753e0b8c5b02a68370b5015bcc4ff94b8fc79b5d63b612342a4`
 - current public state: the exact VSIX and Windows installer are published through the GitHub workflow on `2026-04-04`
 
 Machine-readable public ingestion contract:
