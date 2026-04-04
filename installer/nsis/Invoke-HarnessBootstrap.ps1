@@ -154,10 +154,25 @@ function Invoke-ExternalCommand {
     throw "$FilePath $($Args -join ' ') failed with exit code $exitCode."
   }
 
-  return [ordered]@{
+  return [pscustomobject][ordered]@{
     Output = $output
     ExitCode = $exitCode
   }
+}
+
+function Get-PropertyValueOrDefault {
+  param(
+    [object]$InputObject,
+    [string]$PropertyName,
+    [string]$DefaultValue = ""
+  )
+
+  $property = $InputObject.PSObject.Properties[$PropertyName]
+  if ($property) {
+    return [string]$property.Value
+  }
+
+  return $DefaultValue
 }
 
 function Wait-ForDockerServer {
@@ -249,7 +264,7 @@ function Ensure-FixtureWorkspace {
   $logLines.Add("Pinned proof fixture selection: $selectionPath")
   $logLines | Set-Content -LiteralPath $LogPath -Encoding ASCII
 
-  return [ordered]@{
+  return [pscustomobject][ordered]@{
     WorkspacePath = $workspacePath
     SelectionPath = $selectionPath
     HeadCommit = $resolvedHead
@@ -291,7 +306,7 @@ function Ensure-DockerDesktopAndImage {
     ) | Set-Content -LiteralPath $dockerInstallLogPath -Encoding ASCII
 
     if ($installExitCode -eq 3010 -or $installExitCode -eq 1641) {
-      return [ordered]@{
+      return [pscustomobject][ordered]@{
         RebootRequired = $true
         InstallExitCode = $installExitCode
       }
@@ -348,7 +363,7 @@ function Ensure-DockerDesktopAndImage {
     throw "Pinned LabVIEW Windows container image digest mismatch. Expected $($imageContract.repositoryDigestReference)."
   }
 
-  return [ordered]@{
+  return [pscustomobject][ordered]@{
     RebootRequired = $false
     InstallExitCode = $installExitCode
     DockerCommand = $dockerCommandPath
@@ -385,11 +400,11 @@ $summary = [ordered]@{
   docker = [ordered]@{
     rebootRequired = $dockerResult.RebootRequired
     installExitCode = $dockerResult.InstallExitCode
-    dockerCommand = if ($dockerResult.Contains("DockerCommand")) { $dockerResult.DockerCommand } else { "" }
-    dockerDesktopPath = if ($dockerResult.Contains("DockerDesktopPath")) { $dockerResult.DockerDesktopPath } else { "" }
-    serverVersion = if ($dockerResult.Contains("ServerVersion")) { $dockerResult.ServerVersion } else { "" }
-    imageReference = if ($dockerResult.Contains("ImageReference")) { $dockerResult.ImageReference } else { "" }
-    repositoryDigest = if ($dockerResult.Contains("RepositoryDigest")) { $dockerResult.RepositoryDigest } else { "" }
+    dockerCommand = Get-PropertyValueOrDefault -InputObject $dockerResult -PropertyName "DockerCommand"
+    dockerDesktopPath = Get-PropertyValueOrDefault -InputObject $dockerResult -PropertyName "DockerDesktopPath"
+    serverVersion = Get-PropertyValueOrDefault -InputObject $dockerResult -PropertyName "ServerVersion"
+    imageReference = Get-PropertyValueOrDefault -InputObject $dockerResult -PropertyName "ImageReference"
+    repositoryDigest = Get-PropertyValueOrDefault -InputObject $dockerResult -PropertyName "RepositoryDigest"
   }
   generatedAtUtc = (Get-Date).ToUniversalTime().ToString("o")
 }

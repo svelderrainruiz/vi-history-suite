@@ -228,7 +228,7 @@ function Resolve-FixtureBundle {
   Assert-PathPresent -Path $bundlePath -Message "Pinned fixture bundle was not generated at $bundlePath."
   Assert-PathPresent -Path $metadataPath -Message "Pinned fixture bundle metadata was not generated at $metadataPath."
 
-  return [ordered]@{
+  return [pscustomobject][ordered]@{
     Manifest = $fixtureManifest
     BundlePath = $bundlePath
     MetadataPath = $metadataPath
