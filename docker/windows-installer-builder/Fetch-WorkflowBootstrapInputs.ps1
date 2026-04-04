@@ -84,12 +84,10 @@ $repoRootPath = Resolve-PublicRepoRoot -Path $RepoRoot
 $releaseContractPath = Join-Path $repoRootPath "releases/v0.2.0/release-ingestion.json"
 $releaseContract = Read-JsonFile -Path $releaseContractPath
 
-$nsisContract = $releaseContract.builderContract.toolchainReferences.nsis.bootstrapInstaller
 $vsCodeContract = $releaseContract.builderContract.runtimeBootstrapInstallers.vscode
 $gitContract = $releaseContract.builderContract.runtimeBootstrapInstallers.git
 
-Save-BootstrapInstaller -DestinationPath (Join-Path $repoRootPath $nsisContract.vendorRelativePath) -Contract $nsisContract
 Save-BootstrapInstaller -DestinationPath (Join-Path $repoRootPath $vsCodeContract.vendorRelativePath) -Contract $vsCodeContract
 Save-BootstrapInstaller -DestinationPath (Join-Path $repoRootPath $gitContract.vendorRelativePath) -Contract $gitContract
 
-Write-Host "Pinned workflow bootstrap inputs are staged and verified."
+Write-Host "Pinned workflow runtime bootstrap inputs are staged and verified."
