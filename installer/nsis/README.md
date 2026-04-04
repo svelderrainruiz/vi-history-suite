@@ -52,6 +52,7 @@ Default staged install layout:
 
 ## Current Limitation
 
-This scaffold is intentionally fail-closed until the exact VSIX is staged under
-`releases/v0.2.0/release-evidence/` and the Windows builder lane is executed on
-an actual Windows host or Windows container runner with NSIS available.
+The exact-contract installer is now published through the GitHub workflow, but
+fresh Windows 11 VM proof still remains open. Acceptance must still confirm the
+installer bootstraps Visual Studio Code and Git on a truly fresh VM and that
+the right-click review flow works on the pinned proof fixture.

@@ -1,7 +1,7 @@
 # Windows Installer Builder Surface
 
-This directory contains the Windows container build scaffold for the public
-installer lane for `vi-history-suite`.
+This directory contains the Windows builder scaffold for the public installer
+lane for `vi-history-suite`.
 
 The intended public release path is the GitHub workflow at
 [publish-windows-installer.yml](../../.github/workflows/publish-windows-installer.yml),
@@ -10,10 +10,13 @@ invokes this builder entrypoint on a Windows runner.
 
 ## Trust Boundary
 
-- Windows Docker builds the installer
+- the GitHub workflow builds and publishes the installer by invoking this
+  builder entrypoint on a Windows runner
+- the retained Dockerfile is a hardening scaffold for a future builder image,
+  not the currently proven publication path
 - the Windows 11 VM proves the installed-user experience
 
-The container build lane is not the final user-proof surface.
+The builder lane is not the final user-proof surface.
 
 ## Planned Responsibilities
 

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 3,
-  "status": "ingested-not-yet-publicly-published",
+  "status": "published-on-github-facade",
   "sourceTruth": {
     "provider": "private-gitlab-release",
     "projectPath": "svelderrainruiz/vi-history-suite",
@@ -29,16 +29,51 @@
   },
   "publicFacadeState": {
     "githubRepository": "https://github.com/svelderrainruiz/vi-history-suite",
-    "githubReleasePublished": false,
+    "githubReleasePublished": true,
+    "githubReleaseUrl": "https://github.com/svelderrainruiz/vi-history-suite/releases/tag/v0.2.0",
+    "githubReleasePublishedAt": "2026-04-04T01:47:14Z",
+    "githubReleaseTargetCommitish": "4985517f8c4dc9997f72f55100297bd354ac8d28",
+    "githubReleaseWorkflow": {
+      "path": ".github/workflows/publish-windows-installer.yml",
+      "runUrl": "https://github.com/svelderrainruiz/vi-history-suite/actions/runs/23968715268"
+    },
     "intendedPublicAssets": [
       "GitHub release notes",
       "Exact released VSIX payload",
-      "Checksum evidence",
-      "Future Windows installer built from the exact released VSIX"
+      "VSIX checksum evidence",
+      "Windows installer built from the exact released VSIX",
+      "Installer checksum and build metadata"
+    ],
+    "publishedAssets": [
+      {
+        "fileName": "vi-history-suite-0.2.0.vsix",
+        "sha256": "dd9585dbd684939ce71eeed01ca435685bb8da305b601e4d2bde15dfb54c4cf3",
+        "downloadUrl": "https://github.com/svelderrainruiz/vi-history-suite/releases/download/v0.2.0/vi-history-suite-0.2.0.vsix"
+      },
+      {
+        "fileName": "vi-history-suite-0.2.0.vsix.sha256",
+        "sha256": "e43ff6ce16be49b51d0632ca86df29b16c733514c13e0c166ca8f8de65e17029",
+        "downloadUrl": "https://github.com/svelderrainruiz/vi-history-suite/releases/download/v0.2.0/vi-history-suite-0.2.0.vsix.sha256"
+      },
+      {
+        "fileName": "vi-history-suite-setup-0.2.0.exe",
+        "sha256": "f4c7b57c0b9ad2377e202f8dc898d1ca8291d5134dda25d7bae86221ec1f7e14",
+        "downloadUrl": "https://github.com/svelderrainruiz/vi-history-suite/releases/download/v0.2.0/vi-history-suite-setup-0.2.0.exe"
+      },
+      {
+        "fileName": "SHA256SUMS.txt",
+        "sha256": "3ec141db515824d400035526e4a1eb5a52588f482d0666f1a17eb357779ac02b",
+        "downloadUrl": "https://github.com/svelderrainruiz/vi-history-suite/releases/download/v0.2.0/SHA256SUMS.txt"
+      },
+      {
+        "fileName": "vi-history-suite-setup-0.2.0-build.json",
+        "sha256": "d98061e39ecf14e856ddb0ea9da171ae7ec50ff0416227d90065803abbdd63a1",
+        "downloadUrl": "https://github.com/svelderrainruiz/vi-history-suite/releases/download/v0.2.0/vi-history-suite-setup-0.2.0-build.json"
+      }
     ],
     "notes": [
-      "This public repo has ingested the immutable v0.2.0 release contract but does not yet publish a public GitHub release asset.",
-      "Installer and Windows 11 acceptance work must consume only the identities retained here."
+      "This public repo now publishes the exact v0.2.0 VSIX and Windows installer through the GitHub release workflow.",
+      "Installer and Windows 11 acceptance work must continue consuming only the identities retained here."
     ]
   },
   "builderContract": {

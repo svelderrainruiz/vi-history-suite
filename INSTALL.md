@@ -9,13 +9,16 @@ The first immutable release has been ingested into this public facade repo:
 - commit: `3fcd02c398fe162480e9fdb0bfc432277302fd5f`
 - exact VSIX: `vi-history-suite-0.2.0.vsix`
 - SHA-256: `dd9585dbd684939ce71eeed01ca435685bb8da305b601e4d2bde15dfb54c4cf3`
+- GitHub release: `https://github.com/svelderrainruiz/vi-history-suite/releases/tag/v0.2.0`
+- Windows installer: `vi-history-suite-setup-0.2.0.exe`
+- installer SHA-256: `f4c7b57c0b9ad2377e202f8dc898d1ca8291d5134dda25d7bae86221ec1f7e14`
 
-Current limitation:
+Current state:
 
-- a public GitHub release artifact has not been published here yet
 - the authoritative release still lives on the private GitLab control plane
-- the public installer lane must consume the immutable contract in `releases/v0.2.0/`
-- the scaffolded installer build expects the exact VSIX to be staged under `releases/v0.2.0/release-evidence/`
+- the public GitHub release now publishes the exact VSIX and the workflow-built Windows installer
+- the public installer lane continues consuming the immutable contract in `releases/v0.2.0/`
+- fresh Windows 11 VM acceptance is still a separate proof gate
 
 ## Planned Install Surfaces
 
@@ -23,32 +26,40 @@ Current limitation:
 - GitHub Releases with versioned `.vsix` artifacts
 - GitHub Releases with a Windows installer built from an immutable released `.vsix`
 
-Until a public GitHub release exists, treat this repo as the public
-documentation and support surface, not yet as the public binary download
-surface.
+Current public download commands:
 
-## Planned VS Code CLI Verification
+```powershell
+$tag = 'v0.2.0'
+$asset = 'vi-history-suite-setup-0.2.0.exe'
+$uri = "https://github.com/svelderrainruiz/vi-history-suite/releases/download/$tag/$asset"
+$dest = Join-Path $env:TEMP $asset
+
+Invoke-WebRequest -Uri $uri -OutFile $dest
+Get-FileHash $dest -Algorithm SHA256
+```
+
+## VS Code CLI Verification
 
 The VS Code CLI remains the authoritative extension install, verification, and
 workspace-launch surface for the public Windows flow.
 
-Examples for future public release use:
+Examples:
 
 ```bash
-code --install-extension vi-history-suite-<version>.vsix
-code --install-extension vi-history-suite-<version>.vsix --force
+code --install-extension vi-history-suite-0.2.0.vsix
+code --install-extension vi-history-suite-0.2.0.vsix --force
 code --list-extensions --show-versions
 ```
 
-## Planned Windows Installer Direction
+## Windows Installer Direction
 
-The first public Windows installer lane is planned to:
+The first public Windows installer lane:
 - consume only immutable released VSIX artifacts
-- be built and published through the GitHub repo workflow, using the Windows Docker + NSIS build lane contract
+- is built and published through the GitHub repo workflow, using the Windows Docker + NSIS build lane contract
 - treat the Windows 11 proof VM as a fresh install with no preinstalled Visual Studio Code or Git
 - bootstrap pinned Visual Studio Code and Git installers before using the VS Code CLI to install the exact released extension
 
-The installer build lane is not the installed-user proof lane. Installed-user proof is planned for a separate fresh Windows 11 VM flow.
+The installer build lane is not the installed-user proof lane. Installed-user proof remains a separate fresh Windows 11 VM flow.
 
 Authoritative installer input for the current release:
 
@@ -73,7 +84,7 @@ Pinned bootstrap references for the Windows builder scaffold:
 - SHA-256:
   `3b4e1b127dbebea2931f2ae9dfafa0c2343a488a1222009debfe78d5d335e6a9`
 
-Example scaffold command on a Windows host with NSIS available:
+Reference local build commands on a Windows host with NSIS available:
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File docker/windows-installer-builder/Stage-NsisBootstrap.ps1

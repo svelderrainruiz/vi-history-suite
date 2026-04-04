@@ -18,7 +18,10 @@ An immutable `vi-history-suite` release now exists:
 - package version: `0.2.0`
 - authoritative VSIX: `vi-history-suite-0.2.0.vsix`
 - SHA-256: `dd9585dbd684939ce71eeed01ca435685bb8da305b601e4d2bde15dfb54c4cf3`
-- current public state: the release contract is ingested here, but a public GitHub release has not been published yet
+- public GitHub release: `https://github.com/svelderrainruiz/vi-history-suite/releases/tag/v0.2.0`
+- Windows installer asset: `vi-history-suite-setup-0.2.0.exe`
+- installer SHA-256: `f4c7b57c0b9ad2377e202f8dc898d1ca8291d5134dda25d7bae86221ec1f7e14`
+- current public state: the exact VSIX and Windows installer are published through the GitHub workflow on `2026-04-04`
 
 Machine-readable public ingestion contract:
 
@@ -34,7 +37,8 @@ Scaffold status:
 - Windows Docker builder entrypoint is scaffolded
 - NSIS installer entrypoint is scaffolded
 - Windows 11 acceptance harness and manual checklist are scaffolded
-- public binary publication and executed Windows proof gates remain open
+- public binary publication is complete through the GitHub workflow
+- executed Windows 11 proof remains open
 
 ## Planned User Flows
 
@@ -80,7 +84,8 @@ This facade repo is the intended public surface for:
 Trust boundary:
 - private GitLab release remains the engineering source of truth for the exact released VSIX
 - this public repo is the consumer-facing distribution and support facade
-- Windows Docker is the installer build surface
+- the GitHub workflow is the active installer build and publication surface
+- the Windows builder Docker scaffold is retained for future builder-image hardening
 - a fresh Windows 11 VM is the installed-user proof surface
 
 Current scaffold entrypoints:
