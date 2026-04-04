@@ -15,9 +15,9 @@ Current truth:
 - public GitHub release:
   `https://github.com/svelderrainruiz/vi-history-suite/releases/tag/v0.2.0`
 - workflow publication run:
-  `https://github.com/svelderrainruiz/vi-history-suite/actions/runs/23971788621`
+  `https://github.com/svelderrainruiz/vi-history-suite/actions/runs/23972092540`
 - published Windows installer SHA-256:
-  `d969495919b6e753e0b8c5b02a68370b5015bcc4ff94b8fc79b5d63b612342a4`
+  `f7a3835ee720bc4025569dc502fbf8260bbd0ede492750b8a0e1ce0acf2274e6`
 
 Use [release-ingestion.json](./release-ingestion.json) as the machine-readable
 source for installer and Windows acceptance work in this public facade repo.
