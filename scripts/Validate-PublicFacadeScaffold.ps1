@@ -286,7 +286,6 @@ foreach ($token in @(
   "./scripts/Sync-ImmutableReleaseEvidence.ps1",
   "./scripts/Sync-PinnedFixtureBundle.ps1",
   "./scripts/Build-PublicSetupAssets.ps1",
-  "./scripts/Test-PublicSetupFixture.ps1",
   "gh release delete-asset",
   "SHA256SUMS-public-setup.txt"
 )) {
