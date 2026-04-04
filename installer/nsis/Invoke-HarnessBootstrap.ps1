@@ -9,6 +9,7 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+$script:CurrentBootstrapStage = "initialize"
 
 function Resolve-PathOrDefault {
   param(
@@ -34,6 +35,12 @@ function Ensure-Directory {
   param([string]$Path)
 
   New-Item -ItemType Directory -Force -Path $Path | Out-Null
+}
+
+function Set-BootstrapStage {
+  param([string]$Stage)
+
+  $script:CurrentBootstrapStage = $Stage
 }
 
 function Resolve-GitCommand {
@@ -236,16 +243,19 @@ function Ensure-FixtureWorkspace {
 
   $logLines = New-Object System.Collections.Generic.List[string]
   $logLines.Add("Cloning pinned proof fixture from local bundle: $bundlePath")
+  Set-BootstrapStage -Stage "clone-fixture-workspace"
   $cloneResult = Invoke-ExternalCommand -FilePath $GitCommand -Args @("clone", $bundlePath, $workspacePath) -LogPath ""
   foreach ($line in $cloneResult.Output) {
     $logLines.Add([string]$line)
   }
 
+  Set-BootstrapStage -Stage "checkout-fixture-commit"
   $checkoutResult = Invoke-ExternalCommand -FilePath $GitCommand -Args @("-C", $workspacePath, "checkout", "--detach", $FixtureManifest.reference.commitSha) -LogPath ""
   foreach ($line in $checkoutResult.Output) {
     $logLines.Add([string]$line)
   }
 
+  Set-BootstrapStage -Stage "verify-fixture-workspace"
   $resolvedHead = ((& $GitCommand -C $workspacePath rev-parse HEAD 2>&1) | Out-String).Trim()
   if ($LASTEXITCODE -ne 0) {
     throw "Failed to resolve HEAD for the materialized proof fixture workspace."
@@ -297,6 +307,7 @@ function Ensure-DockerDesktopAndImage {
   $installExitCode = 0
 
   if ((-not $dockerCommandPath) -or (-not $dockerDesktopPath)) {
+    Set-BootstrapStage -Stage "install-docker-desktop"
     $process = Start-Process -FilePath $dockerInstallerPath -ArgumentList $dockerContract.installArguments -Wait -PassThru -NoNewWindow
     $installExitCode = $process.ExitCode
     @(
@@ -316,6 +327,7 @@ function Ensure-DockerDesktopAndImage {
       throw "Docker Desktop bootstrap failed with exit code $installExitCode."
     }
 
+    Set-BootstrapStage -Stage "resolve-docker-desktop-after-install"
     $dockerCommandPath = Resolve-DockerCommand
     $dockerDesktopPath = Resolve-DockerDesktopExecutable
   } else {
@@ -327,23 +339,29 @@ function Ensure-DockerDesktopAndImage {
     ) | Set-Content -LiteralPath $dockerInstallLogPath -Encoding ASCII
   }
 
+  Set-BootstrapStage -Stage "start-docker-desktop"
   $startResult = Invoke-ExternalCommand -FilePath $dockerCommandPath -Args @("desktop", "start") -LogPath $dockerDesktopStartLogPath -AllowedExitCodes @(0)
   if ($startResult.ExitCode -ne 0) {
     throw "Docker Desktop failed to start."
   }
 
+  Set-BootstrapStage -Stage "wait-for-docker-server"
   $serverVersion = Wait-ForDockerServer -DockerCommand $dockerCommandPath
   @("Docker server version: $serverVersion") | Set-Content -LiteralPath $dockerVersionLogPath -Encoding ASCII
 
+  Set-BootstrapStage -Stage "switch-to-windows-containers"
   Invoke-ExternalCommand -FilePath $dockerCommandPath -Args @("desktop", "engine", "use", "windows") -LogPath $dockerEngineLogPath -AllowedExitCodes @(0) | Out-Null
+  Set-BootstrapStage -Stage "wait-for-windows-containers"
   Wait-ForWindowsEngine -DockerCommand $dockerCommandPath
 
+  Set-BootstrapStage -Stage "inspect-pinned-image"
   $repoDigestOutput = & $dockerCommandPath image inspect --format '{{join .RepoDigests "\n"}}' $imageContract.imageReference 2>&1
   $repoDigestExitCode = $LASTEXITCODE
   $repoDigestText = ($repoDigestOutput | Out-String).Trim()
   $imagePresent = $repoDigestExitCode -eq 0 -and ($repoDigestText -match [regex]::Escape($imageContract.repositoryDigestReference))
 
   if (-not $imagePresent) {
+    Set-BootstrapStage -Stage "pull-pinned-image"
     Invoke-ExternalCommand -FilePath $dockerCommandPath -Args @("pull", $imageContract.imageReference) -LogPath $dockerImagePullLogPath -AllowedExitCodes @(0) | Out-Null
   } else {
     @(
@@ -352,6 +370,7 @@ function Ensure-DockerDesktopAndImage {
     ) | Set-Content -LiteralPath $dockerImagePullLogPath -Encoding ASCII
   }
 
+  Set-BootstrapStage -Stage "verify-pinned-image"
   $inspectResult = Invoke-ExternalCommand -FilePath $dockerCommandPath -Args @("image", "inspect", $imageContract.imageReference) -LogPath $dockerImageInspectLogPath -AllowedExitCodes @(0)
   $repoDigests = & $dockerCommandPath image inspect --format '{{join .RepoDigests "\n"}}' $imageContract.imageReference 2>&1
   if ($LASTEXITCODE -ne 0) {
@@ -380,39 +399,74 @@ $releaseContractResolvedPath = Resolve-PathOrDefault -Path $ReleaseContractPath 
 $fixtureManifestResolvedPath = Resolve-PathOrDefault -Path $FixtureManifestPath -DefaultPath (Join-Path $installRootPath "fixtures\labview-icon-editor.manifest.json")
 $logRootPath = Resolve-PathOrDefault -Path $LogRoot -DefaultPath (Join-Path $installRootPath "logs")
 Ensure-Directory -Path $logRootPath
-
-$releaseContract = Read-JsonFile -Path $releaseContractResolvedPath
-$fixtureManifest = Read-JsonFile -Path $fixtureManifestResolvedPath
-$gitCommandPath = Resolve-GitCommand -Candidate $GitCommand
-
-$fixtureResult = Ensure-FixtureWorkspace -GitCommand $gitCommandPath -FixtureManifest $fixtureManifest -InstallRoot $installRootPath -LogPath (Join-Path $logRootPath "fixture-workspace.txt")
-$dockerResult = Ensure-DockerDesktopAndImage -ReleaseContract $releaseContract -InstallRoot $installRootPath -LogRoot $logRootPath
-
+$errorLogPath = Join-Path $logRootPath "harness-bootstrap-error.txt"
 $summaryPath = Join-Path $logRootPath "harness-bootstrap-summary.json"
-$summary = [ordered]@{
-  fixture = [ordered]@{
-    repositoryUrl = $fixtureManifest.repositoryUrl
-    branch = $fixtureManifest.reference.branch
-    commitSha = $fixtureResult.HeadCommit
-    workspacePath = $fixtureResult.WorkspacePath
-    selectionPath = $fixtureResult.SelectionPath
-  }
-  docker = [ordered]@{
-    rebootRequired = $dockerResult.RebootRequired
-    installExitCode = $dockerResult.InstallExitCode
-    dockerCommand = Get-PropertyValueOrDefault -InputObject $dockerResult -PropertyName "DockerCommand"
-    dockerDesktopPath = Get-PropertyValueOrDefault -InputObject $dockerResult -PropertyName "DockerDesktopPath"
-    serverVersion = Get-PropertyValueOrDefault -InputObject $dockerResult -PropertyName "ServerVersion"
-    imageReference = Get-PropertyValueOrDefault -InputObject $dockerResult -PropertyName "ImageReference"
-    repositoryDigest = Get-PropertyValueOrDefault -InputObject $dockerResult -PropertyName "RepositoryDigest"
-  }
-  generatedAtUtc = (Get-Date).ToUniversalTime().ToString("o")
-}
-$summary | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $summaryPath -Encoding ASCII
 
-if ($dockerResult.RebootRequired) {
-  Write-Host "Docker Desktop requested a Windows restart before the harness can finish preparing the Windows container engine."
-  exit $dockerResult.InstallExitCode
-}
+try {
+  Set-BootstrapStage -Stage "read-release-contract"
+  $releaseContract = Read-JsonFile -Path $releaseContractResolvedPath
+  Set-BootstrapStage -Stage "read-fixture-manifest"
+  $fixtureManifest = Read-JsonFile -Path $fixtureManifestResolvedPath
+  Set-BootstrapStage -Stage "resolve-git-command"
+  $gitCommandPath = Resolve-GitCommand -Candidate $GitCommand
 
-Write-Host "Harness bootstrap completed. Summary: $summaryPath"
+  Set-BootstrapStage -Stage "prepare-fixture-workspace"
+  $fixtureResult = Ensure-FixtureWorkspace -GitCommand $gitCommandPath -FixtureManifest $fixtureManifest -InstallRoot $installRootPath -LogPath (Join-Path $logRootPath "fixture-workspace.txt")
+  Set-BootstrapStage -Stage "prepare-docker-desktop-and-image"
+  $dockerResult = Ensure-DockerDesktopAndImage -ReleaseContract $releaseContract -InstallRoot $installRootPath -LogRoot $logRootPath
+
+  Set-BootstrapStage -Stage "write-bootstrap-summary"
+  $summary = [ordered]@{
+    status = "success"
+    stage = $script:CurrentBootstrapStage
+    fixture = [ordered]@{
+      repositoryUrl = $fixtureManifest.repositoryUrl
+      branch = $fixtureManifest.reference.branch
+      commitSha = $fixtureResult.HeadCommit
+      workspacePath = $fixtureResult.WorkspacePath
+      selectionPath = $fixtureResult.SelectionPath
+    }
+    docker = [ordered]@{
+      rebootRequired = $dockerResult.RebootRequired
+      installExitCode = $dockerResult.InstallExitCode
+      dockerCommand = Get-PropertyValueOrDefault -InputObject $dockerResult -PropertyName "DockerCommand"
+      dockerDesktopPath = Get-PropertyValueOrDefault -InputObject $dockerResult -PropertyName "DockerDesktopPath"
+      serverVersion = Get-PropertyValueOrDefault -InputObject $dockerResult -PropertyName "ServerVersion"
+      imageReference = Get-PropertyValueOrDefault -InputObject $dockerResult -PropertyName "ImageReference"
+      repositoryDigest = Get-PropertyValueOrDefault -InputObject $dockerResult -PropertyName "RepositoryDigest"
+    }
+    generatedAtUtc = (Get-Date).ToUniversalTime().ToString("o")
+  }
+  $summary | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $summaryPath -Encoding ASCII
+
+  if ($dockerResult.RebootRequired) {
+    Write-Host "Docker Desktop requested a Windows restart before the harness can finish preparing the Windows container engine."
+    exit $dockerResult.InstallExitCode
+  }
+
+  Write-Host "Harness bootstrap completed. Summary: $summaryPath"
+} catch {
+  $failureMessage = $_.Exception.Message
+  @(
+    "Stage: $script:CurrentBootstrapStage",
+    "Message: $failureMessage",
+    "Category: $($_.CategoryInfo.Category)",
+    "FullyQualifiedErrorId: $($_.FullyQualifiedErrorId)",
+    "ScriptStackTrace:",
+    $_.ScriptStackTrace,
+    "Position:",
+    $_.InvocationInfo.PositionMessage
+  ) | Set-Content -LiteralPath $errorLogPath -Encoding ASCII
+
+  $failureSummary = [ordered]@{
+    status = "failed"
+    stage = $script:CurrentBootstrapStage
+    message = $failureMessage
+    errorLogPath = $errorLogPath
+    generatedAtUtc = (Get-Date).ToUniversalTime().ToString("o")
+  }
+  $failureSummary | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $summaryPath -Encoding ASCII
+
+  Write-Error "Harness bootstrap failed during $($script:CurrentBootstrapStage). See $errorLogPath."
+  exit 1
+}

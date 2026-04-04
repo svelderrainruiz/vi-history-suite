@@ -200,7 +200,7 @@ Function RunHarnessBootstrap
   ${EndIf}
   ${If} $0 != 0
     Push "Harness bootstrap failed. See $INSTDIR\logs for the retained proof-workspace and Docker preparation logs. Exit code: $0"
-    Call FailInstall
+    Call FailInstallPreserveInstallRoot
   ${EndIf}
   Return
 
