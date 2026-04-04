@@ -2,24 +2,16 @@
   "releaseContractId": "v0.2.0",
   "executionEnvironment": {
     "target": "host-machine",
+    "setupStrategy": "direct-release-kit",
     "workRoot": "",
-    "releaseTag": "v0.2.0",
-    "releaseContractPath": "",
-    "releaseContractSource": "",
-    "fixtureManifestPath": "",
-    "fixtureManifestSource": "",
+    "publicSetupManifestPath": "",
+    "setupScriptPath": "",
     "computerName": "",
     "userName": ""
   },
   "expectedExtension": {
     "identifier": "svelderrainruiz.vi-history-suite",
     "version": "0.2.0"
-  },
-  "installer": {
-    "path": "",
-    "sha256": "",
-    "executed": false,
-    "source": ""
   },
   "setup": {
     "manifestPath": "",
@@ -38,12 +30,8 @@
   "automation": {
     "codeCommand": "",
     "gitCommand": "",
-    "dockerCommand": "",
     "codeVersionLogPath": "",
     "gitVersionLogPath": "",
-    "dockerVersionLogPath": "",
-    "dockerEngineLogPath": "",
-    "dockerImageLogPath": "",
     "installedExtensionToken": "svelderrainruiz.vi-history-suite@0.2.0",
     "extensionsLogPath": "",
     "workspaceLaunchExitCode": 0,

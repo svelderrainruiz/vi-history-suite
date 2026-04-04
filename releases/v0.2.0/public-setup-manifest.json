@@ -23,7 +23,7 @@
     },
     "windowsSetupScript": {
       "fileName": "Setup-VIHistorySuite.ps1",
-      "sha256": "eeefb1dff50c9605b4bafdccff04c706fa0ebc990b9840fedd6bf8a258638778",
+      "sha256": "f4e18f03a6c908111891cba2f36eaf8c98ca4727a0d4a1590a8f336cf16c7beb",
       "downloadUrl": "https://github.com/svelderrainruiz/vi-history-suite/releases/download/v0.2.0/Setup-VIHistorySuite.ps1"
     },
     "linuxSetupScript": {
@@ -62,13 +62,12 @@
   "setup": {
     "strategy": "direct-release-kit",
     "optionalProviders": [
-      "docker-runtime",
-      "legacy-nsis-wrapper"
+      "container-automation"
     ],
     "notes": [
       "This public manifest is limited to release, setup, and support metadata.",
       "Docker is not part of the default public setup path.",
-      "NSIS is not part of the primary public setup path."
+      "Legacy installer wrappers are retired from the active public toolchain."
     ],
     "windows": {
       "supported": true,

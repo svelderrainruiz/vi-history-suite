@@ -1,9 +1,7 @@
 # Manual Right-Click Checklist
 
 Use this checklist on the current Windows 11 proof machine after the automated
-direct-release setup and Visual Studio Code CLI verification steps succeed. A
-fresh VM remains an optional replay surface, but the active acceptance lane
-defaults to the host machine.
+direct-release setup and Visual Studio Code CLI verification steps succeed.
 
 ## Canonical Target
 
@@ -29,9 +27,8 @@ defaults to the host machine.
 - installed extension version
 - Visual Studio Code version
 - Git version
-- Docker version only if a Docker-backed optional provider path was exercised
 - pinned proof-repo identity
 - public setup manifest id
 - pass/fail notes for each checklist item
 - screenshots for any UX defect or ambiguity
-- the generated automation record at `%LocalAppData%\VI History Suite\acceptance\host-machine\acceptance-record.json` by default, or the selected `WorkRoot`
+- the generated automation record at `%LocalAppData%\VI History Suite\acceptance\host-machine\acceptance-record.json` or the selected `WorkRoot`

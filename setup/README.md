@@ -18,8 +18,3 @@ Primary entrypoints:
 These adapters consume the public setup manifest at
 [releases/v0.2.0/public-setup-manifest.json](../releases/v0.2.0/public-setup-manifest.json)
 plus the public release assets published on GitHub.
-
-Legacy surfaces retained but no longer primary:
-
-- [installer/nsis/README.md](../installer/nsis/README.md)
-- [docker/windows-installer-builder/README.md](../docker/windows-installer-builder/README.md)

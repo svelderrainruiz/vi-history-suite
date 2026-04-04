@@ -45,6 +45,24 @@ function Assert-Matches {
   }
 }
 
+function Get-Sha256 {
+  param([string]$Path)
+
+  $stream = [System.IO.File]::OpenRead($Path)
+  try {
+    $sha = [System.Security.Cryptography.SHA256]::Create()
+    try {
+      $hashBytes = $sha.ComputeHash($stream)
+    } finally {
+      $sha.Dispose()
+    }
+  } finally {
+    $stream.Dispose()
+  }
+
+  return ([System.BitConverter]::ToString($hashBytes).Replace("-", "").ToLowerInvariant())
+}
+
 function Test-PowerShellSyntax {
   param([string]$Path)
 
@@ -76,24 +94,41 @@ $releaseDir = Join-Path $repoRootPath "releases/v0.2.0"
 $releaseContractPath = Join-Path $releaseDir "release-ingestion.json"
 $publicSetupManifestPath = Join-Path $releaseDir "public-setup-manifest.json"
 $fixtureManifestPath = Join-Path $repoRootPath "fixtures/labview-icon-editor.manifest.json"
+
+Assert-PathPresent -Path $releaseContractPath -Message "Missing public release ledger at $releaseContractPath."
+Assert-PathPresent -Path $publicSetupManifestPath -Message "Missing public setup manifest at $publicSetupManifestPath."
+Assert-PathPresent -Path $fixtureManifestPath -Message "Missing pinned fixture manifest at $fixtureManifestPath."
+
 $releaseContract = Read-JsonFile -Path $releaseContractPath
 $publicSetupManifest = Read-JsonFile -Path $publicSetupManifestPath
 $fixtureManifest = Read-JsonFile -Path $fixtureManifestPath
 
-Assert-PathPresent -Path $releaseContractPath -Message "Missing immutable release contract at $releaseContractPath."
-Assert-PathPresent -Path $publicSetupManifestPath -Message "Missing public setup manifest at $publicSetupManifestPath."
-Assert-PathPresent -Path $fixtureManifestPath -Message "Missing pinned fixture manifest at $fixtureManifestPath."
-
-if ($releaseContract.schemaVersion -lt 4) {
-  throw "Release contract schemaVersion must be at least 4."
+if ($releaseContract.schemaVersion -lt 5) {
+  throw "Release contract schemaVersion must be at least 5."
 }
 
 if ($releaseContract.sourceTruth.releaseTag -ne "v0.2.0") {
-  throw "Expected releaseTag v0.2.0 in the immutable release contract."
+  throw "Expected releaseTag v0.2.0 in the public release ledger."
 }
 
-if ($releaseContract.builderContract.releaseContractId -ne "v0.2.0") {
-  throw "builderContract.releaseContractId must remain aligned with v0.2.0."
+if ($releaseContract.publicSetupContract.releaseContractId -ne "v0.2.0") {
+  throw "publicSetupContract.releaseContractId must remain aligned with v0.2.0."
+}
+
+if ($releaseContract.publicFacadeState.activePublicationWorkflow.path -ne ".github/workflows/publish-public-release-kit.yml") {
+  throw "The active publication workflow must be .github/workflows/publish-public-release-kit.yml."
+}
+
+$retiredAssets = @(
+  "vi-history-suite-setup-0.2.0.exe",
+  "SHA256SUMS.txt",
+  "vi-history-suite-setup-0.2.0-build.json"
+)
+
+foreach ($asset in $retiredAssets) {
+  if ($releaseContract.publicFacadeState.retiredPublicAssets -notcontains $asset) {
+    throw "Retired public asset '$asset' must remain listed in release-ingestion.json."
+  }
 }
 
 if ($publicSetupManifest.schemaVersion -lt 1) {
@@ -112,62 +147,89 @@ if ($publicSetupManifest.setup.strategy -ne "direct-release-kit") {
   throw "Public setup manifest must keep direct-release-kit as the primary setup strategy."
 }
 
-Assert-Matches -Value $releaseContract.sourceTruth.releaseManifest.vsixArtifact.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "VSIX SHA256 must be a lowercase 64-character hex string."
-Assert-Matches -Value $releaseContract.builderContract.toolchainReferences.nsis.bootstrapInstaller.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "Pinned NSIS bootstrap installer SHA256 must be a lowercase 64-character hex string."
-Assert-Matches -Value $releaseContract.builderContract.runtimeBootstrapInstallers.vscode.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "Pinned Visual Studio Code bootstrap installer SHA256 must be a lowercase 64-character hex string."
-Assert-Matches -Value $releaseContract.builderContract.runtimeBootstrapInstallers.git.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "Pinned Git bootstrap installer SHA256 must be a lowercase 64-character hex string."
-Assert-Matches -Value $releaseContract.builderContract.runtimeBootstrapInstallers.dockerDesktop.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "Pinned Docker Desktop bootstrap installer SHA256 must be a lowercase 64-character hex string."
-Assert-Matches -Value $releaseContract.builderContract.toolchainReferences.nsis.bootstrapInstaller.downloadUrl.ToString() -Pattern '^https://.+' -Message "Pinned NSIS bootstrap installer downloadUrl must be an https URL."
-Assert-Matches -Value $releaseContract.builderContract.runtimeBootstrapInstallers.vscode.downloadUrl.ToString() -Pattern '^https://.+' -Message "Pinned Visual Studio Code bootstrap installer downloadUrl must be an https URL."
-Assert-Matches -Value $releaseContract.builderContract.runtimeBootstrapInstallers.git.downloadUrl.ToString() -Pattern '^https://.+' -Message "Pinned Git bootstrap installer downloadUrl must be an https URL."
-Assert-Matches -Value $releaseContract.builderContract.runtimeBootstrapInstallers.dockerDesktop.downloadUrl.ToString() -Pattern '^https://.+' -Message "Pinned Docker Desktop bootstrap installer downloadUrl must be an https URL."
-Assert-Matches -Value $releaseContract.builderContract.runtimeBootstrapInstallers.dockerDesktop.checksumUrl.ToString() -Pattern '^https://.+' -Message "Pinned Docker Desktop bootstrap installer checksumUrl must be an https URL."
-Assert-Matches -Value $releaseContract.builderContract.runtimeContainerImages.labview2026q1Windows.expectedDigest.ToString() -Pattern '^sha256:[0-9a-f]{64}$' -Message "Pinned LabVIEW Windows container digest must be a sha256 reference."
-Assert-Matches -Value $publicSetupManifest.assets.vsix.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "Public setup manifest VSIX SHA256 must be a lowercase 64-character hex string."
-Assert-Matches -Value $publicSetupManifest.assets.windowsSetupScript.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "Windows setup script SHA256 must be a lowercase 64-character hex string."
-Assert-Matches -Value $publicSetupManifest.assets.linuxSetupScript.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "Linux setup script SHA256 must be a lowercase 64-character hex string."
-Assert-Matches -Value $publicSetupManifest.fixture.bundle.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "Fixture bundle SHA256 must be a lowercase 64-character hex string."
-Assert-Matches -Value $publicSetupManifest.fixture.metadata.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "Fixture metadata SHA256 must be a lowercase 64-character hex string."
-Assert-Matches -Value $publicSetupManifest.assets.vsix.downloadUrl.ToString() -Pattern '^https://.+' -Message "Public setup manifest VSIX downloadUrl must be an https URL."
-Assert-Matches -Value $publicSetupManifest.assets.windowsSetupScript.downloadUrl.ToString() -Pattern '^https://.+' -Message "Windows setup script downloadUrl must be an https URL."
-Assert-Matches -Value $publicSetupManifest.assets.linuxSetupScript.downloadUrl.ToString() -Pattern '^https://.+' -Message "Linux setup script downloadUrl must be an https URL."
-Assert-Matches -Value $publicSetupManifest.fixture.manifest.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "Fixture manifest SHA256 must be a lowercase 64-character hex string."
-Assert-Matches -Value $publicSetupManifest.fixture.manifest.downloadUrl.ToString() -Pattern '^https://.+' -Message "Fixture manifest downloadUrl must be an https URL."
-Assert-Matches -Value $publicSetupManifest.fixture.bundle.downloadUrl.ToString() -Pattern '^https://.+' -Message "Fixture bundle downloadUrl must be an https URL."
-Assert-Matches -Value $publicSetupManifest.fixture.metadata.downloadUrl.ToString() -Pattern '^https://.+' -Message "Fixture metadata downloadUrl must be an https URL."
-Assert-Matches -Value $publicSetupManifest.setup.windows.prerequisites.vscode.downloadUrl.ToString() -Pattern '^https://.+' -Message "Windows VS Code bootstrap downloadUrl must be an https URL."
-Assert-Matches -Value $publicSetupManifest.setup.windows.prerequisites.git.downloadUrl.ToString() -Pattern '^https://.+' -Message "Windows Git bootstrap downloadUrl must be an https URL."
-Assert-Matches -Value $publicSetupManifest.setup.windows.prerequisites.vscode.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "Windows VS Code bootstrap SHA256 must be a lowercase 64-character hex string."
-Assert-Matches -Value $publicSetupManifest.setup.windows.prerequisites.git.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "Windows Git bootstrap SHA256 must be a lowercase 64-character hex string."
-
-foreach ($required in $releaseContract.builderContract.stagingRequirements.requiredBeforeInstallerBuild) {
-  $path = Join-Path $repoRootPath $required.relativePath
-  Assert-PathPresent -Path $path -Message "Missing staged release-evidence path required by the contract: $($required.relativePath)"
+if ($publicSetupManifest.setup.optionalProviders -contains "legacy-nsis-wrapper") {
+  throw "legacy-nsis-wrapper must not remain in the public setup manifest optionalProviders."
 }
 
-Assert-PathPresent -Path (Join-Path $repoRootPath $fixtureManifest.bundle.builderEntrypoint) -Message "Missing pinned fixture bundle sync entrypoint."
+$vsixPath = Join-Path $releaseDir $releaseContract.sourceTruth.releaseManifest.vsixArtifact.path
+$fixtureBundlePath = Join-Path $repoRootPath "artifacts/fixtures/$($publicSetupManifest.fixture.bundle.fileName)"
+$fixtureMetadataPath = Join-Path $repoRootPath "artifacts/fixtures/$($publicSetupManifest.fixture.metadata.fileName)"
+$windowsSetupPath = Join-Path $repoRootPath "setup/windows/Setup-VIHistorySuite.ps1"
+$linuxSetupPath = Join-Path $repoRootPath "setup/linux/setup-vi-history-suite.sh"
+
+foreach ($requiredPath in @(
+  $vsixPath,
+  $fixtureBundlePath,
+  $fixtureMetadataPath,
+  $windowsSetupPath,
+  $linuxSetupPath
+)) {
+  Assert-PathPresent -Path $requiredPath -Message "Missing required public setup asset at $requiredPath."
+}
+
+$actualVsixHash = Get-Sha256 -Path $vsixPath
+if ($actualVsixHash -ne $releaseContract.sourceTruth.releaseManifest.vsixArtifact.sha256) {
+  throw "VSIX hash mismatch against release-ingestion.json. Expected $($releaseContract.sourceTruth.releaseManifest.vsixArtifact.sha256) but found $actualVsixHash."
+}
+
+if ($actualVsixHash -ne $publicSetupManifest.assets.vsix.sha256) {
+  throw "VSIX hash mismatch against public-setup-manifest.json. Expected $($publicSetupManifest.assets.vsix.sha256) but found $actualVsixHash."
+}
+
+if ((Get-Sha256 -Path $windowsSetupPath) -ne $publicSetupManifest.assets.windowsSetupScript.sha256) {
+  throw "Windows setup script hash does not match public-setup-manifest.json."
+}
+
+if ((Get-Sha256 -Path $linuxSetupPath) -ne $publicSetupManifest.assets.linuxSetupScript.sha256) {
+  throw "Linux setup script hash does not match public-setup-manifest.json."
+}
+
+if ((Get-Sha256 -Path $fixtureManifestPath) -ne $publicSetupManifest.fixture.manifest.sha256) {
+  throw "Fixture manifest hash does not match public-setup-manifest.json."
+}
+
+if ((Get-Sha256 -Path $fixtureBundlePath) -ne $publicSetupManifest.fixture.bundle.sha256) {
+  throw "Fixture bundle hash does not match public-setup-manifest.json."
+}
+
+if ((Get-Sha256 -Path $fixtureMetadataPath) -ne $publicSetupManifest.fixture.metadata.sha256) {
+  throw "Fixture metadata hash does not match public-setup-manifest.json."
+}
+
+Assert-Matches -Value $releaseContract.sourceTruth.releaseManifest.vsixArtifact.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "VSIX SHA256 must be a lowercase 64-character hex string."
+Assert-Matches -Value $publicSetupManifest.assets.windowsSetupScript.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "Windows setup script SHA256 must be a lowercase 64-character hex string."
+Assert-Matches -Value $publicSetupManifest.assets.linuxSetupScript.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "Linux setup script SHA256 must be a lowercase 64-character hex string."
+Assert-Matches -Value $publicSetupManifest.fixture.manifest.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "Fixture manifest SHA256 must be a lowercase 64-character hex string."
+Assert-Matches -Value $publicSetupManifest.fixture.bundle.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "Fixture bundle SHA256 must be a lowercase 64-character hex string."
+Assert-Matches -Value $publicSetupManifest.fixture.metadata.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "Fixture metadata SHA256 must be a lowercase 64-character hex string."
+
+foreach ($url in @(
+  $publicSetupManifest.assets.vsix.downloadUrl,
+  $publicSetupManifest.assets.windowsSetupScript.downloadUrl,
+  $publicSetupManifest.assets.linuxSetupScript.downloadUrl,
+  $publicSetupManifest.fixture.manifest.downloadUrl,
+  $publicSetupManifest.fixture.bundle.downloadUrl,
+  $publicSetupManifest.fixture.metadata.downloadUrl,
+  $publicSetupManifest.setup.windows.prerequisites.vscode.downloadUrl,
+  $publicSetupManifest.setup.windows.prerequisites.git.downloadUrl
+)) {
+  Assert-Matches -Value $url.ToString() -Pattern '^https://.+' -Message "Expected https downloadUrl but found '$url'."
+}
+
+foreach ($required in $releaseContract.publicSetupContract.releaseEvidenceStaging.requiredBeforePublication) {
+  $path = Join-Path $repoRootPath $required.relativePath
+  Assert-PathPresent -Path $path -Message "Missing staged release-evidence path required by the public release ledger: $($required.relativePath)"
+}
 
 $requiredPaths = @(
   "README.md",
   "INSTALL.md",
   "SUPPORT.md",
-  ".github/workflows/publish-windows-installer.yml",
+  ".github/workflows/publish-public-release-kit.yml",
   "setup/README.md",
   "setup/windows/Setup-VIHistorySuite.ps1",
   "setup/linux/setup-vi-history-suite.sh",
-  "installer/nsis/README.md",
-  "installer/nsis/Invoke-HarnessBootstrap.ps1",
-  "installer/nsis/vi-history-suite-installer.nsi",
-  "docker/windows-installer-builder/README.md",
-  "docker/windows-installer-builder/Dockerfile",
-  "docker/windows-installer-builder/Fetch-WorkflowBootstrapInputs.ps1",
-  "docker/windows-installer-builder/Invoke-InstallerBuild.ps1",
-  "docker/windows-installer-builder/Stage-NsisBootstrap.ps1",
-  "docker/windows-installer-builder/Stage-VsCodeBootstrap.ps1",
-  "docker/windows-installer-builder/Stage-GitBootstrap.ps1",
-  "docker/windows-installer-builder/Stage-DockerDesktopBootstrap.ps1",
-  "docker/windows-installer-builder/vendor/README.md",
-  "scripts/Build-HostIterationInstaller.ps1",
+  "fixtures/labview-icon-editor.manifest.json",
   "acceptance/windows11/README.md",
   "acceptance/windows11/Invoke-Windows11Acceptance.ps1",
   "acceptance/windows11/manual-right-click-checklist.md",
@@ -176,11 +238,15 @@ $requiredPaths = @(
   "scripts/Build-PublicSetupAssets.ps1",
   "scripts/Test-PublicSetupFixture.ps1",
   "scripts/Sync-PinnedFixtureBundle.ps1",
-  "scripts/Validate-PublicFacadeScaffold.ps1"
+  "scripts/Validate-PublicFacadeScaffold.ps1",
+  "releases/v0.2.0/README.md",
+  "releases/v0.2.0/release-evidence/README.md",
+  "releases/v0.2.0/release-ingestion.json",
+  "releases/v0.2.0/public-setup-manifest.json"
 )
 
 foreach ($relativePath in $requiredPaths) {
-  Assert-PathPresent -Path (Join-Path $repoRootPath $relativePath) -Message "Missing scaffold surface: $relativePath"
+  Assert-PathPresent -Path (Join-Path $repoRootPath $relativePath) -Message "Missing required public facade surface: $relativePath"
 }
 
 foreach ($ps1RelativePath in @(
@@ -189,14 +255,6 @@ foreach ($ps1RelativePath in @(
   "scripts/Test-PublicSetupFixture.ps1",
   "scripts/Sync-ImmutableReleaseEvidence.ps1",
   "scripts/Sync-PinnedFixtureBundle.ps1",
-  "docker/windows-installer-builder/Fetch-WorkflowBootstrapInputs.ps1",
-  "docker/windows-installer-builder/Invoke-InstallerBuild.ps1",
-  "docker/windows-installer-builder/Stage-NsisBootstrap.ps1",
-  "docker/windows-installer-builder/Stage-VsCodeBootstrap.ps1",
-  "docker/windows-installer-builder/Stage-GitBootstrap.ps1",
-  "docker/windows-installer-builder/Stage-DockerDesktopBootstrap.ps1",
-  "scripts/Build-HostIterationInstaller.ps1",
-  "installer/nsis/Invoke-HarnessBootstrap.ps1",
   "setup/windows/Setup-VIHistorySuite.ps1",
   "acceptance/windows11/Invoke-Windows11Acceptance.ps1"
 )) {
@@ -219,53 +277,57 @@ if (-not $fixtureManifest.bundle.fileName.ToString().EndsWith(".bundle")) {
 
 Assert-Matches -Value $fixtureManifest.bundle.defaultGeneratedRelativePath.ToString() -Pattern '^artifacts/.+\.bundle$' -Message "Fixture manifest default bundle path must stay under artifacts/ and end with .bundle."
 
-$nsisPath = Join-Path $repoRootPath "installer/nsis/vi-history-suite-installer.nsi"
-$nsisContent = Get-Content -LiteralPath $nsisPath -Raw
+$workflowPath = Join-Path $repoRootPath ".github/workflows/publish-public-release-kit.yml"
+$workflowContent = Get-Content -LiteralPath $workflowPath -Raw
 foreach ($token in @(
-  '--install-extension',
-  '--uninstall-extension',
-  'release-ingestion.json',
-  'Visual Studio Code',
-  'Git',
-  'Docker Desktop',
-  'INSTALLER_PROFILE',
-  'bootstrap\vscode',
-  'bootstrap\git',
-  'DOCKER_DESKTOP_BOOTSTRAP_FILE',
-  'Invoke-HarnessBootstrap.ps1',
-  'svelderrainruiz.vi-history-suite'
+  "./scripts/Sync-ImmutableReleaseEvidence.ps1",
+  "./scripts/Sync-PinnedFixtureBundle.ps1",
+  "./scripts/Build-PublicSetupAssets.ps1",
+  "./scripts/Test-PublicSetupFixture.ps1",
+  "gh release delete-asset",
+  "SHA256SUMS-public-setup.txt"
 )) {
-  if ($nsisContent -notmatch [regex]::Escape($token)) {
-    throw "NSIS scaffold must retain token '$token'."
+  if ($workflowContent -notmatch [regex]::Escape($token)) {
+    throw "Publish workflow must retain token '$token'."
   }
 }
 
-$harnessScriptPath = Join-Path $repoRootPath "installer/nsis/Invoke-HarnessBootstrap.ps1"
-$harnessScriptContent = Get-Content -LiteralPath $harnessScriptPath -Raw
-foreach ($token in @(
-  'Docker Desktop',
-  'host-iteration',
-  '"desktop", "engine", "use", "windows"',
-  '"image", "inspect"',
-  'labview-icon-editor',
-  '.bundle',
-  'fixtures-workspace'
+foreach ($forbiddenToken in @(
+  "publish_legacy_installer",
+  "Invoke-InstallerBuild.ps1",
+  "Stage-NsisBootstrap.ps1",
+  "Fetch-WorkflowBootstrapInputs.ps1",
+  "Test-HarnessBootstrapRegression.ps1",
+  "Test-HarnessFixtureBootstrap.ps1",
+  "artifacts/windows-installer/"
 )) {
-  if ($harnessScriptContent -notmatch [regex]::Escape($token)) {
-    throw "Harness bootstrap script must retain token '$token'."
+  if ($workflowContent -match [regex]::Escape($forbiddenToken)) {
+    throw "Publish workflow must not retain legacy toolchain token '$forbiddenToken'."
   }
 }
 
-$builderScriptPath = Join-Path $repoRootPath "docker/windows-installer-builder/Invoke-InstallerBuild.ps1"
-$builderScriptContent = Get-Content -LiteralPath $builderScriptPath -Raw
+$acceptanceScriptPath = Join-Path $repoRootPath "acceptance/windows11/Invoke-Windows11Acceptance.ps1"
+$acceptanceScriptContent = Get-Content -LiteralPath $acceptanceScriptPath -Raw
 foreach ($token in @(
-  'host-iteration',
-  'IncludeRuntimeBootstrapInstallers',
-  'vi-history-suite-host-iteration-setup-',
-  'HOST_ITERATION_PROFILE'
+  "Setup-VIHistorySuite.ps1",
+  "--list-extensions",
+  "--new-window",
+  "--goto",
+  "setupStrategy",
+  "direct-release"
 )) {
-  if ($builderScriptContent -notmatch [regex]::Escape($token)) {
-    throw "Builder script must retain token '$token'."
+  if ($acceptanceScriptContent -notmatch [regex]::Escape($token)) {
+    throw "Acceptance harness must retain token '$token'."
+  }
+}
+
+foreach ($forbiddenToken in @(
+  "legacy-installer",
+  "InstallerPath",
+  "SkipLegacyInstaller"
+)) {
+  if ($acceptanceScriptContent -match [regex]::Escape($forbiddenToken)) {
+    throw "Acceptance harness must not retain legacy installer token '$forbiddenToken'."
   }
 }
 

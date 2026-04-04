@@ -22,9 +22,7 @@ An immutable `vi-history-suite` release now exists:
 - authoritative VSIX: `vi-history-suite-0.2.0.vsix`
 - SHA-256: `dd9585dbd684939ce71eeed01ca435685bb8da305b601e4d2bde15dfb54c4cf3`
 - public GitHub release: `https://github.com/svelderrainruiz/vi-history-suite/releases/tag/v0.2.0`
-- legacy Windows installer asset: `vi-history-suite-setup-0.2.0.exe`
-- legacy installer SHA-256: `fd66fa6dd3ef7d3e8f840f63dae172bff812c958224313531dcd051970961e72`
-- current public state: the exact VSIX and legacy Windows installer are already published; the release-kit setup assets are now staged here as the validated primary setup surface for the next publication run
+- current public state: the release kit is the active publication surface and the exact VSIX remains the authoritative payload identity
 
 Machine-readable public release/setup surfaces:
 
@@ -38,15 +36,12 @@ Scaffold status:
 - direct-release setup manifest and Windows/Linux setup adapters are now scaffolded as the primary public setup surface
 - a pinned `ni/labview-icon-editor` fixture bundle with commit history is generated for the release kit
 - Docker is no longer part of the default public setup path
-- legacy NSIS scaffolding is retained as an optional secondary wrapper path
-- pinned NSIS 3.11 bootstrap reference is retained in the release/build contract
-- pinned Visual Studio Code, Git, and Docker Desktop bootstrap references are
-  retained only for legacy installer-wrapper work and future optional provider work
-- Windows Docker builder entrypoint is retained as legacy scaffolding
-- NSIS installer entrypoint is retained as legacy scaffolding
+- legacy installer assets are retired from the active public toolchain
+- pinned Visual Studio Code and Git prerequisite identities remain in the public setup contracts
 - Windows 11 acceptance harness and manual checklist are scaffolded
 - public binary publication is complete through the GitHub workflow
-- executed Windows 11 host-machine proof remains open
+- automated Windows 11 host-machine proof is the active acceptance lane
+- future reproducible automation is intended to move to a published container image
 
 ## Planned User Flows
 
@@ -63,15 +58,9 @@ Scaffold status:
 - [Support](SUPPORT.md)
 - [Public Setup Surface](setup/README.md)
 - [Release Ingestion](releases/v0.2.0/README.md)
-- [Windows Installer Build Scaffold](docker/windows-installer-builder/README.md)
-- [NSIS Installer Scaffold](installer/nsis/README.md)
 - [Windows 11 Acceptance Scaffold](acceptance/windows11/README.md)
 - [Scaffold Validation Script](scripts/Validate-PublicFacadeScaffold.ps1)
-- [Publish Public Release Kit Workflow](.github/workflows/publish-windows-installer.yml)
-- [Stage NSIS Bootstrap](docker/windows-installer-builder/Stage-NsisBootstrap.ps1)
-- [Stage Visual Studio Code Bootstrap](docker/windows-installer-builder/Stage-VsCodeBootstrap.ps1)
-- [Stage Git Bootstrap](docker/windows-installer-builder/Stage-GitBootstrap.ps1)
-- [Stage Docker Desktop Bootstrap](docker/windows-installer-builder/Stage-DockerDesktopBootstrap.ps1)
+- [Publish Public Release Kit Workflow](.github/workflows/publish-public-release-kit.yml)
 - [Sync Pinned Fixture Bundle](scripts/Sync-PinnedFixtureBundle.ps1)
 
 ## Public Support Scope
@@ -99,12 +88,11 @@ Trust boundary:
 - private requirements, design gates, and retained engineering evidence are intentionally not mirrored here
 - this public repo is the consumer-facing distribution and support facade
 - `public-setup-manifest.json` is the primary public release/setup manifest
-- `release-ingestion.json` is retained only for legacy builder/installer scaffolding
-- the GitHub workflow now treats the release kit as the primary publication surface and the installer path as optional legacy work
-- the Windows builder Docker scaffold is retained only for legacy or future optional hardening work
+- `release-ingestion.json` is retained as a bounded public release-provenance ledger
+- the GitHub workflow now publishes the release kit only and deletes retired legacy installer assets when present
 - the current Windows 11 host machine is the active installed-user proof surface
 - a future published container image is the preferred reproducible automation follow-on
-- a fresh Windows 11 VM remains only optional replay evidence
+- public GitHub issues are supplemental field feedback, not the proof gate
 
 Current scaffold entrypoints:
 
@@ -113,6 +101,5 @@ Current scaffold entrypoints:
 - Windows setup adapter: `pwsh -File setup/windows/Setup-VIHistorySuite.ps1`
 - Linux setup adapter: `bash setup/linux/setup-vi-history-suite.sh`
 - sync pinned fixture bundle: `pwsh -File scripts/Sync-PinnedFixtureBundle.ps1`
-- Windows 11 acceptance: `pwsh -File acceptance/windows11/Invoke-Windows11Acceptance.ps1 -ExecutionTarget host-machine -SetupMode direct-release`
-- publish workflow: `.github/workflows/publish-windows-installer.yml`
-- legacy installer build: `pwsh -File docker/windows-installer-builder/Invoke-InstallerBuild.ps1`
+- Windows 11 acceptance: `pwsh -File acceptance/windows11/Invoke-Windows11Acceptance.ps1 -ExecutionTarget host-machine`
+- publish workflow: `.github/workflows/publish-public-release-kit.yml`

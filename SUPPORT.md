@@ -57,7 +57,6 @@ Current scaffold entrypoints:
 - [acceptance/windows11/Invoke-Windows11Acceptance.ps1](acceptance/windows11/Invoke-Windows11Acceptance.ps1)
 - [acceptance/windows11/manual-right-click-checklist.md](acceptance/windows11/manual-right-click-checklist.md)
 - [acceptance/windows11/acceptance-record.template.json](acceptance/windows11/acceptance-record.template.json)
-- [docker/windows-installer-builder/Invoke-InstallerBuild.ps1](docker/windows-installer-builder/Invoke-InstallerBuild.ps1)
 
 ## Good Issue Topics
 

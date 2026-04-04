@@ -2,12 +2,6 @@ name: Publish Public Release Kit
 
 on:
   workflow_dispatch:
-    inputs:
-      publish_legacy_installer:
-        description: "Also build and publish the legacy NSIS installer wrapper"
-        required: false
-        default: false
-        type: boolean
 
 permissions:
   contents: write
@@ -48,43 +42,12 @@ jobs:
         shell: pwsh
         run: ./scripts/Test-PublicSetupFixture.ps1
 
-      - name: Install NSIS 3.11 on runner
-        if: ${{ inputs.publish_legacy_installer }}
-        shell: pwsh
-        run: |
-          if (-not (Get-Command choco.exe -ErrorAction SilentlyContinue)) {
-            throw "Chocolatey is required on the Windows runner to install NSIS 3.11."
-          }
-          choco install nsis --version=3.11 -y --allow-downgrade --no-progress
-
-      - name: Fetch pinned bootstrap inputs
-        if: ${{ inputs.publish_legacy_installer }}
-        shell: pwsh
-        run: ./docker/windows-installer-builder/Fetch-WorkflowBootstrapInputs.ps1
-
-      - name: Test harness bootstrap regression guards
-        if: ${{ inputs.publish_legacy_installer }}
-        shell: pwsh
-        run: ./scripts/Test-HarnessBootstrapRegression.ps1
-
-      - name: Smoke test harness fixture bootstrap
-        if: ${{ inputs.publish_legacy_installer }}
-        shell: pwsh
-        run: ./scripts/Test-HarnessFixtureBootstrap.ps1
-
-      - name: Build legacy Windows installer
-        if: ${{ inputs.publish_legacy_installer }}
-        shell: pwsh
-        run: ./docker/windows-installer-builder/Invoke-InstallerBuild.ps1
-
       - name: Publish release assets
         shell: pwsh
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          $legacyInstallerEnabled = '${{ inputs.publish_legacy_installer }}' -eq 'true'
           $publicManifest = Get-Content -LiteralPath "releases/v0.2.0/public-setup-manifest.json" -Raw | ConvertFrom-Json
-          $releaseContract = Get-Content -LiteralPath "releases/v0.2.0/release-ingestion.json" -Raw | ConvertFrom-Json
 
           $tag = $publicManifest.release.tag
           $version = $publicManifest.release.version
@@ -101,12 +64,9 @@ jobs:
             "- Exact VSIX: vi-history-suite-$version.vsix",
             "- Primary public setup surface: release kit manifest plus Windows and Linux setup adapters.",
             "- Pinned labview-icon-editor fixture bundle is published for reproducible review setup.",
-            "- Host-machine setup and acceptance are now the primary public proof path."
+            "- Host-machine setup and acceptance are the active public proof path.",
+            "- Legacy NSIS installer assets are retired and removed from the public toolchain."
           )
-
-          if ($legacyInstallerEnabled) {
-            $notes += "- Legacy NSIS installer wrapper also published for compatibility."
-          }
 
           $notes | Set-Content -LiteralPath $notesPath -Encoding ASCII
 
@@ -124,18 +84,22 @@ jobs:
             "$publicSetupAssetRoot/SHA256SUMS-public-setup.txt"
           )
 
-          if ($legacyInstallerEnabled) {
-            $assets += @(
-              $releaseContract.builderContract.installerBuild.defaultOutputRelativePath,
-              "artifacts/windows-installer/SHA256SUMS.txt",
-              $releaseContract.builderContract.installerBuild.defaultBuildMetadataRelativePath
-            )
-          }
+          $retiredAssets = @(
+            "vi-history-suite-setup-$version.exe",
+            "SHA256SUMS.txt",
+            "vi-history-suite-setup-$version-build.json"
+          )
 
           gh release view $tag --repo $env:GITHUB_REPOSITORY *> $null
           if ($LASTEXITCODE -ne 0) {
             gh release create $tag @assets --repo $env:GITHUB_REPOSITORY --title "VI History Suite $tag" --notes-file $notesPath --target $env:GITHUB_SHA
           } else {
+            foreach ($retiredAsset in $retiredAssets) {
+              gh release delete-asset $tag $retiredAsset --repo $env:GITHUB_REPOSITORY --yes *> $null
+              if ($LASTEXITCODE -eq 0) {
+                Write-Host "Removed retired release asset $retiredAsset"
+              }
+            }
             gh release upload $tag @assets --repo $env:GITHUB_REPOSITORY --clobber
             gh release edit $tag --repo $env:GITHUB_REPOSITORY --title "VI History Suite $tag" --notes-file $notesPath
           }
@@ -146,7 +110,6 @@ jobs:
           name: public-release-kit-v0.2.0
           path: |
             artifacts/public-setup/
-            artifacts/windows-installer/
             releases/v0.2.0/release-evidence/vi-history-suite-0.2.0.vsix
             releases/v0.2.0/release-evidence/vi-history-suite-0.2.0.vsix.sha256
             releases/v0.2.0/release-evidence/release-manifest.json

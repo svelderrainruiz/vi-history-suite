@@ -3,7 +3,7 @@ param(
   [string]$ManifestPath = "",
   [string]$ManifestUrl = "",
   [string]$ReleaseTag = "v0.2.0",
-  [ValidateSet("host-machine", "fresh-vm")]
+  [ValidateSet("host-machine")]
   [string]$ExecutionTarget = "host-machine",
   [string]$WorkRoot = "",
   [string]$InstallRoot = "",

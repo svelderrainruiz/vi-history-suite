@@ -11,25 +11,20 @@ This directory defines the installed-user acceptance lane for `vi-history-suite`
 
 - primary public setup manifest:
   [releases/v0.2.0/public-setup-manifest.json](../../releases/v0.2.0/public-setup-manifest.json)
-- legacy builder/installer manifest:
+- public release-provenance ledger:
   [releases/v0.2.0/release-ingestion.json](../../releases/v0.2.0/release-ingestion.json)
 - canonical fixture manifest:
   [fixtures/labview-icon-editor.manifest.json](../../fixtures/labview-icon-editor.manifest.json)
 - primary public setup adapter:
   [setup/windows/Setup-VIHistorySuite.ps1](../../setup/windows/Setup-VIHistorySuite.ps1)
-- optional legacy installer asset:
-  `vi-history-suite-setup-0.2.0.exe`
 
-The automation script supports two execution targets:
+The automation script currently supports one execution target:
 
 - `host-machine`: default and current iteration surface on this Windows 11 machine
-- `fresh-vm`: optional clean-machine replay surface
 
 If the local repo checkout or public setup files are not available, the script
 downloads the public setup manifest and setup script into
-`%LocalAppData%\VI History Suite\acceptance\<target>\downloads`. Legacy
-installer mode remains available explicitly, but it is no longer the primary
-acceptance path.
+`%LocalAppData%\VI History Suite\acceptance\<target>\downloads`.
 
 ## Current Automated Proof Surface
 
@@ -56,11 +51,5 @@ See [manual-right-click-checklist.md](./manual-right-click-checklist.md).
 Example primary acceptance command on this Windows 11 host machine:
 
 ```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File acceptance/windows11/Invoke-Windows11Acceptance.ps1 -ExecutionTarget host-machine -SetupMode direct-release
-```
-
-Optional legacy installer replay:
-
-```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File acceptance/windows11/Invoke-Windows11Acceptance.ps1 -ExecutionTarget host-machine -SetupMode legacy-installer
+pwsh -NoProfile -ExecutionPolicy Bypass -File acceptance/windows11/Invoke-Windows11Acceptance.ps1 -ExecutionTarget host-machine
 ```

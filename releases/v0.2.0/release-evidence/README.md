@@ -1,9 +1,10 @@
 # Release Evidence Staging
 
 This directory is the bounded staging root for the immutable `v0.2.0` release
-artifacts that the legacy wrapper/builder scaffolds are allowed to consume.
+artifacts that the public release-kit publication workflow is allowed to
+consume.
 
-Expected staged files before the legacy wrapper build runs:
+Expected staged files before the public publication workflow runs:
 
 - `vi-history-suite-0.2.0.vsix`
 - `release-manifest.json`

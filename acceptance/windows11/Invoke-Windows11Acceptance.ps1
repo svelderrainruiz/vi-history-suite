@@ -1,20 +1,16 @@
 [CmdletBinding()]
 param(
-  [ValidateSet("host-machine", "fresh-vm")]
+  [ValidateSet("host-machine")]
   [string]$ExecutionTarget = "host-machine",
-  [ValidateSet("direct-release", "legacy-installer")]
-  [string]$SetupMode = "direct-release",
   [string]$ReleaseTag = "v0.2.0",
   [string]$RepoRoot = "",
   [string]$PublicSetupManifestPath = "",
   [string]$SetupScriptPath = "",
-  [string]$InstallerPath = "",
   [string]$VsixPath = "",
   [string]$FixtureBundlePath = "",
   [string]$WorkRoot = "",
   [string]$CodeCommand = "",
   [switch]$SkipSetup,
-  [switch]$SkipLegacyInstaller,
   [switch]$SkipClone
 )
 
@@ -324,7 +320,6 @@ if (-not $isWindowsPlatform) {
   $stagedScriptPath = Stage-LocalFileForWindowsInvocation -SourcePath $scriptSelfPath -DestinationDirectory $stagingAssetsRoot
   $stagedManifestPath = Stage-LocalFileForWindowsInvocation -SourcePath $PublicSetupManifestPath -DestinationDirectory $stagingAssetsRoot
   $stagedSetupScriptPath = Stage-LocalFileForWindowsInvocation -SourcePath $SetupScriptPath -DestinationDirectory $stagingAssetsRoot
-  $stagedInstallerPath = Stage-LocalFileForWindowsInvocation -SourcePath $InstallerPath -DestinationDirectory $stagingAssetsRoot
   $stagedVsixPath = Stage-LocalFileForWindowsInvocation -SourcePath $VsixPath -DestinationDirectory $stagingAssetsRoot
   $stagedFixtureBundlePath = Stage-LocalFileForWindowsInvocation -SourcePath $FixtureBundlePath -DestinationDirectory $stagingAssetsRoot
 
@@ -333,7 +328,6 @@ if (-not $isWindowsPlatform) {
     '-ExecutionPolicy', 'Bypass',
     '-File', (wslpath -w $stagedScriptPath),
     '-ExecutionTarget', $ExecutionTarget,
-    '-SetupMode', $SetupMode,
     '-ReleaseTag', $ReleaseTag,
     '-WorkRoot', $(if ($WorkRoot) { Resolve-WindowsInvocationPath -Path $WorkRoot } else { "$stagingRootWindows\\acceptance-work-root" })
   )
@@ -344,10 +338,6 @@ if (-not $isWindowsPlatform) {
 
   if ($stagedSetupScriptPath) {
     $arguments += @('-SetupScriptPath', (wslpath -w $stagedSetupScriptPath))
-  }
-
-  if ($stagedInstallerPath) {
-    $arguments += @('-InstallerPath', (wslpath -w $stagedInstallerPath))
   }
 
   if ($stagedVsixPath) {
@@ -364,10 +354,6 @@ if (-not $isWindowsPlatform) {
 
   if ($SkipSetup.IsPresent) {
     $arguments += '-SkipSetup'
-  }
-
-  if ($SkipLegacyInstaller.IsPresent) {
-    $arguments += '-SkipLegacyInstaller'
   }
 
   if ($SkipClone.IsPresent) {
@@ -400,73 +386,49 @@ $acceptanceRecordPath = Join-Path $workRootPath "acceptance-record.json"
 
 $setupRecord = $null
 $setupScriptResolvedPath = ""
-$resolvedInstallerPath = ""
-$installerSha256 = ""
-
-if ($SetupMode -eq "direct-release") {
-  $setupScriptResolvedPath = Resolve-LocalOrDownloadedSetupScript -CandidatePath $SetupScriptPath -RepoRootPath $repoRootPath -Manifest $setupManifest -DownloadsRoot $downloadsRootPath
-  $localVsixPath = if ($VsixPath) { (Resolve-Path -LiteralPath $VsixPath).Path } else { "" }
-  $localFixtureBundlePath = if ($FixtureBundlePath) { (Resolve-Path -LiteralPath $FixtureBundlePath).Path } else { "" }
-  if ($repoRootPath) {
-    $candidateVsixPath = Join-Path $repoRootPath ("releases\{0}\release-evidence\{1}" -f $setupManifest.release.tag, $setupManifest.assets.vsix.fileName)
-    if ((-not $localVsixPath) -and (Test-Path -LiteralPath $candidateVsixPath)) {
-      $localVsixPath = (Resolve-Path -LiteralPath $candidateVsixPath).Path
-    }
-
-    $candidateFixtureBundlePath = Join-Path $repoRootPath ("artifacts\fixtures\{0}" -f $setupManifest.fixture.bundle.fileName)
-    if ((-not $localFixtureBundlePath) -and (Test-Path -LiteralPath $candidateFixtureBundlePath)) {
-      $localFixtureBundlePath = (Resolve-Path -LiteralPath $candidateFixtureBundlePath).Path
-    }
+$setupScriptResolvedPath = Resolve-LocalOrDownloadedSetupScript -CandidatePath $SetupScriptPath -RepoRootPath $repoRootPath -Manifest $setupManifest -DownloadsRoot $downloadsRootPath
+$localVsixPath = if ($VsixPath) { (Resolve-Path -LiteralPath $VsixPath).Path } else { "" }
+$localFixtureBundlePath = if ($FixtureBundlePath) { (Resolve-Path -LiteralPath $FixtureBundlePath).Path } else { "" }
+if ($repoRootPath) {
+  $candidateVsixPath = Join-Path $repoRootPath ("releases\{0}\release-evidence\{1}" -f $setupManifest.release.tag, $setupManifest.assets.vsix.fileName)
+  if ((-not $localVsixPath) -and (Test-Path -LiteralPath $candidateVsixPath)) {
+    $localVsixPath = (Resolve-Path -LiteralPath $candidateVsixPath).Path
   }
 
-  if (-not $SkipSetup.IsPresent) {
-    $setupArguments = @(
-      '-NoProfile',
-      '-ExecutionPolicy', 'Bypass',
-      '-File', $setupScriptResolvedPath,
-      '-ManifestPath', $setupManifestResolvedPath,
-      '-ExecutionTarget', $ExecutionTarget,
-      '-WorkRoot', $setupWorkRoot,
-      '-InstallRoot', $setupInstallRoot,
-      '-VsixPath', $localVsixPath,
-      '-FixtureBundlePath', $localFixtureBundlePath,
-      '-OpenWorkspace'
-    )
-
-    if ($CodeCommand) {
-      $setupArguments += @('-CodeCommand', $CodeCommand)
-    }
-
-    & powershell.exe @setupArguments
-
-    if ($LASTEXITCODE -ne 0) {
-      throw "Direct-release setup failed with exit code $LASTEXITCODE."
-    }
+  $candidateFixtureBundlePath = Join-Path $repoRootPath ("artifacts\fixtures\{0}" -f $setupManifest.fixture.bundle.fileName)
+  if ((-not $localFixtureBundlePath) -and (Test-Path -LiteralPath $candidateFixtureBundlePath)) {
+    $localFixtureBundlePath = (Resolve-Path -LiteralPath $candidateFixtureBundlePath).Path
   }
-
-  $setupRecordPath = Join-Path $setupWorkRoot "setup-record.json"
-  Assert-PathPresent -Path $setupRecordPath -Message "Setup record was not found at $setupRecordPath."
-  $setupRecord = Read-JsonFile -Path $setupRecordPath
-} else {
-  if ($SkipLegacyInstaller.IsPresent) {
-    throw "legacy-installer mode cannot be used with -SkipLegacyInstaller."
-  }
-
-  if ($InstallerPath) {
-    $resolvedInstallerPath = [IO.Path]::GetFullPath($InstallerPath)
-  } else {
-    $resolvedInstallerPath = Ensure-DownloadedFile `
-      -Url ("https://github.com/svelderrainruiz/vi-history-suite/releases/download/{0}/vi-history-suite-setup-{1}.exe" -f $setupManifest.release.tag, $setupManifest.release.version) `
-      -DestinationPath (Join-Path $downloadsRootPath ("vi-history-suite-setup-{0}.exe" -f $setupManifest.release.version))
-  }
-
-  & $resolvedInstallerPath "/S"
-  if ($LASTEXITCODE -ne 0) {
-    throw "Legacy installer execution failed with exit code $LASTEXITCODE."
-  }
-
-  $installerSha256 = Get-Sha256 -Path $resolvedInstallerPath
 }
+
+if (-not $SkipSetup.IsPresent) {
+  $setupArguments = @(
+    '-NoProfile',
+    '-ExecutionPolicy', 'Bypass',
+    '-File', $setupScriptResolvedPath,
+    '-ManifestPath', $setupManifestResolvedPath,
+    '-ExecutionTarget', $ExecutionTarget,
+    '-WorkRoot', $setupWorkRoot,
+    '-InstallRoot', $setupInstallRoot,
+    '-VsixPath', $localVsixPath,
+    '-FixtureBundlePath', $localFixtureBundlePath,
+    '-OpenWorkspace'
+  )
+
+  if ($CodeCommand) {
+    $setupArguments += @('-CodeCommand', $CodeCommand)
+  }
+
+  & powershell.exe @setupArguments
+
+  if ($LASTEXITCODE -ne 0) {
+    throw "Direct-release setup failed with exit code $LASTEXITCODE."
+  }
+}
+
+$setupRecordPath = Join-Path $setupWorkRoot "setup-record.json"
+Assert-PathPresent -Path $setupRecordPath -Message "Setup record was not found at $setupRecordPath."
+$setupRecord = Read-JsonFile -Path $setupRecordPath
 
 $codeCommandPath = Resolve-CodeCommand -Candidate $CodeCommand
 $gitCommandPath = Resolve-GitCommand
@@ -492,33 +454,21 @@ try {
     }
   }
 
-  if ($SetupMode -eq "direct-release") {
-    $fixtureWorkspacePath = $setupRecord.fixture.workspacePath
-    $selectionPath = $setupRecord.fixture.selectionPath
-    Assert-PathPresent -Path $fixtureWorkspacePath -Message "Pinned proof workspace was not found at $fixtureWorkspacePath."
-    Assert-PathPresent -Path $selectionPath -Message "Pinned canonical VI was not found at $selectionPath."
+  $fixtureWorkspacePath = $setupRecord.fixture.workspacePath
+  $selectionPath = $setupRecord.fixture.selectionPath
+  Assert-PathPresent -Path $fixtureWorkspacePath -Message "Pinned proof workspace was not found at $fixtureWorkspacePath."
+  Assert-PathPresent -Path $selectionPath -Message "Pinned canonical VI was not found at $selectionPath."
 
-    & $codeCommandPath --new-window $fixtureWorkspacePath 2>&1 | Set-Content -LiteralPath $workspaceLogPath -Encoding ASCII
-    $workspaceExitCode = $LASTEXITCODE
-    & $codeCommandPath --goto $selectionPath 2>&1 | Set-Content -LiteralPath $selectionLogPath -Encoding ASCII
-    $selectionExitCode = $LASTEXITCODE
-  } else {
-    $installedFixtureWorkspacePath = Join-Path $env:LocalAppData "Programs\VI History Suite\fixtures-workspace\labview-icon-editor"
-    $selectionPath = Join-Path $installedFixtureWorkspacePath ($setupManifest.fixture.selectionPath -replace '/', '\')
-    Assert-PathPresent -Path $selectionPath -Message "Pinned canonical VI was not found at $selectionPath."
-
-    & $codeCommandPath --new-window $installedFixtureWorkspacePath 2>&1 | Set-Content -LiteralPath $workspaceLogPath -Encoding ASCII
-    $workspaceExitCode = $LASTEXITCODE
-    & $codeCommandPath --goto $selectionPath 2>&1 | Set-Content -LiteralPath $selectionLogPath -Encoding ASCII
-    $selectionExitCode = $LASTEXITCODE
-    $fixtureWorkspacePath = $installedFixtureWorkspacePath
-  }
+  & $codeCommandPath --new-window $fixtureWorkspacePath 2>&1 | Set-Content -LiteralPath $workspaceLogPath -Encoding ASCII
+  $workspaceExitCode = $LASTEXITCODE
+  & $codeCommandPath --goto $selectionPath 2>&1 | Set-Content -LiteralPath $selectionLogPath -Encoding ASCII
+  $selectionExitCode = $LASTEXITCODE
 
   $record = [ordered]@{
     releaseContractId = $setupManifest.release.id
     executionEnvironment = [ordered]@{
       target = $ExecutionTarget
-      setupMode = $SetupMode
+      setupStrategy = $setupManifest.setup.strategy
       workRoot = $workRootPath
       publicSetupManifestPath = $setupManifestResolvedPath
       setupScriptPath = $setupScriptResolvedPath
@@ -529,17 +479,11 @@ try {
       identifier = $setupManifest.release.extensionIdentifier
       version = $setupManifest.release.version
     }
-    installer = [ordered]@{
-      path = $resolvedInstallerPath
-      sha256 = $installerSha256
-      executed = ($SetupMode -eq "legacy-installer")
-      source = if ($SetupMode -eq "legacy-installer") { "legacy-installer" } else { "" }
-    }
     setup = [ordered]@{
       manifestPath = $setupManifestResolvedPath
       setupScriptPath = $setupScriptResolvedPath
       setupRecordPath = if ($setupRecord) { (Join-Path $setupWorkRoot "setup-record.json") } else { "" }
-      directRelease = ($SetupMode -eq "direct-release")
+      directRelease = $true
     }
     fixture = [ordered]@{
       fixtureId = $setupManifest.fixture.id
@@ -570,7 +514,7 @@ try {
   }
 
   $record | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $acceptanceRecordPath -Encoding ASCII
-  Write-Host ("Windows 11 acceptance completed for {0} using {1}. Record: {2}" -f $ExecutionTarget, $SetupMode, $acceptanceRecordPath)
+  Write-Host ("Windows 11 acceptance completed for {0} using direct-release. Record: {1}" -f $ExecutionTarget, $acceptanceRecordPath)
 } finally {
   Pop-Location
 }

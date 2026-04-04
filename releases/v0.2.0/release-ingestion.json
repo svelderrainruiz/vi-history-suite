@@ -1,6 +1,6 @@
 {
-  "schemaVersion": 4,
-  "status": "published-on-github-facade",
+  "schemaVersion": 5,
+  "status": "public-release-kit-primary",
   "sourceTruth": {
     "provider": "private-gitlab-release",
     "projectPath": "svelderrainruiz/vi-history-suite",
@@ -33,66 +33,50 @@
     "githubReleaseUrl": "https://github.com/svelderrainruiz/vi-history-suite/releases/tag/v0.2.0",
     "githubReleasePublishedAt": "2026-04-04T01:47:14Z",
     "githubReleaseTargetCommitish": "4985517f8c4dc9997f72f55100297bd354ac8d28",
-    "githubReleaseWorkflow": {
-      "path": ".github/workflows/publish-windows-installer.yml",
-      "runUrl": "https://github.com/svelderrainruiz/vi-history-suite/actions/runs/23972941672"
+    "activePublicationWorkflow": {
+      "path": ".github/workflows/publish-public-release-kit.yml",
+      "name": "Publish Public Release Kit"
     },
-    "intendedPublicAssets": [
+    "primaryPublicAssets": [
       "GitHub release notes",
       "Exact released VSIX payload",
       "VSIX checksum evidence",
-      "Windows installer built from the exact released VSIX",
-      "Installer checksum and build metadata"
+      "Public setup manifest",
+      "Windows setup adapter",
+      "Linux setup adapter",
+      "Pinned fixture manifest",
+      "Pinned fixture bundle",
+      "Pinned fixture metadata",
+      "Public setup checksum evidence"
     ],
-    "publishedAssets": [
-      {
-        "fileName": "vi-history-suite-0.2.0.vsix",
-        "sha256": "dd9585dbd684939ce71eeed01ca435685bb8da305b601e4d2bde15dfb54c4cf3",
-        "downloadUrl": "https://github.com/svelderrainruiz/vi-history-suite/releases/download/v0.2.0/vi-history-suite-0.2.0.vsix"
-      },
-      {
-        "fileName": "vi-history-suite-0.2.0.vsix.sha256",
-        "sha256": "e43ff6ce16be49b51d0632ca86df29b16c733514c13e0c166ca8f8de65e17029",
-        "downloadUrl": "https://github.com/svelderrainruiz/vi-history-suite/releases/download/v0.2.0/vi-history-suite-0.2.0.vsix.sha256"
-      },
-      {
-        "fileName": "vi-history-suite-setup-0.2.0.exe",
-        "sha256": "fd66fa6dd3ef7d3e8f840f63dae172bff812c958224313531dcd051970961e72",
-        "downloadUrl": "https://github.com/svelderrainruiz/vi-history-suite/releases/download/v0.2.0/vi-history-suite-setup-0.2.0.exe"
-      },
-      {
-        "fileName": "SHA256SUMS.txt",
-        "sha256": "9a1f6f657fce34393e085a20a2447dcba2835964aaf042abec39aa90a87805d2",
-        "downloadUrl": "https://github.com/svelderrainruiz/vi-history-suite/releases/download/v0.2.0/SHA256SUMS.txt"
-      },
-      {
-        "fileName": "vi-history-suite-setup-0.2.0-build.json",
-        "sha256": "e060a260aea8f3359346406e9064ac1f114c580e1a7445baa456b45a54aa9470",
-        "downloadUrl": "https://github.com/svelderrainruiz/vi-history-suite/releases/download/v0.2.0/vi-history-suite-setup-0.2.0-build.json"
-      }
+    "retiredPublicAssets": [
+      "vi-history-suite-setup-0.2.0.exe",
+      "SHA256SUMS.txt",
+      "vi-history-suite-setup-0.2.0-build.json"
     ],
     "notes": [
-      "This public repo now publishes the exact v0.2.0 VSIX and Windows installer through the GitHub release workflow.",
-      "Installer and Windows 11 acceptance work must continue consuming only the identities retained here, whether the proof target is the current host machine or a fresh VM."
+      "This public repo now treats the release kit as the only active publication surface.",
+      "Legacy NSIS assets are retired from the workflow and are deleted during release publication when present.",
+      "Host-machine setup and acceptance continue consuming only the exact released VSIX identities retained here."
     ],
     "scopeNotes": [
       "This public manifest is limited to release, setup, and support metadata.",
       "Private requirements, design gates, and retained engineering evidence are intentionally not published in the public facade repo."
     ]
   },
-  "builderContract": {
+  "publicSetupContract": {
     "releaseContractId": "v0.2.0",
     "packageVersion": "0.2.0",
     "extensionIdentifier": "svelderrainruiz.vi-history-suite",
-    "windowsExecutionAssumptions": [
-      "The active Windows 11 proof lane may run on the current host machine or on a fresh replay VM.",
-      "The Windows 11 proof machine may be missing Visual Studio Code, Git, Docker Desktop, or the pinned Windows container image required for isolated LabVIEW execution.",
-      "The installer carries a pinned `ni/labview-icon-editor` Git fixture bundle with commit history and materializes the canonical proof workspace locally.",
-      "The installer bootstraps pinned Visual Studio Code, Git, and Docker Desktop installers, then uses the Visual Studio Code CLI to install the exact released VSIX and prepare the pinned Windows container image required by the product."
+    "hostExecutionAssumptions": [
+      "The active proof lane runs on the current Windows 11 host machine.",
+      "Visual Studio Code and Git may be missing and can be provisioned by the Windows setup adapter when needed.",
+      "The release kit carries a pinned `ni/labview-icon-editor` Git fixture bundle with commit history and materializes the canonical proof workspace locally.",
+      "Visual Studio Code CLI is the authoritative install, verification, and workspace-launch surface after setup."
     ],
-    "stagingRequirements": {
+    "releaseEvidenceStaging": {
       "releaseEvidenceRoot": "releases/v0.2.0/release-evidence",
-      "requiredBeforeInstallerBuild": [
+      "requiredBeforePublication": [
         {
           "id": "release-evidence-root",
           "relativePath": "releases/v0.2.0/release-evidence",
@@ -110,26 +94,19 @@
         "unpublished package versions"
       ]
     },
-    "installerBuild": {
-      "dockerContext": "docker/windows-installer-builder",
-      "dockerfile": "docker/windows-installer-builder/Dockerfile",
-      "builderEntrypoint": "docker/windows-installer-builder/Invoke-InstallerBuild.ps1",
-      "nsisProject": "installer/nsis/vi-history-suite-installer.nsi",
-      "defaultOutputRelativePath": "artifacts/windows-installer/vi-history-suite-setup-0.2.0.exe",
-      "defaultBuildMetadataRelativePath": "artifacts/windows-installer/vi-history-suite-setup-0.2.0-build.json",
-      "installerContents": [
+    "publicationSurface": {
+      "workflowPath": ".github/workflows/publish-public-release-kit.yml",
+      "releaseNotesAssetRoot": "artifacts/public-setup",
+      "publishedAssets": [
         "Exact released VSIX payload",
-        "Pinned Visual Studio Code bootstrap installer",
-        "Pinned Git for Windows bootstrap installer",
-        "Pinned Docker Desktop bootstrap installer",
-        "Pinned harness bootstrap script",
+        "VSIX checksum evidence",
+        "Primary public setup manifest",
+        "Windows setup adapter",
+        "Linux setup adapter",
         "Pinned labview-icon-editor Git fixture bundle with develop commit history",
         "Pinned labview-icon-editor fixture manifest",
-        "README.md",
-        "INSTALL.md",
-        "SUPPORT.md",
-        "LICENSE",
-        "release-ingestion.json"
+        "Pinned labview-icon-editor fixture metadata",
+        "Public setup checksums"
       ]
     },
     "runtimeBootstrapInstallers": {
@@ -138,74 +115,32 @@
         "version": "1.109.3",
         "fileName": "VSCodeSetup-x64-1.109.3.exe",
         "sha256": "ef2ffa7f7589209a6ce452955b0dacd842be4f960b3a92c0d275180b0e74874d",
-        "downloadUrl": "https://update.code.visualstudio.com/1.109.3/win32-x64/stable",
-        "stageEntrypoint": "docker/windows-installer-builder/Stage-VsCodeBootstrap.ps1",
-        "vendorRelativePath": "docker/windows-installer-builder/vendor/VSCodeSetup-x64-1.109.3.exe"
+        "downloadUrl": "https://update.code.visualstudio.com/1.109.3/win32-x64/stable"
       },
       "git": {
         "productName": "Git for Windows",
         "version": "2.53.0",
         "fileName": "Git-2.53.0-64-bit.exe",
         "sha256": "3b4e1b127dbebea2931f2ae9dfafa0c2343a488a1222009debfe78d5d335e6a9",
-        "downloadUrl": "https://github.com/git-for-windows/git/releases/download/v2.53.0.windows.1/Git-2.53.0-64-bit.exe",
-        "stageEntrypoint": "docker/windows-installer-builder/Stage-GitBootstrap.ps1",
-        "vendorRelativePath": "docker/windows-installer-builder/vendor/Git-2.53.0-64-bit.exe"
-      },
-      "dockerDesktop": {
-        "productName": "Docker Desktop",
-        "version": "4.67.0",
-        "fileName": "Docker Desktop Installer.exe",
-        "sha256": "9e334622293ddf15eb7ecb935b829370899a93c92a53385a2e4c7749e5d57c77",
-        "downloadUrl": "https://desktop.docker.com/win/main/amd64/222858/Docker%20Desktop%20Installer.exe",
-        "checksumUrl": "https://desktop.docker.com/win/main/amd64/222858/checksums.txt",
-        "installArguments": [
-          "install",
-          "--quiet",
-          "--accept-license",
-          "--backend=windows",
-          "--always-run-service"
-        ],
-        "stageEntrypoint": "docker/windows-installer-builder/Stage-DockerDesktopBootstrap.ps1",
-        "vendorRelativePath": "docker/windows-installer-builder/vendor/Docker Desktop Installer.exe"
+        "downloadUrl": "https://github.com/git-for-windows/git/releases/download/v2.53.0.windows.1/Git-2.53.0-64-bit.exe"
       }
     },
-    "runtimeContainerImages": {
-      "labview2026q1Windows": {
-        "productName": "LabVIEW Windows container image",
-        "imageReference": "nationalinstruments/labview:2026q1-windows",
-        "pullReference": "nationalinstruments/labview:2026q1-windows@sha256:57c453dabd2ff0185ce718d88704921bb82eb83189f4049205ed9b4da7df7bcd",
-        "repositoryDigestReference": "nationalinstruments/labview@sha256:57c453dabd2ff0185ce718d88704921bb82eb83189f4049205ed9b4da7df7bcd",
-        "expectedDigest": "sha256:57c453dabd2ff0185ce718d88704921bb82eb83189f4049205ed9b4da7df7bcd",
-        "pullEntrypoint": "installer/nsis/Invoke-HarnessBootstrap.ps1",
-        "verificationCommand": [
-          "docker",
-          "image",
-          "inspect",
-          "nationalinstruments/labview:2026q1-windows"
-        ]
-      }
-    },
-    "toolchainReferences": {
-      "nsis": {
-        "version": "3.11",
-        "bootstrapInstaller": {
-          "fileName": "nsis-3.11-setup.exe",
-          "sha256": "38d49f8fe09b1c332b01d0940e57b7258f4447733643273a01c59959ad9d3b0a",
-          "downloadUrl": "https://downloads.sourceforge.net/project/nsis/NSIS%203/3.11/nsis-3.11-setup.exe",
-          "stageEntrypoint": "docker/windows-installer-builder/Stage-NsisBootstrap.ps1",
-          "vendorRelativePath": "docker/windows-installer-builder/vendor/nsis-3.11-setup.exe"
-        }
-      }
+    "futureAutomationLane": {
+      "intendedSurface": "published-container-image",
+      "status": "planned-not-implemented",
+      "notes": [
+        "A future published container image is intended to mirror the public setup contract for reproducible automation.",
+        "Container automation is not a default end-user prerequisite."
+      ]
     },
     "acceptanceProof": {
       "defaultExecutionTarget": "host-machine",
       "supportedExecutionTargets": [
-        "host-machine",
-        "fresh-vm"
+        "host-machine"
       ],
       "executionTargetNotes": [
-        "The public acceptance harness defaults to the current Windows 11 host machine for faster iteration.",
-        "A fresh Windows 11 VM remains an optional stronger replay surface when clean-machine proof is needed."
+        "The public acceptance harness uses the current Windows 11 host machine as the active proof surface.",
+        "Future reproducible automation is intended to move to a published container image instead of a replay VM."
       ],
       "automationEntrypoint": "acceptance/windows11/Invoke-Windows11Acceptance.ps1",
       "manualChecklistPath": "acceptance/windows11/manual-right-click-checklist.md",
