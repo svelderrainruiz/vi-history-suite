@@ -68,6 +68,11 @@ function Resolve-GitCommand {
     $candidates += (Join-Path $env:ProgramFiles "Git\bin\git.exe")
   }
 
+  if ($env:ProgramW6432) {
+    $candidates += (Join-Path $env:ProgramW6432 "Git\cmd\git.exe")
+    $candidates += (Join-Path $env:ProgramW6432 "Git\bin\git.exe")
+  }
+
   if (${env:ProgramFiles(x86)}) {
     $candidates += (Join-Path ${env:ProgramFiles(x86)} "Git\cmd\git.exe")
     $candidates += (Join-Path ${env:ProgramFiles(x86)} "Git\bin\git.exe")
@@ -99,6 +104,10 @@ function Resolve-DockerCommand {
     $candidates += (Join-Path $env:ProgramFiles "Docker\Docker\resources\bin\docker.exe")
   }
 
+  if ($env:ProgramW6432) {
+    $candidates += (Join-Path $env:ProgramW6432 "Docker\Docker\resources\bin\docker.exe")
+  }
+
   if (${env:ProgramFiles(x86)}) {
     $candidates += (Join-Path ${env:ProgramFiles(x86)} "Docker\Docker\resources\bin\docker.exe")
   }
@@ -127,6 +136,9 @@ function Resolve-DockerDesktopExecutable {
   $candidates = @()
   if ($env:ProgramFiles) {
     $candidates += (Join-Path $env:ProgramFiles "Docker\Docker\Docker Desktop.exe")
+  }
+  if ($env:ProgramW6432) {
+    $candidates += (Join-Path $env:ProgramW6432 "Docker\Docker\Docker Desktop.exe")
   }
   if (${env:ProgramFiles(x86)}) {
     $candidates += (Join-Path ${env:ProgramFiles(x86)} "Docker\Docker\Docker Desktop.exe")
@@ -199,6 +211,21 @@ function Get-PropertyValueOrDefault {
   $property = $InputObject.PSObject.Properties[$PropertyName]
   if ($property) {
     return [string]$property.Value
+  }
+
+  return $DefaultValue
+}
+
+function Get-BooleanPropertyValueOrDefault {
+  param(
+    [object]$InputObject,
+    [string]$PropertyName,
+    [bool]$DefaultValue = $false
+  )
+
+  $property = $InputObject.PSObject.Properties[$PropertyName]
+  if ($property) {
+    return [bool]$property.Value
   }
 
   return $DefaultValue
@@ -451,6 +478,10 @@ $errorLogPath = Join-Path $logRootPath "harness-bootstrap-error.txt"
 $summaryPath = Join-Path $logRootPath "harness-bootstrap-summary.json"
 
 try {
+  if (Test-Path -LiteralPath $errorLogPath) {
+    Remove-Item -LiteralPath $errorLogPath -Force -ErrorAction SilentlyContinue
+  }
+
   Set-BootstrapStage -Stage "read-release-contract"
   $releaseContract = Read-JsonFile -Path $releaseContractResolvedPath
   Set-BootstrapStage -Stage "read-fixture-manifest"
@@ -485,7 +516,7 @@ try {
       selectionPath = $fixtureResult.SelectionPath
     }
     docker = [ordered]@{
-      skipped = [bool](Get-PropertyValueOrDefault -InputObject $dockerResult -PropertyName "Skipped" -DefaultValue "False")
+      skipped = Get-BooleanPropertyValueOrDefault -InputObject $dockerResult -PropertyName "Skipped" -DefaultValue $false
       rebootRequired = $dockerResult.RebootRequired
       installExitCode = $dockerResult.InstallExitCode
       dockerCommand = Get-PropertyValueOrDefault -InputObject $dockerResult -PropertyName "DockerCommand"
