@@ -152,25 +152,16 @@ function Invoke-ExternalCommand {
     [int[]]$AllowedExitCodes = @(0)
   )
 
-  $stdoutPath = Join-Path ([System.IO.Path]::GetTempPath()) ("vi-history-suite-stdout-" + [guid]::NewGuid().ToString("N") + ".log")
-  $stderrPath = Join-Path ([System.IO.Path]::GetTempPath()) ("vi-history-suite-stderr-" + [guid]::NewGuid().ToString("N") + ".log")
-
+  $previousErrorActionPreference = $ErrorActionPreference
   try {
-    $process = Start-Process `
-      -FilePath $FilePath `
-      -ArgumentList $CommandArgs `
-      -Wait `
-      -PassThru `
-      -NoNewWindow `
-      -RedirectStandardOutput $stdoutPath `
-      -RedirectStandardError $stderrPath
-
+    $ErrorActionPreference = "Continue"
+    $rawOutput = & $FilePath @CommandArgs 2>&1
     $output = New-Object System.Collections.Generic.List[string]
-    foreach ($path in @($stdoutPath, $stderrPath)) {
-      if (Test-Path -LiteralPath $path) {
-        foreach ($line in (Get-Content -LiteralPath $path -ErrorAction SilentlyContinue)) {
-          $output.Add([string]$line)
-        }
+    foreach ($item in @($rawOutput)) {
+      if ($item -is [System.Management.Automation.ErrorRecord]) {
+        $output.Add($item.ToString())
+      } elseif ($null -ne $item) {
+        $output.Add([string]$item)
       }
     }
 
@@ -178,7 +169,7 @@ function Invoke-ExternalCommand {
       $output | Set-Content -LiteralPath $LogPath -Encoding ASCII
     }
 
-    $exitCode = $process.ExitCode
+    $exitCode = $LASTEXITCODE
     if ($AllowedExitCodes -notcontains $exitCode) {
       $details = ($output | Out-String).Trim()
       if ($details) {
@@ -193,11 +184,7 @@ function Invoke-ExternalCommand {
       ExitCode = $exitCode
     }
   } finally {
-    foreach ($path in @($stdoutPath, $stderrPath)) {
-      if (Test-Path -LiteralPath $path) {
-        Remove-Item -LiteralPath $path -Force -ErrorAction SilentlyContinue
-      }
-    }
+    $ErrorActionPreference = $previousErrorActionPreference
   }
 }
 

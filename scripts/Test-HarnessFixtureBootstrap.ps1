@@ -63,7 +63,7 @@ $bundlePath = Join-Path $repoRootPath $fixtureManifest.bundle.defaultGeneratedRe
 Assert-PathPresent -Path $bundlePath -Message "Pinned fixture bundle was not found at $bundlePath."
 
 $windowsPowerShell = Get-Command powershell.exe -ErrorAction SilentlyContinue
-$tempId = "vi-history-suite-harness-fixture-" + [guid]::NewGuid().ToString("N")
+$tempId = "VI History Suite Harness Fixture " + [guid]::NewGuid().ToString("N")
 
 if ($IsWindows) {
   $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) $tempId
