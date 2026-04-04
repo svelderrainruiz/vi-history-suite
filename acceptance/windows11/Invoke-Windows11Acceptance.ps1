@@ -508,6 +508,7 @@ try {
     humanGate = [ordered]@{
       checklistPath = "acceptance/windows11/manual-right-click-checklist.md"
       recordTemplatePath = "acceptance/windows11/acceptance-record.template.json"
+      reviewer = "Sergio Velderrain"
       status = "pending-human-review"
     }
     generatedAtUtc = (Get-Date).ToUniversalTime().ToString("o")

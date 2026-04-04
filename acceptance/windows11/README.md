@@ -7,6 +7,10 @@ This directory defines the installed-user acceptance lane for `vi-history-suite`
 - automation: PowerShell + public release kit setup + Visual Studio Code CLI
 - human gate: manual right-click review flow on the canonical VI
 
+The current human gate is maintainer-operated by Sergio Velderrain on the host
+Windows 11 machine. Public GitHub issues are supplemental feedback, not a
+replacement for that gate.
+
 ## Current Acceptance Inputs
 
 - primary public setup manifest:
@@ -45,6 +49,7 @@ Current scaffold files:
 - evaluate wording clarity and trust prompts
 - confirm the expected review surfaces open
 - retain the result as a bounded acceptance record
+- Sergio Velderrain is the named maintainer reviewer for the current host-machine pass
 
 See [manual-right-click-checklist.md](./manual-right-click-checklist.md).
 

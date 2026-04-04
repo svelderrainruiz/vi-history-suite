@@ -43,7 +43,7 @@ The intended acceptance split for the current public release-kit lane is:
 - automation via PowerShell plus the public setup manifest, setup adapters, and
   VS Code CLI for install, version verification, and workspace launch from the
   bundled Git fixture
-- a human manual right-click pass on the current Windows 11 proof machine for the final UX gate
+- a maintainer-operated human manual right-click pass by Sergio Velderrain on the current Windows 11 proof machine for the final UX gate
 
 That split exists because VS Code CLI can verify installation and launch surfaces, but cannot replace the real right-click interaction proof.
 

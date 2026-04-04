@@ -3,6 +3,10 @@
 Use this checklist on the current Windows 11 proof machine after the automated
 direct-release setup and Visual Studio Code CLI verification steps succeed.
 
+This host-machine human gate is currently maintainer-operated by Sergio
+Velderrain. Public GitHub issues are supplemental feedback and do not replace
+this click UX pass.
+
 ## Canonical Target
 
 - repository: `ni/labview-icon-editor`
@@ -11,6 +15,7 @@ direct-release setup and Visual Studio Code CLI verification steps succeed.
 
 ## Checklist
 
+- confirm you are Sergio Velderrain operating the current host-machine proof lane
 - confirm Visual Studio Code opens the pinned proof workspace
 - confirm Git-backed workspace state is available on the proof machine
 - confirm the workspace is trusted before review actions are exercised
@@ -27,6 +32,7 @@ direct-release setup and Visual Studio Code CLI verification steps succeed.
 - installed extension version
 - Visual Studio Code version
 - Git version
+- reviewer identity: `Sergio Velderrain`
 - pinned proof-repo identity
 - public setup manifest id
 - pass/fail notes for each checklist item

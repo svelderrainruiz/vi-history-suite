@@ -41,7 +41,7 @@
   },
   "humanGate": {
     "checklistPath": "acceptance/windows11/manual-right-click-checklist.md",
-    "reviewer": "",
+    "reviewer": "Sergio Velderrain",
     "status": "pending-human-review",
     "notes": [],
     "screenshots": []
