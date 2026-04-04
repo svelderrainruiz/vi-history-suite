@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "status": "public-setup-primary",
+  "release": {
+    "id": "v0.2.0",
+    "tag": "v0.2.0",
+    "version": "0.2.0",
+    "extensionIdentifier": "svelderrainruiz.vi-history-suite",
+    "githubRepository": "https://github.com/svelderrainruiz/vi-history-suite",
+    "githubReleaseUrl": "https://github.com/svelderrainruiz/vi-history-suite/releases/tag/v0.2.0",
+    "publishedAtUtc": "2026-04-04T01:47:14Z"
+  },
+  "assets": {
+    "vsix": {
+      "fileName": "vi-history-suite-0.2.0.vsix",
+      "sha256": "dd9585dbd684939ce71eeed01ca435685bb8da305b601e4d2bde15dfb54c4cf3",
+      "downloadUrl": "https://github.com/svelderrainruiz/vi-history-suite/releases/download/v0.2.0/vi-history-suite-0.2.0.vsix"
+    },
+    "vsixChecksum": {
+      "fileName": "vi-history-suite-0.2.0.vsix.sha256",
+      "sha256": "e43ff6ce16be49b51d0632ca86df29b16c733514c13e0c166ca8f8de65e17029",
+      "downloadUrl": "https://github.com/svelderrainruiz/vi-history-suite/releases/download/v0.2.0/vi-history-suite-0.2.0.vsix.sha256"
+    },
+    "windowsSetupScript": {
+      "fileName": "Setup-VIHistorySuite.ps1",
+      "sha256": "eeefb1dff50c9605b4bafdccff04c706fa0ebc990b9840fedd6bf8a258638778",
+      "downloadUrl": "https://github.com/svelderrainruiz/vi-history-suite/releases/download/v0.2.0/Setup-VIHistorySuite.ps1"
+    },
+    "linuxSetupScript": {
+      "fileName": "setup-vi-history-suite.sh",
+      "sha256": "e71eb3be2e57f7c733544d3032870c80a9d53a13c74f7495e09a0b7719bd3f7a",
+      "downloadUrl": "https://github.com/svelderrainruiz/vi-history-suite/releases/download/v0.2.0/setup-vi-history-suite.sh"
+    },
+    "publicSetupChecksums": {
+      "fileName": "SHA256SUMS-public-setup.txt",
+      "downloadUrl": "https://github.com/svelderrainruiz/vi-history-suite/releases/download/v0.2.0/SHA256SUMS-public-setup.txt"
+    }
+  },
+  "fixture": {
+    "id": "ni-labview-icon-editor-develop-e8945de7",
+    "repositoryName": "labview-icon-editor",
+    "repositoryUrl": "https://github.com/ni/labview-icon-editor.git",
+    "branch": "develop",
+    "commitSha": "e8945de7e07feba4b87daf7b41d546f10e9d714c",
+    "selectionPath": "Tooling/deployment/VIP_Pre-Install Custom Action.vi",
+    "manifest": {
+      "fileName": "labview-icon-editor.manifest.json",
+      "sha256": "0aa17e6b3dd0a23a21ce0c9592065e5aff25fc686f7e966a654f38bdcf1371c4",
+      "downloadUrl": "https://github.com/svelderrainruiz/vi-history-suite/releases/download/v0.2.0/labview-icon-editor.manifest.json"
+    },
+    "bundle": {
+      "fileName": "labview-icon-editor-develop-e8945de7.bundle",
+      "sha256": "896d37aebcdd20727b132935d5d32edd88b2651cef9380ba924cded3645daf40",
+      "downloadUrl": "https://github.com/svelderrainruiz/vi-history-suite/releases/download/v0.2.0/labview-icon-editor-develop-e8945de7.bundle"
+    },
+    "metadata": {
+      "fileName": "labview-icon-editor-develop-e8945de7.json",
+      "sha256": "bfed53a9376996749cc10e934416b577da29a3d9915f2f1e5e1997c3cd410191",
+      "downloadUrl": "https://github.com/svelderrainruiz/vi-history-suite/releases/download/v0.2.0/labview-icon-editor-develop-e8945de7.json"
+    }
+  },
+  "setup": {
+    "strategy": "direct-release-kit",
+    "optionalProviders": [
+      "docker-runtime",
+      "legacy-nsis-wrapper"
+    ],
+    "notes": [
+      "This public manifest is limited to release, setup, and support metadata.",
+      "Docker is not part of the default public setup path.",
+      "NSIS is not part of the primary public setup path."
+    ],
+    "windows": {
+      "supported": true,
+      "adapter": {
+        "assetFileName": "Setup-VIHistorySuite.ps1"
+      },
+      "prerequisites": {
+        "vscode": {
+          "productName": "Visual Studio Code",
+          "fileName": "VSCodeSetup-x64-1.109.3.exe",
+          "sha256": "ef2ffa7f7589209a6ce452955b0dacd842be4f960b3a92c0d275180b0e74874d",
+          "downloadUrl": "https://update.code.visualstudio.com/1.109.3/win32-x64/stable",
+          "silentArguments": [
+            "/VERYSILENT",
+            "/SUPPRESSMSGBOXES",
+            "/NORESTART",
+            "/MERGETASKS=!runcode"
+          ]
+        },
+        "git": {
+          "productName": "Git for Windows",
+          "fileName": "Git-2.53.0-64-bit.exe",
+          "sha256": "3b4e1b127dbebea2931f2ae9dfafa0c2343a488a1222009debfe78d5d335e6a9",
+          "downloadUrl": "https://github.com/git-for-windows/git/releases/download/v2.53.0.windows.1/Git-2.53.0-64-bit.exe",
+          "silentArguments": [
+            "/VERYSILENT",
+            "/SUPPRESSMSGBOXES",
+            "/NORESTART",
+            "/SP-"
+          ]
+        }
+      }
+    },
+    "linux": {
+      "supported": true,
+      "adapter": {
+        "assetFileName": "setup-vi-history-suite.sh"
+      },
+      "requiredCommands": [
+        "curl",
+        "git",
+        "code",
+        "python3"
+      ],
+      "notes": [
+        "The Linux adapter currently expects Git and the VS Code CLI to already be available.",
+        "Linux setup does not attempt to provision Docker."
+      ]
+    }
+  }
+}

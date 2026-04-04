@@ -1,9 +1,9 @@
 # Release Evidence Staging
 
 This directory is the bounded staging root for the immutable `v0.2.0` release
-artifacts that the public Windows installer scaffold is allowed to consume.
+artifacts that the legacy wrapper/builder scaffolds are allowed to consume.
 
-Expected staged files before the public installer build runs:
+Expected staged files before the legacy wrapper build runs:
 
 - `vi-history-suite-0.2.0.vsix`
 - `release-manifest.json`

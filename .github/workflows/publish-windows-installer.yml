@@ -1,7 +1,13 @@
-name: Publish Windows Installer
+name: Publish Public Release Kit
 
 on:
   workflow_dispatch:
+    inputs:
+      publish_legacy_installer:
+        description: "Also build and publish the legacy NSIS installer wrapper"
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -26,7 +32,24 @@ jobs:
         shell: pwsh
         run: ./scripts/Sync-ImmutableReleaseEvidence.ps1
 
+      - name: Sync pinned fixture bundle
+        shell: pwsh
+        run: ./scripts/Sync-PinnedFixtureBundle.ps1
+
+      - name: Build public setup assets
+        shell: pwsh
+        run: ./scripts/Build-PublicSetupAssets.ps1
+
+      - name: Validate public facade scaffold
+        shell: pwsh
+        run: ./scripts/Validate-PublicFacadeScaffold.ps1
+
+      - name: Smoke test public setup fixture bootstrap
+        shell: pwsh
+        run: ./scripts/Test-PublicSetupFixture.ps1
+
       - name: Install NSIS 3.11 on runner
+        if: ${{ inputs.publish_legacy_installer }}
         shell: pwsh
         run: |
           if (-not (Get-Command choco.exe -ErrorAction SilentlyContinue)) {
@@ -35,22 +58,22 @@ jobs:
           choco install nsis --version=3.11 -y --allow-downgrade --no-progress
 
       - name: Fetch pinned bootstrap inputs
+        if: ${{ inputs.publish_legacy_installer }}
         shell: pwsh
         run: ./docker/windows-installer-builder/Fetch-WorkflowBootstrapInputs.ps1
 
-      - name: Validate public facade scaffold
-        shell: pwsh
-        run: ./scripts/Validate-PublicFacadeScaffold.ps1
-
       - name: Test harness bootstrap regression guards
+        if: ${{ inputs.publish_legacy_installer }}
         shell: pwsh
         run: ./scripts/Test-HarnessBootstrapRegression.ps1
 
       - name: Smoke test harness fixture bootstrap
+        if: ${{ inputs.publish_legacy_installer }}
         shell: pwsh
         run: ./scripts/Test-HarnessFixtureBootstrap.ps1
 
-      - name: Build Windows installer
+      - name: Build legacy Windows installer
+        if: ${{ inputs.publish_legacy_installer }}
         shell: pwsh
         run: ./docker/windows-installer-builder/Invoke-InstallerBuild.ps1
 
@@ -59,36 +82,55 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          $contract = Get-Content -LiteralPath "releases/v0.2.0/release-ingestion.json" -Raw | ConvertFrom-Json
-          $tag = $contract.sourceTruth.releaseTag
-          $version = $contract.sourceTruth.releaseManifest.packageVersion
-          $installerPath = $contract.builderContract.installerBuild.defaultOutputRelativePath
-          $buildMetadataPath = $contract.builderContract.installerBuild.defaultBuildMetadataRelativePath
-          $checksumPath = "artifacts/windows-installer/SHA256SUMS.txt"
+          $legacyInstallerEnabled = '${{ inputs.publish_legacy_installer }}' -eq 'true'
+          $publicManifest = Get-Content -LiteralPath "releases/v0.2.0/public-setup-manifest.json" -Raw | ConvertFrom-Json
+          $releaseContract = Get-Content -LiteralPath "releases/v0.2.0/release-ingestion.json" -Raw | ConvertFrom-Json
+
+          $tag = $publicManifest.release.tag
+          $version = $publicManifest.release.version
+          $notesPath = "artifacts/public-setup/github-release-notes.md"
           $vsixPath = "releases/v0.2.0/release-evidence/vi-history-suite-$version.vsix"
           $vsixChecksumPath = "releases/v0.2.0/release-evidence/vi-history-suite-$version.vsix.sha256"
           $releaseManifestPath = "releases/v0.2.0/release-evidence/release-manifest.json"
           $releaseRecordPath = "releases/v0.2.0/release-evidence/release-record.md"
-          $notesPath = "artifacts/windows-installer/github-release-notes.md"
+          $publicSetupAssetRoot = "artifacts/public-setup"
 
-          @(
+          $notes = @(
             "# VI History Suite $tag",
             "",
-            "- Exact VSIX source: retained GitLab release job $($contract.sourceTruth.releaseJobId)",
-            "- Exact VSIX SHA-256: $($contract.sourceTruth.releaseManifest.vsixArtifact.sha256)",
-            "- Windows installer: vi-history-suite-setup-$version.exe",
-            "- Installer built from the exact retained VSIX through the public GitHub facade workflow."
-          ) | Set-Content -LiteralPath $notesPath -Encoding ASCII
+            "- Exact VSIX: vi-history-suite-$version.vsix",
+            "- Primary public setup surface: release kit manifest plus Windows and Linux setup adapters.",
+            "- Pinned labview-icon-editor fixture bundle is published for reproducible review setup.",
+            "- Host-machine setup and acceptance are now the primary public proof path."
+          )
+
+          if ($legacyInstallerEnabled) {
+            $notes += "- Legacy NSIS installer wrapper also published for compatibility."
+          }
+
+          $notes | Set-Content -LiteralPath $notesPath -Encoding ASCII
 
           $assets = @(
             $vsixPath,
             $vsixChecksumPath,
             $releaseManifestPath,
             $releaseRecordPath,
-            $installerPath,
-            $checksumPath,
-            $buildMetadataPath
+            "$publicSetupAssetRoot/public-setup-manifest.json",
+            "$publicSetupAssetRoot/labview-icon-editor.manifest.json",
+            "$publicSetupAssetRoot/labview-icon-editor-develop-e8945de7.bundle",
+            "$publicSetupAssetRoot/labview-icon-editor-develop-e8945de7.json",
+            "$publicSetupAssetRoot/setup/windows/Setup-VIHistorySuite.ps1",
+            "$publicSetupAssetRoot/setup/linux/setup-vi-history-suite.sh",
+            "$publicSetupAssetRoot/SHA256SUMS-public-setup.txt"
           )
+
+          if ($legacyInstallerEnabled) {
+            $assets += @(
+              $releaseContract.builderContract.installerBuild.defaultOutputRelativePath,
+              "artifacts/windows-installer/SHA256SUMS.txt",
+              $releaseContract.builderContract.installerBuild.defaultBuildMetadataRelativePath
+            )
+          }
 
           gh release view $tag --repo $env:GITHUB_REPOSITORY *> $null
           if ($LASTEXITCODE -ne 0) {
@@ -101,8 +143,9 @@ jobs:
       - name: Upload workflow artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: windows-installer-v0.2.0
+          name: public-release-kit-v0.2.0
           path: |
+            artifacts/public-setup/
             artifacts/windows-installer/
             releases/v0.2.0/release-evidence/vi-history-suite-0.2.0.vsix
             releases/v0.2.0/release-evidence/vi-history-suite-0.2.0.vsix.sha256

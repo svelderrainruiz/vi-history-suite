@@ -1,31 +1,84 @@
 [CmdletBinding()]
 param(
+  [ValidateSet("host-machine", "fresh-vm")]
+  [string]$ExecutionTarget = "host-machine",
+  [ValidateSet("direct-release", "legacy-installer")]
+  [string]$SetupMode = "direct-release",
+  [string]$ReleaseTag = "v0.2.0",
   [string]$RepoRoot = "",
-  [string]$ReleaseDir = "",
+  [string]$PublicSetupManifestPath = "",
+  [string]$SetupScriptPath = "",
   [string]$InstallerPath = "",
+  [string]$VsixPath = "",
+  [string]$FixtureBundlePath = "",
   [string]$WorkRoot = "",
   [string]$CodeCommand = "",
-  [switch]$SkipInstaller,
+  [switch]$SkipSetup,
+  [switch]$SkipLegacyInstaller,
   [switch]$SkipClone
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+$isWindowsPlatform = [System.Environment]::OSVersion.Platform -eq [System.PlatformID]::Win32NT
 
-function Resolve-PublicRepoRoot {
+function Resolve-OptionalPublicRepoRoot {
   param([string]$Path)
 
   if ($Path) {
     return (Resolve-Path -LiteralPath $Path).Path
   }
 
-  return (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..\\..")).Path
+  $defaultPath = Join-Path $PSScriptRoot "..\.."
+  if (Test-Path -LiteralPath $defaultPath) {
+    return (Resolve-Path -LiteralPath $defaultPath).Path
+  }
+
+  return ""
 }
 
 function Read-JsonFile {
   param([string]$Path)
 
   return (Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json)
+}
+
+function Ensure-Directory {
+  param([string]$Path)
+
+  New-Item -ItemType Directory -Force -Path $Path | Out-Null
+}
+
+function Convert-WindowsPathToWsl {
+  param([string]$Path)
+
+  if ($Path -match '^([A-Za-z]):\\(.*)$') {
+    $drive = $Matches[1].ToLowerInvariant()
+    $rest = $Matches[2] -replace '\\', '/'
+    return "/mnt/$drive/$rest"
+  }
+
+  throw "Unable to convert Windows path '$Path' to a WSL path."
+}
+
+function Stage-LocalFileForWindowsInvocation {
+  param(
+    [string]$SourcePath,
+    [string]$DestinationDirectory
+  )
+
+  if (-not $SourcePath) {
+    return ""
+  }
+
+  if (-not (Test-Path -LiteralPath $SourcePath)) {
+    throw "Staging source file was not found at $SourcePath."
+  }
+
+  Ensure-Directory -Path $DestinationDirectory
+  $destinationPath = Join-Path $DestinationDirectory (Split-Path -Leaf $SourcePath)
+  Copy-Item -LiteralPath $SourcePath -Destination $destinationPath -Force
+  return $destinationPath
 }
 
 function Assert-PathPresent {
@@ -37,12 +90,6 @@ function Assert-PathPresent {
   if (-not (Test-Path -LiteralPath $Path)) {
     throw $Message
   }
-}
-
-function Ensure-Directory {
-  param([string]$Path)
-
-  New-Item -ItemType Directory -Force -Path $Path | Out-Null
 }
 
 function Get-Sha256 {
@@ -61,6 +108,42 @@ function Get-Sha256 {
   }
 
   return ([System.BitConverter]::ToString($hashBytes).Replace("-", "").ToLowerInvariant())
+}
+
+function Ensure-DownloadedFile {
+  param(
+    [string]$Url,
+    [string]$DestinationPath,
+    [string]$ExpectedSha256 = ""
+  )
+
+  Ensure-Directory -Path (Split-Path -Parent $DestinationPath)
+
+  $needsDownload = $true
+  if (Test-Path -LiteralPath $DestinationPath) {
+    if ($ExpectedSha256) {
+      if ((Get-Sha256 -Path $DestinationPath) -eq $ExpectedSha256) {
+        $needsDownload = $false
+      } else {
+        Remove-Item -LiteralPath $DestinationPath -Force
+      }
+    } else {
+      $needsDownload = $false
+    }
+  }
+
+  if ($needsDownload) {
+    Invoke-WebRequest -Uri $Url -OutFile $DestinationPath
+  }
+
+  if ($ExpectedSha256) {
+    $actualSha256 = Get-Sha256 -Path $DestinationPath
+    if ($actualSha256 -ne $ExpectedSha256) {
+      throw "Downloaded file hash mismatch for $DestinationPath. Expected $ExpectedSha256 but found $actualSha256."
+    }
+  }
+
+  return (Resolve-Path -LiteralPath $DestinationPath).Path
 }
 
 function Resolve-CodeCommand {
@@ -95,7 +178,7 @@ function Resolve-CodeCommand {
     }
   }
 
-  throw "Visual Studio Code CLI was not found after installer execution. The Windows acceptance lane expects the fresh-machine bootstrap path to provide code.cmd."
+  throw "Visual Studio Code CLI was not found after setup."
 }
 
 function Resolve-GitCommand {
@@ -130,234 +213,342 @@ function Resolve-GitCommand {
     }
   }
 
-  throw "Git executable was not found after installer execution. The Windows acceptance lane requires a real Git-backed workspace."
+  throw "Git executable was not found after setup."
 }
 
-function Resolve-DockerCommand {
-  $candidates = @(
-    "docker.exe",
-    "docker"
-  )
-
-  if ($env:ProgramFiles) {
-    $candidates += (Join-Path $env:ProgramFiles "Docker\Docker\resources\bin\docker.exe")
-  }
-
-  if (${env:ProgramFiles(x86)}) {
-    $candidates += (Join-Path ${env:ProgramFiles(x86)} "Docker\Docker\resources\bin\docker.exe")
-  }
-
-  foreach ($item in $candidates | Where-Object { $_ }) {
-    if (Test-Path -LiteralPath $item) {
-      return (Resolve-Path -LiteralPath $item).Path
-    }
-
-    $command = Get-Command $item -ErrorAction SilentlyContinue
-    if ($command) {
-      return $command.Source
-    }
-  }
-
-  throw "Docker CLI was not found after installer execution. The harness installer is expected to bootstrap Docker Desktop for the Windows container proof lane."
-}
-
-function Invoke-Git {
+function Resolve-WorkRootPath {
   param(
-    [string]$GitCommand,
-    [string[]]$CommandArgs
+    [string]$RequestedPath,
+    [string]$ExecutionTargetName
   )
 
-  $mergedOutput = & $GitCommand @CommandArgs 2>&1
-  $exitCode = $LASTEXITCODE
+  if ($RequestedPath) {
+    return [IO.Path]::GetFullPath($RequestedPath)
+  }
 
-  foreach ($line in @($mergedOutput)) {
-    if ($null -ne $line -and "$line".Length -gt 0) {
-      Write-Host $line
+  if (-not $env:LocalAppData) {
+    throw "LocalAppData is required to resolve the default Windows acceptance work root."
+  }
+
+  return Join-Path $env:LocalAppData ("VI History Suite\acceptance\{0}" -f $ExecutionTargetName)
+}
+
+function Resolve-LocalOrDownloadedSetupManifest {
+  param(
+    [string]$CandidatePath,
+    [string]$RepoRootPath,
+    [string]$Tag,
+    [string]$DownloadsRoot
+  )
+
+  if ($CandidatePath) {
+    return (Resolve-Path -LiteralPath $CandidatePath).Path
+  }
+
+  if ($RepoRootPath) {
+    $localPath = Join-Path $RepoRootPath ("releases\{0}\public-setup-manifest.json" -f $Tag)
+    if (Test-Path -LiteralPath $localPath) {
+      return (Resolve-Path -LiteralPath $localPath).Path
     }
   }
 
-  if ($exitCode -ne 0) {
-    throw "$GitCommand $($CommandArgs -join ' ') failed with exit code $exitCode."
-  }
+  $url = "https://github.com/svelderrainruiz/vi-history-suite/releases/download/{0}/public-setup-manifest.json" -f $Tag
+  return Ensure-DownloadedFile -Url $url -DestinationPath (Join-Path $DownloadsRoot "public-setup-manifest.json")
 }
 
-function Materialize-FixtureWorkspace {
+function Resolve-LocalOrDownloadedSetupScript {
   param(
-    [string]$GitCommand,
-    [pscustomobject]$FixtureManifest,
-    [string]$InstalledFixtureWorkspacePath,
-    [string]$InstalledFixtureBundlePath,
-    [string]$DestinationPath,
-    [switch]$SkipProvisioning
+    [string]$CandidatePath,
+    [string]$RepoRootPath,
+    [pscustomobject]$Manifest,
+    [string]$DownloadsRoot
   )
 
-  if (Test-Path -LiteralPath $InstalledFixtureWorkspacePath) {
-    return (Resolve-Path -LiteralPath $InstalledFixtureWorkspacePath).Path
+  if ($CandidatePath) {
+    return (Resolve-Path -LiteralPath $CandidatePath).Path
   }
 
-  if ($SkipProvisioning.IsPresent) {
-    throw "Pinned fixture workspace was not present at $InstalledFixtureWorkspacePath and provisioning was skipped."
+  if ($RepoRootPath) {
+    $localPath = Join-Path $RepoRootPath "setup/windows/Setup-VIHistorySuite.ps1"
+    if (Test-Path -LiteralPath $localPath) {
+      return (Resolve-Path -LiteralPath $localPath).Path
+    }
   }
 
-  if (-not (Test-Path -LiteralPath $InstalledFixtureBundlePath)) {
-    throw "Pinned fixture bundle was not found at $InstalledFixtureBundlePath."
-  }
-
-  if (Test-Path -LiteralPath $DestinationPath) {
-    Remove-Item -LiteralPath $DestinationPath -Recurse -Force
-  }
-
-  Ensure-Directory -Path (Split-Path -Parent $DestinationPath)
-  Invoke-Git -GitCommand $GitCommand -CommandArgs @("clone", $InstalledFixtureBundlePath, $DestinationPath)
-  Invoke-Git -GitCommand $GitCommand -CommandArgs @("-C", $DestinationPath, "checkout", "--detach", $FixtureManifest.reference.commitSha)
-
-  $resolvedHead = ((& $GitCommand -C $DestinationPath rev-parse HEAD 2>&1) | Out-String).Trim()
-  if ($LASTEXITCODE -ne 0) {
-    throw "Failed to resolve HEAD for the materialized fixture workspace."
-  }
-
-  if ($resolvedHead -ne $FixtureManifest.reference.commitSha) {
-    throw "Materialized fixture workspace resolved HEAD $resolvedHead but expected $($FixtureManifest.reference.commitSha)."
-  }
-
-  return $DestinationPath
+  return Ensure-DownloadedFile `
+    -Url $Manifest.assets.windowsSetupScript.downloadUrl `
+    -DestinationPath (Join-Path $DownloadsRoot $Manifest.assets.windowsSetupScript.fileName) `
+    -ExpectedSha256 $Manifest.assets.windowsSetupScript.sha256
 }
 
-$repoRootPath = Resolve-PublicRepoRoot -Path $RepoRoot
-$releaseDirPath = if ($ReleaseDir) { (Resolve-Path -LiteralPath $ReleaseDir).Path } else { Join-Path $repoRootPath "releases/v0.2.0" }
-$releaseContractPath = Join-Path $releaseDirPath "release-ingestion.json"
-$fixtureManifestPath = Join-Path $repoRootPath "fixtures/labview-icon-editor.manifest.json"
-$releaseContract = Read-JsonFile -Path $releaseContractPath
-$fixtureManifest = Read-JsonFile -Path $fixtureManifestPath
+if (-not $isWindowsPlatform) {
+  $windowsPowerShell = Get-Command powershell.exe -ErrorAction SilentlyContinue
+  if (-not $windowsPowerShell) {
+    throw "powershell.exe was not found, so the Windows acceptance harness cannot be exercised from this environment."
+  }
 
-$workRootPath = if ($WorkRoot) { [IO.Path]::GetFullPath($WorkRoot) } else { Join-Path $repoRootPath "artifacts/windows11-acceptance" }
+  $windowsTempRoot = (& $windowsPowerShell.Source -NoProfile -Command '$env:TEMP' | Select-Object -First 1).Trim()
+  if (-not $windowsTempRoot) {
+    throw "Failed to resolve the Windows TEMP directory."
+  }
+
+  $stagingId = "VI History Suite Acceptance " + [guid]::NewGuid().ToString("N")
+  $stagingRootWindows = "{0}\\{1}" -f $windowsTempRoot.TrimEnd('\'), $stagingId
+  $stagingRoot = Convert-WindowsPathToWsl -Path $stagingRootWindows
+  $stagingAssetsRoot = Join-Path $stagingRoot "staged-assets"
+  Ensure-Directory -Path $stagingAssetsRoot
+
+  $scriptSelfPath = (Resolve-Path -LiteralPath $PSCommandPath).Path
+  $stagedScriptPath = Stage-LocalFileForWindowsInvocation -SourcePath $scriptSelfPath -DestinationDirectory $stagingAssetsRoot
+  $stagedManifestPath = Stage-LocalFileForWindowsInvocation -SourcePath $PublicSetupManifestPath -DestinationDirectory $stagingAssetsRoot
+  $stagedSetupScriptPath = Stage-LocalFileForWindowsInvocation -SourcePath $SetupScriptPath -DestinationDirectory $stagingAssetsRoot
+  $stagedInstallerPath = Stage-LocalFileForWindowsInvocation -SourcePath $InstallerPath -DestinationDirectory $stagingAssetsRoot
+  $stagedVsixPath = Stage-LocalFileForWindowsInvocation -SourcePath $VsixPath -DestinationDirectory $stagingAssetsRoot
+  $stagedFixtureBundlePath = Stage-LocalFileForWindowsInvocation -SourcePath $FixtureBundlePath -DestinationDirectory $stagingAssetsRoot
+
+  $arguments = @(
+    '-NoProfile',
+    '-ExecutionPolicy', 'Bypass',
+    '-File', (wslpath -w $stagedScriptPath),
+    '-ExecutionTarget', $ExecutionTarget,
+    '-SetupMode', $SetupMode,
+    '-ReleaseTag', $ReleaseTag,
+    '-WorkRoot', "$stagingRootWindows\\acceptance-work-root"
+  )
+
+  if ($stagedManifestPath) {
+    $arguments += @('-PublicSetupManifestPath', (wslpath -w $stagedManifestPath))
+  }
+
+  if ($stagedSetupScriptPath) {
+    $arguments += @('-SetupScriptPath', (wslpath -w $stagedSetupScriptPath))
+  }
+
+  if ($stagedInstallerPath) {
+    $arguments += @('-InstallerPath', (wslpath -w $stagedInstallerPath))
+  }
+
+  if ($stagedVsixPath) {
+    $arguments += @('-VsixPath', (wslpath -w $stagedVsixPath))
+  }
+
+  if ($stagedFixtureBundlePath) {
+    $arguments += @('-FixtureBundlePath', (wslpath -w $stagedFixtureBundlePath))
+  }
+
+  if ($CodeCommand) {
+    $arguments += @('-CodeCommand', $CodeCommand)
+  }
+
+  if ($SkipSetup.IsPresent) {
+    $arguments += '-SkipSetup'
+  }
+
+  if ($SkipLegacyInstaller.IsPresent) {
+    $arguments += '-SkipLegacyInstaller'
+  }
+
+  if ($SkipClone.IsPresent) {
+    $arguments += '-SkipClone'
+  }
+
+  & $windowsPowerShell.Source @arguments
+  exit $LASTEXITCODE
+}
+
+$repoRootPath = Resolve-OptionalPublicRepoRoot -Path $RepoRoot
+$workRootPath = Resolve-WorkRootPath -RequestedPath $WorkRoot -ExecutionTargetName $ExecutionTarget
 Ensure-Directory -Path $workRootPath
+$downloadsRootPath = Join-Path $workRootPath "downloads"
+$setupWorkRoot = Join-Path $workRootPath "setup"
+$setupInstallRoot = Join-Path $setupWorkRoot "install-root"
+Ensure-Directory -Path $downloadsRootPath
+Ensure-Directory -Path $setupWorkRoot
+Ensure-Directory -Path $setupInstallRoot
 
-$resolvedInstallerPath = if ($InstallerPath) {
-  [IO.Path]::GetFullPath($InstallerPath)
-} else {
-  Join-Path $repoRootPath $releaseContract.builderContract.installerBuild.defaultOutputRelativePath
-}
-$automationLogPath = Join-Path $workRootPath "cli-extensions.txt"
+$setupManifestResolvedPath = Resolve-LocalOrDownloadedSetupManifest -CandidatePath $PublicSetupManifestPath -RepoRootPath $repoRootPath -Tag $ReleaseTag -DownloadsRoot $downloadsRootPath
+$setupManifest = Read-JsonFile -Path $setupManifestResolvedPath
+
 $codeVersionLogPath = Join-Path $workRootPath "cli-code-version.txt"
 $gitVersionLogPath = Join-Path $workRootPath "cli-git-version.txt"
-$dockerVersionLogPath = Join-Path $workRootPath "cli-docker-version.txt"
-$dockerEngineLogPath = Join-Path $workRootPath "docker-engine.txt"
-$dockerImageLogPath = Join-Path $workRootPath "docker-image.txt"
+$extensionsLogPath = Join-Path $workRootPath "cli-extensions.txt"
 $workspaceLogPath = Join-Path $workRootPath "workspace-launch.txt"
 $selectionLogPath = Join-Path $workRootPath "selection-launch.txt"
 $acceptanceRecordPath = Join-Path $workRootPath "acceptance-record.json"
-$fixtureRoot = Join-Path $workRootPath "fixture\labview-icon-editor"
-$installedFixtureWorkspacePath = Join-Path $env:LocalAppData "Programs\VI History Suite\fixtures-workspace\labview-icon-editor"
-$installedFixtureBundlePath = Join-Path $env:LocalAppData ("Programs\VI History Suite\" + $fixtureManifest.bundle.installerRelativePath.Replace('/', '\'))
 
-if (-not $SkipInstaller.IsPresent) {
-  Assert-PathPresent -Path $resolvedInstallerPath -Message "Installer not found at $resolvedInstallerPath."
+$setupRecord = $null
+$setupScriptResolvedPath = ""
+$resolvedInstallerPath = ""
+$installerSha256 = ""
+
+if ($SetupMode -eq "direct-release") {
+  $setupScriptResolvedPath = Resolve-LocalOrDownloadedSetupScript -CandidatePath $SetupScriptPath -RepoRootPath $repoRootPath -Manifest $setupManifest -DownloadsRoot $downloadsRootPath
+  $localVsixPath = if ($VsixPath) { (Resolve-Path -LiteralPath $VsixPath).Path } else { "" }
+  $localFixtureBundlePath = if ($FixtureBundlePath) { (Resolve-Path -LiteralPath $FixtureBundlePath).Path } else { "" }
+  if ($repoRootPath) {
+    $candidateVsixPath = Join-Path $repoRootPath ("releases\{0}\release-evidence\{1}" -f $setupManifest.release.tag, $setupManifest.assets.vsix.fileName)
+    if ((-not $localVsixPath) -and (Test-Path -LiteralPath $candidateVsixPath)) {
+      $localVsixPath = (Resolve-Path -LiteralPath $candidateVsixPath).Path
+    }
+
+    $candidateFixtureBundlePath = Join-Path $repoRootPath ("artifacts\fixtures\{0}" -f $setupManifest.fixture.bundle.fileName)
+    if ((-not $localFixtureBundlePath) -and (Test-Path -LiteralPath $candidateFixtureBundlePath)) {
+      $localFixtureBundlePath = (Resolve-Path -LiteralPath $candidateFixtureBundlePath).Path
+    }
+  }
+
+  if (-not $SkipSetup.IsPresent) {
+    $setupArguments = @(
+      '-NoProfile',
+      '-ExecutionPolicy', 'Bypass',
+      '-File', $setupScriptResolvedPath,
+      '-ManifestPath', $setupManifestResolvedPath,
+      '-ExecutionTarget', $ExecutionTarget,
+      '-WorkRoot', $setupWorkRoot,
+      '-InstallRoot', $setupInstallRoot,
+      '-VsixPath', $localVsixPath,
+      '-FixtureBundlePath', $localFixtureBundlePath,
+      '-OpenWorkspace'
+    )
+
+    if ($CodeCommand) {
+      $setupArguments += @('-CodeCommand', $CodeCommand)
+    }
+
+    & powershell.exe @setupArguments
+
+    if ($LASTEXITCODE -ne 0) {
+      throw "Direct-release setup failed with exit code $LASTEXITCODE."
+    }
+  }
+
+  $setupRecordPath = Join-Path $setupWorkRoot "setup-record.json"
+  Assert-PathPresent -Path $setupRecordPath -Message "Setup record was not found at $setupRecordPath."
+  $setupRecord = Read-JsonFile -Path $setupRecordPath
+} else {
+  if ($SkipLegacyInstaller.IsPresent) {
+    throw "legacy-installer mode cannot be used with -SkipLegacyInstaller."
+  }
+
+  if ($InstallerPath) {
+    $resolvedInstallerPath = [IO.Path]::GetFullPath($InstallerPath)
+  } else {
+    $resolvedInstallerPath = Ensure-DownloadedFile `
+      -Url ("https://github.com/svelderrainruiz/vi-history-suite/releases/download/{0}/vi-history-suite-setup-{1}.exe" -f $setupManifest.release.tag, $setupManifest.release.version) `
+      -DestinationPath (Join-Path $downloadsRootPath ("vi-history-suite-setup-{0}.exe" -f $setupManifest.release.version))
+  }
+
   & $resolvedInstallerPath "/S"
   if ($LASTEXITCODE -ne 0) {
-    throw "Installer execution failed with exit code $LASTEXITCODE."
+    throw "Legacy installer execution failed with exit code $LASTEXITCODE."
   }
+
+  $installerSha256 = Get-Sha256 -Path $resolvedInstallerPath
 }
 
 $codeCommandPath = Resolve-CodeCommand -Candidate $CodeCommand
 $gitCommandPath = Resolve-GitCommand
-$dockerCommandPath = Resolve-DockerCommand
 
-& $codeCommandPath --version 2>&1 | Set-Content -LiteralPath $codeVersionLogPath -Encoding ASCII
-if ($LASTEXITCODE -ne 0) {
-  throw "VS Code CLI version check failed with exit code $LASTEXITCODE."
-}
-
-& $gitCommandPath --version 2>&1 | Set-Content -LiteralPath $gitVersionLogPath -Encoding ASCII
-if ($LASTEXITCODE -ne 0) {
-  throw "Git version check failed with exit code $LASTEXITCODE."
-}
-
-& $dockerCommandPath version 2>&1 | Set-Content -LiteralPath $dockerVersionLogPath -Encoding ASCII
-if ($LASTEXITCODE -ne 0) {
-  throw "Docker CLI version check failed with exit code $LASTEXITCODE."
-}
-
-& $dockerCommandPath info --format "{{.OSType}}" 2>&1 | Set-Content -LiteralPath $dockerEngineLogPath -Encoding ASCII
-if ($LASTEXITCODE -ne 0) {
-  throw "Docker engine check failed with exit code $LASTEXITCODE."
-}
-
-& $dockerCommandPath image inspect $releaseContract.builderContract.runtimeContainerImages.labview2026q1Windows.imageReference 2>&1 | Set-Content -LiteralPath $dockerImageLogPath -Encoding ASCII
-if ($LASTEXITCODE -ne 0) {
-  throw "Pinned LabVIEW Windows container image was not present after installer execution."
-}
-
-$repoDigests = (& $dockerCommandPath image inspect --format '{{join .RepoDigests "\n"}}' $releaseContract.builderContract.runtimeContainerImages.labview2026q1Windows.imageReference 2>&1) | Out-String
-if ($LASTEXITCODE -ne 0) {
-  throw "Pinned LabVIEW Windows container image digest check failed."
-}
-
-if ($repoDigests -notmatch [regex]::Escape($releaseContract.builderContract.runtimeContainerImages.labview2026q1Windows.repositoryDigestReference)) {
-  throw "Pinned LabVIEW Windows container image digest mismatch."
-}
-
-$extensionsOutput = & $codeCommandPath --list-extensions --show-versions 2>&1
-$extensionsOutput | Set-Content -LiteralPath $automationLogPath -Encoding ASCII
-$expectedToken = "{0}@{1}" -f $releaseContract.builderContract.extensionIdentifier, $releaseContract.sourceTruth.releaseManifest.packageVersion
-if ($extensionsOutput -notcontains $expectedToken) {
-  if (-not (($extensionsOutput -join "`n") -match [regex]::Escape($expectedToken))) {
-    throw "Expected installed extension token '$expectedToken' was not found in VS Code CLI output."
+Push-Location -LiteralPath $workRootPath
+try {
+  & $codeCommandPath --version 2>&1 | Set-Content -LiteralPath $codeVersionLogPath -Encoding ASCII
+  if ($LASTEXITCODE -ne 0) {
+    throw "VS Code CLI version check failed with exit code $LASTEXITCODE."
   }
+
+  & $gitCommandPath --version 2>&1 | Set-Content -LiteralPath $gitVersionLogPath -Encoding ASCII
+  if ($LASTEXITCODE -ne 0) {
+    throw "Git version check failed with exit code $LASTEXITCODE."
+  }
+
+  $extensionsOutput = & $codeCommandPath --list-extensions --show-versions 2>&1
+  $extensionsOutput | Set-Content -LiteralPath $extensionsLogPath -Encoding ASCII
+  $expectedToken = "{0}@{1}" -f $setupManifest.release.extensionIdentifier, $setupManifest.release.version
+  if ($extensionsOutput -notcontains $expectedToken) {
+    if (-not (($extensionsOutput -join "`n") -match [regex]::Escape($expectedToken))) {
+      throw "Expected installed extension token '$expectedToken' was not found in VS Code CLI output."
+    }
+  }
+
+  if ($SetupMode -eq "direct-release") {
+    $fixtureWorkspacePath = $setupRecord.fixture.workspacePath
+    $selectionPath = $setupRecord.fixture.selectionPath
+    Assert-PathPresent -Path $fixtureWorkspacePath -Message "Pinned proof workspace was not found at $fixtureWorkspacePath."
+    Assert-PathPresent -Path $selectionPath -Message "Pinned canonical VI was not found at $selectionPath."
+
+    & $codeCommandPath --new-window $fixtureWorkspacePath 2>&1 | Set-Content -LiteralPath $workspaceLogPath -Encoding ASCII
+    $workspaceExitCode = $LASTEXITCODE
+    & $codeCommandPath --goto $selectionPath 2>&1 | Set-Content -LiteralPath $selectionLogPath -Encoding ASCII
+    $selectionExitCode = $LASTEXITCODE
+  } else {
+    $installedFixtureWorkspacePath = Join-Path $env:LocalAppData "Programs\VI History Suite\fixtures-workspace\labview-icon-editor"
+    $selectionPath = Join-Path $installedFixtureWorkspacePath ($setupManifest.fixture.selectionPath -replace '/', '\')
+    Assert-PathPresent -Path $selectionPath -Message "Pinned canonical VI was not found at $selectionPath."
+
+    & $codeCommandPath --new-window $installedFixtureWorkspacePath 2>&1 | Set-Content -LiteralPath $workspaceLogPath -Encoding ASCII
+    $workspaceExitCode = $LASTEXITCODE
+    & $codeCommandPath --goto $selectionPath 2>&1 | Set-Content -LiteralPath $selectionLogPath -Encoding ASCII
+    $selectionExitCode = $LASTEXITCODE
+    $fixtureWorkspacePath = $installedFixtureWorkspacePath
+  }
+
+  $record = [ordered]@{
+    releaseContractId = $setupManifest.release.id
+    executionEnvironment = [ordered]@{
+      target = $ExecutionTarget
+      setupMode = $SetupMode
+      workRoot = $workRootPath
+      publicSetupManifestPath = $setupManifestResolvedPath
+      setupScriptPath = $setupScriptResolvedPath
+      computerName = $env:COMPUTERNAME
+      userName = $env:USERNAME
+    }
+    expectedExtension = [ordered]@{
+      identifier = $setupManifest.release.extensionIdentifier
+      version = $setupManifest.release.version
+    }
+    installer = [ordered]@{
+      path = $resolvedInstallerPath
+      sha256 = $installerSha256
+      executed = ($SetupMode -eq "legacy-installer")
+      source = if ($SetupMode -eq "legacy-installer") { "legacy-installer" } else { "" }
+    }
+    setup = [ordered]@{
+      manifestPath = $setupManifestResolvedPath
+      setupScriptPath = $setupScriptResolvedPath
+      setupRecordPath = if ($setupRecord) { (Join-Path $setupWorkRoot "setup-record.json") } else { "" }
+      directRelease = ($SetupMode -eq "direct-release")
+    }
+    fixture = [ordered]@{
+      fixtureId = $setupManifest.fixture.id
+      repositoryUrl = $setupManifest.fixture.repositoryUrl
+      commitSha = $setupManifest.fixture.commitSha
+      bundledWorkspacePath = $fixtureWorkspacePath
+      bundledBundlePath = if ($setupRecord) { $setupRecord.assets.fixtureBundlePath } else { "" }
+      selectionPath = $setupManifest.fixture.selectionPath
+    }
+    automation = [ordered]@{
+      codeCommand = $codeCommandPath
+      gitCommand = $gitCommandPath
+      codeVersionLogPath = $codeVersionLogPath
+      gitVersionLogPath = $gitVersionLogPath
+      installedExtensionToken = $expectedToken
+      extensionsLogPath = $extensionsLogPath
+      workspaceLaunchExitCode = $workspaceExitCode
+      workspaceLaunchLogPath = $workspaceLogPath
+      selectionLaunchExitCode = $selectionExitCode
+      selectionLaunchLogPath = $selectionLogPath
+    }
+    humanGate = [ordered]@{
+      checklistPath = "acceptance/windows11/manual-right-click-checklist.md"
+      recordTemplatePath = "acceptance/windows11/acceptance-record.template.json"
+      status = "pending-human-review"
+    }
+    generatedAtUtc = (Get-Date).ToUniversalTime().ToString("o")
+  }
+
+  $record | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $acceptanceRecordPath -Encoding ASCII
+  Write-Host ("Windows 11 acceptance completed for {0} using {1}. Record: {2}" -f $ExecutionTarget, $SetupMode, $acceptanceRecordPath)
+} finally {
+  Pop-Location
 }
-
-$fixtureWorkspacePath = Materialize-FixtureWorkspace -GitCommand $gitCommandPath -FixtureManifest $fixtureManifest -InstalledFixtureWorkspacePath $installedFixtureWorkspacePath -InstalledFixtureBundlePath $installedFixtureBundlePath -DestinationPath $fixtureRoot -SkipProvisioning:$SkipClone.IsPresent
-
-$selectionPath = Join-Path $fixtureWorkspacePath ($fixtureManifest.selectionPath -replace '/', '\')
-Assert-PathPresent -Path $selectionPath -Message "Pinned canonical VI was not found at $selectionPath."
-
-& $codeCommandPath --new-window $fixtureWorkspacePath 2>&1 | Set-Content -LiteralPath $workspaceLogPath -Encoding ASCII
-$workspaceExitCode = $LASTEXITCODE
-& $codeCommandPath --goto $selectionPath 2>&1 | Set-Content -LiteralPath $selectionLogPath -Encoding ASCII
-$selectionExitCode = $LASTEXITCODE
-
-$record = [ordered]@{
-  releaseContractId = $releaseContract.builderContract.releaseContractId
-  expectedExtension = [ordered]@{
-    identifier = $releaseContract.builderContract.extensionIdentifier
-    version = $releaseContract.sourceTruth.releaseManifest.packageVersion
-  }
-  installer = [ordered]@{
-    path = $resolvedInstallerPath
-    sha256 = if (Test-Path -LiteralPath $resolvedInstallerPath) { (Get-Sha256 -Path $resolvedInstallerPath) } else { "" }
-    executed = (-not $SkipInstaller.IsPresent)
-  }
-  fixture = [ordered]@{
-    fixtureId = $fixtureManifest.fixtureId
-    repositoryUrl = $fixtureManifest.repositoryUrl
-    commitSha = $fixtureManifest.reference.commitSha
-    bundledWorkspacePath = $fixtureWorkspacePath
-    bundledBundlePath = $installedFixtureBundlePath
-    selectionPath = $fixtureManifest.selectionPath
-  }
-  automation = [ordered]@{
-    codeCommand = $codeCommandPath
-    gitCommand = $gitCommandPath
-    dockerCommand = $dockerCommandPath
-    codeVersionLogPath = $codeVersionLogPath
-    gitVersionLogPath = $gitVersionLogPath
-    dockerVersionLogPath = $dockerVersionLogPath
-    dockerEngineLogPath = $dockerEngineLogPath
-    dockerImageLogPath = $dockerImageLogPath
-    installedExtensionToken = $expectedToken
-    extensionsLogPath = $automationLogPath
-    workspaceLaunchExitCode = $workspaceExitCode
-    workspaceLaunchLogPath = $workspaceLogPath
-    selectionLaunchExitCode = $selectionExitCode
-    selectionLaunchLogPath = $selectionLogPath
-  }
-  humanGate = [ordered]@{
-    checklistPath = "acceptance/windows11/manual-right-click-checklist.md"
-    recordTemplatePath = "acceptance/windows11/acceptance-record.template.json"
-    status = "pending-human-review"
-  }
-  generatedAtUtc = (Get-Date).ToUniversalTime().ToString("o")
-}
-
-$record | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $acceptanceRecordPath -Encoding ASCII
-Write-Host "Windows 11 acceptance scaffold completed. Record: $acceptanceRecordPath"

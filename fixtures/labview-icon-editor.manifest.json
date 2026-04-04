@@ -19,7 +19,7 @@
   "selectionCommitVerified": true,
   "notes": [
     "Use this exact canonical public repo identity for Windows 11 acceptance and manual right-click proof.",
-    "Bundle a local Git fixture for the pinned develop branch so a fresh VM can materialize the proof workspace without network credentials."
+    "Bundle a local Git fixture for the pinned develop branch so the Windows 11 proof machine can materialize the proof workspace without network credentials."
   ],
   "status": "pinned"
 }

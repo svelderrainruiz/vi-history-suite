@@ -73,16 +73,20 @@
     ],
     "notes": [
       "This public repo now publishes the exact v0.2.0 VSIX and Windows installer through the GitHub release workflow.",
-      "Installer and Windows 11 acceptance work must continue consuming only the identities retained here."
+      "Installer and Windows 11 acceptance work must continue consuming only the identities retained here, whether the proof target is the current host machine or a fresh VM."
+    ],
+    "scopeNotes": [
+      "This public manifest is limited to release, setup, and support metadata.",
+      "Private requirements, design gates, and retained engineering evidence are intentionally not published in the public facade repo."
     ]
   },
   "builderContract": {
     "releaseContractId": "v0.2.0",
     "packageVersion": "0.2.0",
     "extensionIdentifier": "svelderrainruiz.vi-history-suite",
-    "windowsVmAssumptions": [
-      "The Windows 11 acceptance VM may be a fresh install with neither Visual Studio Code nor Git preinstalled.",
-      "The Windows 11 acceptance VM may also be missing Docker Desktop and the pinned Windows container image required for isolated LabVIEW execution.",
+    "windowsExecutionAssumptions": [
+      "The active Windows 11 proof lane may run on the current host machine or on a fresh replay VM.",
+      "The Windows 11 proof machine may be missing Visual Studio Code, Git, Docker Desktop, or the pinned Windows container image required for isolated LabVIEW execution.",
       "The installer carries a pinned `ni/labview-icon-editor` Git fixture bundle with commit history and materializes the canonical proof workspace locally.",
       "The installer bootstraps pinned Visual Studio Code, Git, and Docker Desktop installers, then uses the Visual Studio Code CLI to install the exact released VSIX and prepare the pinned Windows container image required by the product."
     ],
@@ -194,6 +198,15 @@
       }
     },
     "acceptanceProof": {
+      "defaultExecutionTarget": "host-machine",
+      "supportedExecutionTargets": [
+        "host-machine",
+        "fresh-vm"
+      ],
+      "executionTargetNotes": [
+        "The public acceptance harness defaults to the current Windows 11 host machine for faster iteration.",
+        "A fresh Windows 11 VM remains an optional stronger replay surface when clean-machine proof is needed."
+      ],
       "automationEntrypoint": "acceptance/windows11/Invoke-Windows11Acceptance.ps1",
       "manualChecklistPath": "acceptance/windows11/manual-right-click-checklist.md",
       "acceptanceRecordTemplatePath": "acceptance/windows11/acceptance-record.template.json",

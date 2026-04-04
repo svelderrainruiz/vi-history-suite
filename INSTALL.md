@@ -10,23 +10,32 @@ The first immutable release has been ingested into this public facade repo:
 - exact VSIX: `vi-history-suite-0.2.0.vsix`
 - SHA-256: `dd9585dbd684939ce71eeed01ca435685bb8da305b601e4d2bde15dfb54c4cf3`
 - GitHub release: `https://github.com/svelderrainruiz/vi-history-suite/releases/tag/v0.2.0`
-- Windows installer: `vi-history-suite-setup-0.2.0.exe`
-- installer SHA-256: `fd66fa6dd3ef7d3e8f840f63dae172bff812c958224313531dcd051970961e72`
+- legacy Windows installer: `vi-history-suite-setup-0.2.0.exe`
+- legacy installer SHA-256: `fd66fa6dd3ef7d3e8f840f63dae172bff812c958224313531dcd051970961e72`
 
 Current state:
 
-- the authoritative release still lives on the private GitLab control plane
-- the public GitHub release now publishes the exact VSIX and the workflow-built Windows installer
-- the public installer lane continues consuming the immutable contract in `releases/v0.2.0/`
-- fresh Windows 11 VM acceptance is still a separate proof gate
+- the authoritative release still lives on the private GitLab release surface
+- private requirements and design-gate artifacts are not published in this repo
+- the public GitHub release currently publishes the exact VSIX and the legacy workflow-built Windows installer
+- the public release-kit setup lane is now scaffolded in this repo and is intended to become the primary publication surface
+- Windows 11 host-machine acceptance is still a separate proof gate; a fresh VM remains optional replay evidence
 
 ## Planned Install Surfaces
 
 - VS Code Marketplace
 - GitHub Releases with versioned `.vsix` artifacts
-- GitHub Releases with a Windows installer built from an immutable released `.vsix`
+- GitHub Releases with a public release kit: setup manifest, setup scripts, fixture bundle, and checksums
+- optional legacy Windows installer assets built from an immutable released `.vsix`
 
-Current public download commands:
+Current direct public setup direction:
+
+- Windows: `Setup-VIHistorySuite.ps1`
+- Linux: `setup-vi-history-suite.sh`
+- both adapters consume `public-setup-manifest.json`
+- Docker is not part of the default public setup path
+
+Current legacy installer download commands:
 
 ```powershell
 $tag = 'v0.2.0'
@@ -51,19 +60,26 @@ code --install-extension vi-history-suite-0.2.0.vsix --force
 code --list-extensions --show-versions
 ```
 
-## Windows Installer Direction
+## Public Setup Direction
 
-The first public Windows installer lane:
+The primary public setup lane now aims to:
 - consume only immutable released VSIX artifacts
-- is built and published through the GitHub repo workflow on a Windows runner, using the NSIS build lane contract and the retained Windows builder scaffold
-- treat the Windows 11 proof VM as a fresh install with no preinstalled Visual Studio Code, Git, or Docker Desktop
-- bootstrap pinned Visual Studio Code, Git, and Docker Desktop installers before using the VS Code CLI to install the exact released extension
-- switch Docker Desktop to the Windows containers engine and verify the pinned LabVIEW Windows container image digest
-- materialize a local `ni/labview-icon-editor` Git fixture workspace from a bundled fixture bundle so commit history is available without remote clone credentials
+- publish a public setup manifest plus Windows and Linux setup adapters
+- support the default review flow with Visual Studio Code, Git, the exact released extension, and a pinned Git fixture bundle
+- avoid Docker in the default setup path
+- treat heavier runtime providers such as Docker as optional future capability providers
 
-The installer build lane is not the installed-user proof lane. Installed-user proof remains a separate fresh Windows 11 VM flow.
+The public setup lane is not the installed-user proof lane. Installed-user proof remains a separate Windows 11 acceptance flow that now defaults to the current host machine and can replay on a fresh VM when needed.
 
-Authoritative installer input for the current release:
+Primary public setup inputs for the current release:
+
+- [releases/v0.2.0/public-setup-manifest.json](releases/v0.2.0/public-setup-manifest.json)
+- [setup/windows/Setup-VIHistorySuite.ps1](setup/windows/Setup-VIHistorySuite.ps1)
+- [setup/linux/setup-vi-history-suite.sh](setup/linux/setup-vi-history-suite.sh)
+- [scripts/Build-PublicSetupAssets.ps1](scripts/Build-PublicSetupAssets.ps1)
+- [fixtures/labview-icon-editor.manifest.json](fixtures/labview-icon-editor.manifest.json)
+
+Legacy builder/installer inputs retained for compatibility:
 
 - [releases/v0.2.0/release-ingestion.json](releases/v0.2.0/release-ingestion.json)
 - [releases/v0.2.0/release-evidence/README.md](releases/v0.2.0/release-evidence/README.md)
@@ -76,7 +92,7 @@ Authoritative installer input for the current release:
 - [docker/windows-installer-builder/Invoke-InstallerBuild.ps1](docker/windows-installer-builder/Invoke-InstallerBuild.ps1)
 - [installer/nsis/vi-history-suite-installer.nsi](installer/nsis/vi-history-suite-installer.nsi)
 - [installer/nsis/Invoke-HarnessBootstrap.ps1](installer/nsis/Invoke-HarnessBootstrap.ps1)
-- [fixtures/labview-icon-editor.manifest.json](fixtures/labview-icon-editor.manifest.json)
+- [acceptance/windows11/Invoke-Windows11Acceptance.ps1](acceptance/windows11/Invoke-Windows11Acceptance.ps1)
 
 Pinned bootstrap references for the Windows builder scaffold:
 
@@ -93,7 +109,7 @@ Pinned bootstrap references for the Windows builder scaffold:
 - SHA-256:
   `9e334622293ddf15eb7ecb935b829370899a93c92a53385a2e4c7749e5d57c77`
 
-Pinned Windows container fixture identities:
+Pinned review fixture identities:
 
 - image reference: `nationalinstruments/labview:2026q1-windows`
 - image digest:
@@ -101,7 +117,15 @@ Pinned Windows container fixture identities:
 - bundled fixture bundle:
   `labview-icon-editor-develop-e8945de7.bundle`
 
-Reference local build commands on a Windows host with NSIS available:
+Reference local release-kit commands:
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/Sync-PinnedFixtureBundle.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/Build-PublicSetupAssets.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File setup/windows/Setup-VIHistorySuite.ps1
+```
+
+Legacy builder commands on a Windows host with NSIS available:
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File docker/windows-installer-builder/Stage-NsisBootstrap.ps1

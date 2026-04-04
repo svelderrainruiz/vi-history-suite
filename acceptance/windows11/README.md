@@ -4,23 +4,37 @@ This directory defines the installed-user acceptance lane for `vi-history-suite`
 
 ## Intended Split
 
-- automation: PowerShell + fresh-machine prerequisite bootstrap + Visual Studio Code CLI
+- automation: PowerShell + public release kit setup + Visual Studio Code CLI
 - human gate: manual right-click review flow on the canonical VI
 
 ## Current Acceptance Inputs
 
-- immutable release contract:
+- primary public setup manifest:
+  [releases/v0.2.0/public-setup-manifest.json](../../releases/v0.2.0/public-setup-manifest.json)
+- legacy builder/installer manifest:
   [releases/v0.2.0/release-ingestion.json](../../releases/v0.2.0/release-ingestion.json)
 - canonical fixture manifest:
   [fixtures/labview-icon-editor.manifest.json](../../fixtures/labview-icon-editor.manifest.json)
-- installer build output:
-  `artifacts/windows-installer/vi-history-suite-setup-0.2.0.exe`
+- primary public setup adapter:
+  [setup/windows/Setup-VIHistorySuite.ps1](../../setup/windows/Setup-VIHistorySuite.ps1)
+- optional legacy installer asset:
+  `vi-history-suite-setup-0.2.0.exe`
 
-## Planned Automated Proof
+The automation script supports two execution targets:
 
-- invoke the public installer
-- confirm the installer bootstraps Visual Studio Code, Git, and Docker Desktop on a fresh VM
-- confirm Docker Desktop is running the Windows containers engine and that the pinned LabVIEW image digest is present
+- `host-machine`: default and current iteration surface on this Windows 11 machine
+- `fresh-vm`: optional clean-machine replay surface
+
+If the local repo checkout or public setup files are not available, the script
+downloads the public setup manifest and setup script into
+`%LocalAppData%\VI History Suite\acceptance\<target>\downloads`. Legacy
+installer mode remains available explicitly, but it is no longer the primary
+acceptance path.
+
+## Current Automated Proof Surface
+
+- invoke the public setup adapter on the selected Windows 11 proof machine
+- confirm the setup adapter installs or reuses Visual Studio Code and Git
 - verify the installed extension version
 - launch the pinned proof workspace materialized from the bundled Git fixture
 - retain CLI outputs and acceptance artifacts
@@ -39,8 +53,14 @@ Current scaffold files:
 
 See [manual-right-click-checklist.md](./manual-right-click-checklist.md).
 
-Example scaffold command on a Windows 11 VM after building the installer:
+Example primary acceptance command on this Windows 11 host machine:
 
 ```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File acceptance/windows11/Invoke-Windows11Acceptance.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File acceptance/windows11/Invoke-Windows11Acceptance.ps1 -ExecutionTarget host-machine -SetupMode direct-release
+```
+
+Optional legacy installer replay:
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File acceptance/windows11/Invoke-Windows11Acceptance.ps1 -ExecutionTarget host-machine -SetupMode legacy-installer
 ```

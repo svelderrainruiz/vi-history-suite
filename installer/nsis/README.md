@@ -1,11 +1,19 @@
-# NSIS Installer Surface
+# Legacy NSIS Wrapper Surface
 
-This directory contains the public Windows installer scaffold for
+This directory retains the legacy Windows NSIS wrapper scaffold for
 `vi-history-suite`.
+
+It is no longer the primary public setup surface. The primary public setup
+surface is the release kit:
+
+- [releases/v0.2.0/public-setup-manifest.json](../../releases/v0.2.0/public-setup-manifest.json)
+- [setup/windows/Setup-VIHistorySuite.ps1](../../setup/windows/Setup-VIHistorySuite.ps1)
+- [setup/linux/setup-vi-history-suite.sh](../../setup/linux/setup-vi-history-suite.sh)
 
 ## Source Truth
 
-The installer consumes only the immutable released VSIX contract retained in:
+The legacy wrapper consumes only the immutable released VSIX contract retained
+in:
 
 - [releases/v0.2.0/release-ingestion.json](../../releases/v0.2.0/release-ingestion.json)
 - [releases/v0.2.0/release-evidence/README.md](../../releases/v0.2.0/release-evidence/README.md)
@@ -19,16 +27,15 @@ It must not consume:
 ## Scaffold Files
 
 - [vi-history-suite-installer.nsi](./vi-history-suite-installer.nsi):
-  public installer entrypoint
+  legacy wrapper entrypoint
 - [Invoke-HarnessBootstrap.ps1](./Invoke-HarnessBootstrap.ps1):
-  materializes the bundled proof workspace, prepares Docker Desktop, and
-  verifies the pinned Windows container image
+  legacy prerequisite/bootstrap harness retained for wrapper work
 - [docker/windows-installer-builder/Invoke-InstallerBuild.ps1](../../docker/windows-installer-builder/Invoke-InstallerBuild.ps1):
-  stages immutable inputs and calls `makensis`
+  stages immutable inputs and calls `makensis` for the legacy wrapper build
 
-## Current Installer Contract
+## Current Legacy Contract
 
-The scaffolded installer:
+The retained wrapper scaffold:
 
 - stages the exact released VSIX into the install root
 - stages pinned Visual Studio Code, Git, and Docker Desktop bootstrap
@@ -37,9 +44,9 @@ The scaffolded installer:
   with develop-branch commit history
 - stages public-facing `README.md`, `INSTALL.md`, `SUPPORT.md`, `LICENSE`, and
   the immutable `release-ingestion.json`
-- bootstraps Visual Studio Code on a fresh Windows 11 VM when needed
-- bootstraps Git for Windows on a fresh Windows 11 VM when needed
-- bootstraps Docker Desktop on a fresh Windows 11 VM when needed
+- bootstraps Visual Studio Code on a Windows 11 proof machine when needed
+- bootstraps Git for Windows on a Windows 11 proof machine when needed
+- bootstraps Docker Desktop on a Windows 11 proof machine when needed
 - switches Docker Desktop to the Windows containers engine and verifies the
   pinned LabVIEW Windows image digest
 - materializes the pinned proof workspace from the bundled Git fixture so a
@@ -82,11 +89,9 @@ Local host-iteration build command:
 pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/Build-HostIterationInstaller.ps1
 ```
 
-## Current Limitation
+## Current Status
 
-The exact-contract installer is now published through the GitHub workflow, but
-fresh Windows 11 VM proof still remains open. Acceptance must still confirm the
-installer bootstraps Visual Studio Code, Git, and Docker Desktop on a truly
-fresh VM, prepares the pinned Windows container image, materializes the pinned
-Git fixture workspace with commit history, and supports the right-click review
-flow on that proof fixture.
+The exact-contract wrapper is retained as a secondary or future signed-wrapper
+option. It is not the critical path for public setup anymore. The active public
+direction is direct setup from the public release kit, with Docker removed from
+the default setup lane and NSIS treated as optional legacy scaffolding.
