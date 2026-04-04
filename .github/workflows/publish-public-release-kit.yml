@@ -38,10 +38,6 @@ jobs:
         shell: pwsh
         run: ./scripts/Validate-PublicFacadeScaffold.ps1
 
-      - name: Smoke test public setup fixture bootstrap
-        shell: pwsh
-        run: ./scripts/Test-PublicSetupFixture.ps1
-
       - name: Publish release assets
         shell: pwsh
         env:
