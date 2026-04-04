@@ -9,6 +9,14 @@
   !define PRODUCT_VERSION "0.0.0"
 !endif
 
+!ifndef INSTALL_DIR_NAME
+  !define INSTALL_DIR_NAME "${PRODUCT_NAME}"
+!endif
+
+!ifndef INSTALLER_PROFILE
+  !define INSTALLER_PROFILE "public-release"
+!endif
+
 !ifndef EXTENSION_IDENTIFIER
   !define EXTENSION_IDENTIFIER "svelderrainruiz.vi-history-suite"
 !endif
@@ -42,7 +50,7 @@
 Unicode True
 Name "${PRODUCT_NAME}"
 OutFile "${OUTPUT_FILE}"
-InstallDir "$LOCALAPPDATA\Programs\VI History Suite"
+InstallDir "$LOCALAPPDATA\Programs\${INSTALL_DIR_NAME}"
 InstallDirRegKey HKCU "${UNINSTALL_KEY}" "InstallLocation"
 RequestExecutionLevel admin
 ShowInstDetails show
@@ -145,7 +153,11 @@ Function EnsureVisualStudioCode
   Return
 
 missing_vscode_bootstrap:
+  !ifdef HOST_ITERATION_PROFILE
+    Push "Visual Studio Code was not found. This host-iteration build expects Visual Studio Code to already be installed on this machine."
+  !else
   Push "Visual Studio Code bootstrap installer was not staged with this build."
+  !endif
   Call FailInstall
 FunctionEnd
 
@@ -169,7 +181,11 @@ Function EnsureGit
   Return
 
 missing_git_bootstrap:
+  !ifdef HOST_ITERATION_PROFILE
+    Push "Git was not found. This host-iteration build expects Git to already be installed on this machine."
+  !else
   Push "Git bootstrap installer was not staged with this build."
+  !endif
   Call FailInstall
 FunctionEnd
 
@@ -189,7 +205,7 @@ FunctionEnd
 Function RunHarnessBootstrap
   IfFileExists "$INSTDIR\scripts\${HARNESS_BOOTSTRAP_SCRIPT_FILE}" 0 missing_harness_bootstrap
   DetailPrint "Preparing the pinned proof workspace and Docker Desktop harness prerequisites."
-  ExecWait '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -File "$INSTDIR\scripts\${HARNESS_BOOTSTRAP_SCRIPT_FILE}" -InstallRoot "$INSTDIR" -ReleaseContractPath "$INSTDIR\contracts\release-ingestion.json" -FixtureManifestPath "$INSTDIR\fixtures\labview-icon-editor.manifest.json" -GitCommand "$GitCommand"' $0
+  ExecWait '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -File "$INSTDIR\scripts\${HARNESS_BOOTSTRAP_SCRIPT_FILE}" -InstallRoot "$INSTDIR" -ReleaseContractPath "$INSTDIR\contracts\release-ingestion.json" -FixtureManifestPath "$INSTDIR\fixtures\labview-icon-editor.manifest.json" -GitCommand "$GitCommand" -InstallerProfile "${INSTALLER_PROFILE}"' $0
   ${If} $0 == 3010
     Push "Docker Desktop requested a Windows restart before the harness could finish. Restart Windows and rerun this installer to complete the pinned Windows container image preparation."
     Call FailInstallPreserveInstallRoot

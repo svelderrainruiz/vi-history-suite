@@ -50,6 +50,16 @@ The scaffolded installer:
 - leaves shared Visual Studio Code, Git, and Docker Desktop installations in
   place on uninstall
 
+The builder also supports a local `host-iteration` profile for this machine:
+
+- writes to `$LocalAppData\Programs\VI History Suite Host Iteration`
+- omits the pinned Visual Studio Code, Git, and Docker Desktop bootstrap
+  installers from the payload
+- expects those shared tools to already be installed on the host
+- still installs the exact released VSIX, materializes the pinned proof
+  workspace, and verifies Docker Desktop plus the pinned Windows container
+  image
+
 Default staged install layout:
 
 - `$LocalAppData\Programs\VI History Suite\payload\vi-history-suite-<version>.vsix`
@@ -65,6 +75,12 @@ Default staged install layout:
 - `$LocalAppData\Programs\VI History Suite\fixtures\labview-icon-editor.manifest.json`
 - `$LocalAppData\Programs\VI History Suite\fixtures\labview-icon-editor-develop-e8945de7.bundle`
 - `$LocalAppData\Programs\VI History Suite\fixtures-workspace\labview-icon-editor`
+
+Local host-iteration build command:
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/Build-HostIterationInstaller.ps1
+```
 
 ## Current Limitation
 

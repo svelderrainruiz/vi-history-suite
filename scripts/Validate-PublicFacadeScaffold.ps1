@@ -115,6 +115,7 @@ $requiredPaths = @(
   "docker/windows-installer-builder/Stage-GitBootstrap.ps1",
   "docker/windows-installer-builder/Stage-DockerDesktopBootstrap.ps1",
   "docker/windows-installer-builder/vendor/README.md",
+  "scripts/Build-HostIterationInstaller.ps1",
   "acceptance/windows11/README.md",
   "acceptance/windows11/Invoke-Windows11Acceptance.ps1",
   "acceptance/windows11/manual-right-click-checklist.md",
@@ -138,6 +139,7 @@ foreach ($ps1RelativePath in @(
   "docker/windows-installer-builder/Stage-VsCodeBootstrap.ps1",
   "docker/windows-installer-builder/Stage-GitBootstrap.ps1",
   "docker/windows-installer-builder/Stage-DockerDesktopBootstrap.ps1",
+  "scripts/Build-HostIterationInstaller.ps1",
   "installer/nsis/Invoke-HarnessBootstrap.ps1",
   "acceptance/windows11/Invoke-Windows11Acceptance.ps1"
 )) {
@@ -167,6 +169,7 @@ foreach ($token in @(
   'Visual Studio Code',
   'Git',
   'Docker Desktop',
+  'INSTALLER_PROFILE',
   'bootstrap\vscode',
   'bootstrap\git',
   'DOCKER_DESKTOP_BOOTSTRAP_FILE',
@@ -182,6 +185,7 @@ $harnessScriptPath = Join-Path $repoRootPath "installer/nsis/Invoke-HarnessBoots
 $harnessScriptContent = Get-Content -LiteralPath $harnessScriptPath -Raw
 foreach ($token in @(
   'Docker Desktop',
+  'host-iteration',
   '"desktop", "engine", "use", "windows"',
   '"image", "inspect"',
   'labview-icon-editor',
@@ -190,6 +194,19 @@ foreach ($token in @(
 )) {
   if ($harnessScriptContent -notmatch [regex]::Escape($token)) {
     throw "Harness bootstrap script must retain token '$token'."
+  }
+}
+
+$builderScriptPath = Join-Path $repoRootPath "docker/windows-installer-builder/Invoke-InstallerBuild.ps1"
+$builderScriptContent = Get-Content -LiteralPath $builderScriptPath -Raw
+foreach ($token in @(
+  'host-iteration',
+  'IncludeRuntimeBootstrapInstallers',
+  'vi-history-suite-host-iteration-setup-',
+  'HOST_ITERATION_PROFILE'
+)) {
+  if ($builderScriptContent -notmatch [regex]::Escape($token)) {
+    throw "Builder script must retain token '$token'."
   }
 }
 

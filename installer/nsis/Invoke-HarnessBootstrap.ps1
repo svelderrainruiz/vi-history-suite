@@ -5,6 +5,7 @@ param(
   [string]$FixtureManifestPath = "",
   [string]$GitCommand = "",
   [string]$LogRoot = "",
+  [string]$InstallerProfile = "public-release",
   [switch]$SkipDockerDesktopPreparation
 )
 
@@ -328,7 +329,8 @@ function Ensure-DockerDesktopAndImage {
   param(
     [pscustomobject]$ReleaseContract,
     [string]$InstallRoot,
-    [string]$LogRoot
+    [string]$LogRoot,
+    [string]$InstallerProfile
   )
 
   $dockerContract = $ReleaseContract.builderContract.runtimeBootstrapInstallers.dockerDesktop
@@ -348,6 +350,10 @@ function Ensure-DockerDesktopAndImage {
 
   if ((-not $dockerCommandPath) -or (-not $dockerDesktopPath)) {
     if (-not (Test-Path -LiteralPath $dockerInstallerPath)) {
+      if ($InstallerProfile -eq "host-iteration") {
+        throw "Docker Desktop was not found. This host-iteration build expects Docker Desktop to already be installed on this machine."
+      }
+
       throw "Docker Desktop bootstrap installer was not found at $dockerInstallerPath."
     }
 
@@ -436,10 +442,11 @@ function Ensure-DockerDesktopAndImage {
 }
 
 $installRootPath = Resolve-PathOrDefault -Path $InstallRoot -DefaultPath (Join-Path $PSScriptRoot "..")
-$releaseContractResolvedPath = Resolve-PathOrDefault -Path $ReleaseContractPath -DefaultPath (Join-Path $installRootPath "contracts\release-ingestion.json")
-$fixtureManifestResolvedPath = Resolve-PathOrDefault -Path $FixtureManifestPath -DefaultPath (Join-Path $installRootPath "fixtures\labview-icon-editor.manifest.json")
-$logRootPath = Resolve-PathOrDefault -Path $LogRoot -DefaultPath (Join-Path $installRootPath "logs")
-Ensure-Directory -Path $logRootPath
+  $releaseContractResolvedPath = Resolve-PathOrDefault -Path $ReleaseContractPath -DefaultPath (Join-Path $installRootPath "contracts\release-ingestion.json")
+  $fixtureManifestResolvedPath = Resolve-PathOrDefault -Path $FixtureManifestPath -DefaultPath (Join-Path $installRootPath "fixtures\labview-icon-editor.manifest.json")
+  $logRootPath = Resolve-PathOrDefault -Path $LogRoot -DefaultPath (Join-Path $installRootPath "logs")
+  $installerProfileNormalized = if ($InstallerProfile) { $InstallerProfile.ToLowerInvariant() } else { "public-release" }
+  Ensure-Directory -Path $logRootPath
 $errorLogPath = Join-Path $logRootPath "harness-bootstrap-error.txt"
 $summaryPath = Join-Path $logRootPath "harness-bootstrap-summary.json"
 
@@ -462,13 +469,14 @@ try {
     }
   } else {
     Set-BootstrapStage -Stage "prepare-docker-desktop-and-image"
-    $dockerResult = Ensure-DockerDesktopAndImage -ReleaseContract $releaseContract -InstallRoot $installRootPath -LogRoot $logRootPath
+    $dockerResult = Ensure-DockerDesktopAndImage -ReleaseContract $releaseContract -InstallRoot $installRootPath -LogRoot $logRootPath -InstallerProfile $installerProfileNormalized
   }
 
   Set-BootstrapStage -Stage "write-bootstrap-summary"
   $summary = [ordered]@{
     status = "success"
     stage = $script:CurrentBootstrapStage
+    installerProfile = $installerProfileNormalized
     fixture = [ordered]@{
       repositoryUrl = $fixtureManifest.repositoryUrl
       branch = $fixtureManifest.reference.branch
@@ -517,6 +525,7 @@ try {
   $failureSummary = [ordered]@{
     status = "failed"
     stage = $script:CurrentBootstrapStage
+    installerProfile = $installerProfileNormalized
     message = $failureMessage
     errorLogPath = $errorLogPath
     generatedAtUtc = (Get-Date).ToUniversalTime().ToString("o")

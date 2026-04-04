@@ -66,17 +66,37 @@ function Invoke-Git {
     [string[]]$CommandArgs
   )
 
-  $mergedOutput = & $GitCommand @CommandArgs 2>&1
-  $exitCode = $LASTEXITCODE
+  $previousErrorActionPreference = $ErrorActionPreference
+  try {
+    $ErrorActionPreference = "Continue"
+    $rawOutput = & $GitCommand @CommandArgs 2>&1
+    $exitCode = $LASTEXITCODE
 
-  foreach ($line in @($mergedOutput)) {
-    if ($null -ne $line -and "$line".Length -gt 0) {
-      Write-Host $line
+    $output = New-Object System.Collections.Generic.List[string]
+    foreach ($item in @($rawOutput)) {
+      if ($item -is [System.Management.Automation.ErrorRecord]) {
+        $output.Add($item.ToString())
+      } elseif ($null -ne $item) {
+        $output.Add([string]$item)
+      }
     }
-  }
 
-  if ($exitCode -ne 0) {
-    throw "$GitCommand $($CommandArgs -join ' ') failed with exit code $exitCode."
+    foreach ($line in $output) {
+      if ($line.Length -gt 0) {
+        Write-Host $line
+      }
+    }
+
+    if ($exitCode -ne 0) {
+      $details = ($output | Out-String).Trim()
+      if ($details) {
+        throw "$GitCommand $($CommandArgs -join ' ') failed with exit code $exitCode. Output: $details"
+      }
+
+      throw "$GitCommand $($CommandArgs -join ' ') failed with exit code $exitCode."
+    }
+  } finally {
+    $ErrorActionPreference = $previousErrorActionPreference
   }
 }
 

@@ -5,6 +5,8 @@ param(
   [string]$OutputDir = "",
   [string]$MakensisPath = "",
   [string]$NsisBootstrapInstaller = "",
+  [ValidateSet("public-release", "host-iteration")]
+  [string]$BuildProfile = "public-release",
   [switch]$KeepStaging
 )
 
@@ -42,6 +44,38 @@ function Ensure-Directory {
   param([string]$Path)
 
   New-Item -ItemType Directory -Force -Path $Path | Out-Null
+}
+
+function Get-BuildProfileSettings {
+  param(
+    [string]$BuildProfile,
+    [string]$PackageVersion
+  )
+
+  switch ($BuildProfile) {
+    "host-iteration" {
+      return [pscustomobject][ordered]@{
+        Id = "host-iteration"
+        ProductName = "VI History Suite Host Iteration"
+        InstallDirName = "VI History Suite Host Iteration"
+        OutputDirRelativePath = "artifacts/windows-installer-host-iteration"
+        InstallerFileName = "vi-history-suite-host-iteration-setup-$PackageVersion.exe"
+        BuildMetadataFileName = "vi-history-suite-host-iteration-setup-$PackageVersion-build.json"
+        IncludeRuntimeBootstrapInstallers = $false
+      }
+    }
+    default {
+      return [pscustomobject][ordered]@{
+        Id = "public-release"
+        ProductName = "VI History Suite"
+        InstallDirName = "VI History Suite"
+        OutputDirRelativePath = "artifacts/windows-installer"
+        InstallerFileName = "vi-history-suite-setup-$PackageVersion.exe"
+        BuildMetadataFileName = "vi-history-suite-setup-$PackageVersion-build.json"
+        IncludeRuntimeBootstrapInstallers = $true
+      }
+    }
+  }
 }
 
 function Get-Sha256 {
@@ -240,6 +274,8 @@ $releaseDirPath = if ($ReleaseDir) { (Resolve-Path -LiteralPath $ReleaseDir).Pat
 $releaseContractPath = Join-Path $releaseDirPath "release-ingestion.json"
 $fixtureManifestPath = Join-Path $repoRootPath "fixtures/labview-icon-editor.manifest.json"
 $releaseContract = Read-JsonFile -Path $releaseContractPath
+$packageVersion = $releaseContract.sourceTruth.releaseManifest.packageVersion
+$buildProfileSettings = Get-BuildProfileSettings -BuildProfile $BuildProfile -PackageVersion $packageVersion
 
 foreach ($required in $releaseContract.builderContract.stagingRequirements.requiredBeforeInstallerBuild) {
   Assert-PathPresent -Path (Join-Path $repoRootPath $required.relativePath) -Message "Missing required release-evidence path: $($required.relativePath)"
@@ -248,14 +284,18 @@ foreach ($required in $releaseContract.builderContract.stagingRequirements.requi
 $vsixPath = Assert-ExactVsix -Contract $releaseContract -ReleaseRoot $releaseDirPath
 $fixtureBundleInfo = Resolve-FixtureBundle -RepoRoot $repoRootPath -FixtureManifestPath $fixtureManifestPath
 $nsisBootstrapInstallerPath = Resolve-NsisBootstrapInstaller -RepoRoot $repoRootPath -Contract $releaseContract -Candidate $NsisBootstrapInstaller
-$vsCodeBootstrapInstallerPath = Resolve-StagedBootstrapInstaller -RepoRoot $repoRootPath -BootstrapInstaller $releaseContract.builderContract.runtimeBootstrapInstallers.vscode -Label "Visual Studio Code"
-$gitBootstrapInstallerPath = Resolve-StagedBootstrapInstaller -RepoRoot $repoRootPath -BootstrapInstaller $releaseContract.builderContract.runtimeBootstrapInstallers.git -Label "Git"
-$dockerDesktopBootstrapInstallerPath = Resolve-StagedBootstrapInstaller -RepoRoot $repoRootPath -BootstrapInstaller $releaseContract.builderContract.runtimeBootstrapInstallers.dockerDesktop -Label "Docker Desktop"
+$vsCodeBootstrapInstallerPath = ""
+$gitBootstrapInstallerPath = ""
+$dockerDesktopBootstrapInstallerPath = ""
+if ($buildProfileSettings.IncludeRuntimeBootstrapInstallers) {
+  $vsCodeBootstrapInstallerPath = Resolve-StagedBootstrapInstaller -RepoRoot $repoRootPath -BootstrapInstaller $releaseContract.builderContract.runtimeBootstrapInstallers.vscode -Label "Visual Studio Code"
+  $gitBootstrapInstallerPath = Resolve-StagedBootstrapInstaller -RepoRoot $repoRootPath -BootstrapInstaller $releaseContract.builderContract.runtimeBootstrapInstallers.git -Label "Git"
+  $dockerDesktopBootstrapInstallerPath = Resolve-StagedBootstrapInstaller -RepoRoot $repoRootPath -BootstrapInstaller $releaseContract.builderContract.runtimeBootstrapInstallers.dockerDesktop -Label "Docker Desktop"
+}
 $makensis = Resolve-MakensisPath -Contract $releaseContract -RepoRoot $repoRootPath -Candidate $MakensisPath -BootstrapInstallerPath $nsisBootstrapInstallerPath
-$outputDirPath = if ($OutputDir) { [IO.Path]::GetFullPath($OutputDir) } else { Join-Path $repoRootPath "artifacts/windows-installer" }
+$outputDirPath = if ($OutputDir) { [IO.Path]::GetFullPath($OutputDir) } else { Join-Path $repoRootPath $buildProfileSettings.OutputDirRelativePath }
 Ensure-Directory -Path $outputDirPath
 
-$packageVersion = $releaseContract.sourceTruth.releaseManifest.packageVersion
 $stageRoot = Join-Path $outputDirPath ("staging-{0}" -f ([guid]::NewGuid().ToString("N")))
 $payloadRoot = Join-Path $stageRoot "payload"
 $bootstrapRoot = Join-Path $stageRoot "bootstrap"
@@ -266,10 +306,9 @@ $scriptsRoot = Join-Path $stageRoot "scripts"
 $fixturesRoot = Join-Path $stageRoot "fixtures"
 $docsRoot = Join-Path $stageRoot "docs"
 $contractsRoot = Join-Path $stageRoot "contracts"
-$installerRelativePath = $releaseContract.builderContract.installerBuild.defaultOutputRelativePath
-$installerFileName = Split-Path -Leaf $installerRelativePath
+$installerFileName = $buildProfileSettings.InstallerFileName
 $installerPath = Join-Path $outputDirPath $installerFileName
-$buildMetadataPath = Join-Path $outputDirPath (Split-Path -Leaf $releaseContract.builderContract.installerBuild.defaultBuildMetadataRelativePath)
+$buildMetadataPath = Join-Path $outputDirPath $buildProfileSettings.BuildMetadataFileName
 $checksumPath = Join-Path $outputDirPath "SHA256SUMS.txt"
 $nsisScriptPath = Join-Path $repoRootPath $releaseContract.builderContract.installerBuild.nsisProject
 
@@ -283,9 +322,11 @@ Ensure-Directory -Path $docsRoot
 Ensure-Directory -Path $contractsRoot
 
 Copy-Item -LiteralPath $vsixPath -Destination (Join-Path $payloadRoot (Split-Path -Leaf $vsixPath)) -Force
-Copy-Item -LiteralPath $vsCodeBootstrapInstallerPath -Destination (Join-Path $vsCodeBootstrapRoot (Split-Path -Leaf $vsCodeBootstrapInstallerPath)) -Force
-Copy-Item -LiteralPath $gitBootstrapInstallerPath -Destination (Join-Path $gitBootstrapRoot (Split-Path -Leaf $gitBootstrapInstallerPath)) -Force
-Copy-Item -LiteralPath $dockerDesktopBootstrapInstallerPath -Destination (Join-Path $dockerBootstrapRoot (Split-Path -Leaf $dockerDesktopBootstrapInstallerPath)) -Force
+if ($buildProfileSettings.IncludeRuntimeBootstrapInstallers) {
+  Copy-Item -LiteralPath $vsCodeBootstrapInstallerPath -Destination (Join-Path $vsCodeBootstrapRoot (Split-Path -Leaf $vsCodeBootstrapInstallerPath)) -Force
+  Copy-Item -LiteralPath $gitBootstrapInstallerPath -Destination (Join-Path $gitBootstrapRoot (Split-Path -Leaf $gitBootstrapInstallerPath)) -Force
+  Copy-Item -LiteralPath $dockerDesktopBootstrapInstallerPath -Destination (Join-Path $dockerBootstrapRoot (Split-Path -Leaf $dockerDesktopBootstrapInstallerPath)) -Force
+}
 Copy-Item -LiteralPath (Join-Path $repoRootPath "installer/nsis/Invoke-HarnessBootstrap.ps1") -Destination (Join-Path $scriptsRoot "Invoke-HarnessBootstrap.ps1") -Force
 Copy-Item -LiteralPath $fixtureManifestPath -Destination (Join-Path $fixturesRoot "labview-icon-editor.manifest.json") -Force
 Copy-Item -LiteralPath $fixtureBundleInfo.BundlePath -Destination (Join-Path $fixturesRoot $fixtureBundleInfo.Manifest.bundle.fileName) -Force
@@ -295,9 +336,11 @@ foreach ($doc in @("README.md", "INSTALL.md", "SUPPORT.md", "LICENSE")) {
 Copy-Item -LiteralPath $releaseContractPath -Destination (Join-Path $contractsRoot "release-ingestion.json") -Force
 
 $makensisArgs = @(
-  "/DPRODUCT_NAME=VI History Suite",
+  "/DPRODUCT_NAME=$($buildProfileSettings.ProductName)",
   "/DPRODUCT_VERSION=$packageVersion",
   "/DEXTENSION_IDENTIFIER=$($releaseContract.builderContract.extensionIdentifier)",
+  "/DINSTALL_DIR_NAME=$($buildProfileSettings.InstallDirName)",
+  "/DINSTALLER_PROFILE=$($buildProfileSettings.Id)",
   "/DVSCODE_BOOTSTRAP_FILE=$($releaseContract.builderContract.runtimeBootstrapInstallers.vscode.fileName)",
   "/DGIT_BOOTSTRAP_FILE=$($releaseContract.builderContract.runtimeBootstrapInstallers.git.fileName)",
   "/DDOCKER_DESKTOP_BOOTSTRAP_FILE=$($releaseContract.builderContract.runtimeBootstrapInstallers.dockerDesktop.fileName)",
@@ -306,8 +349,11 @@ $makensisArgs = @(
   "/DOUTPUT_FILE=$installerPath",
   $nsisScriptPath
 )
+if ($buildProfileSettings.Id -eq "host-iteration") {
+  $makensisArgs = @("/DHOST_ITERATION_PROFILE") + $makensisArgs
+}
 
-Write-Host "Building public installer from immutable release contract $($releaseContract.builderContract.releaseContractId)."
+Write-Host "Building $($buildProfileSettings.Id) installer from immutable release contract $($releaseContract.builderContract.releaseContractId)."
 & $makensis @makensisArgs
 if ($LASTEXITCODE -ne 0) {
   throw "makensis.exe failed with exit code $LASTEXITCODE."
@@ -319,6 +365,12 @@ $installerHash = Get-Sha256 -Path $installerPath
 $metadata = [ordered]@{
   releaseContractId = $releaseContract.builderContract.releaseContractId
   packageVersion = $packageVersion
+  buildProfile = [ordered]@{
+    id = $buildProfileSettings.Id
+    productName = $buildProfileSettings.ProductName
+    installDirName = $buildProfileSettings.InstallDirName
+    includesRuntimeBootstrapInstallers = $buildProfileSettings.IncludeRuntimeBootstrapInstallers
+  }
   extensionIdentifier = $releaseContract.builderContract.extensionIdentifier
   installer = [ordered]@{
     fileName = $installerFileName
@@ -343,17 +395,18 @@ $metadata = [ordered]@{
     nsisBootstrapInstallerSha256 = if ($nsisBootstrapInstallerPath) { (Get-Sha256 -Path $nsisBootstrapInstallerPath) } else { "" }
   }
   runtimeBootstrapInstallers = [ordered]@{
+    includedInPayload = $buildProfileSettings.IncludeRuntimeBootstrapInstallers
     vscode = [ordered]@{
       path = $vsCodeBootstrapInstallerPath
-      sha256 = $releaseContract.builderContract.runtimeBootstrapInstallers.vscode.sha256
+      sha256 = if ($buildProfileSettings.IncludeRuntimeBootstrapInstallers) { $releaseContract.builderContract.runtimeBootstrapInstallers.vscode.sha256 } else { "" }
     }
     git = [ordered]@{
       path = $gitBootstrapInstallerPath
-      sha256 = $releaseContract.builderContract.runtimeBootstrapInstallers.git.sha256
+      sha256 = if ($buildProfileSettings.IncludeRuntimeBootstrapInstallers) { $releaseContract.builderContract.runtimeBootstrapInstallers.git.sha256 } else { "" }
     }
     dockerDesktop = [ordered]@{
       path = $dockerDesktopBootstrapInstallerPath
-      sha256 = $releaseContract.builderContract.runtimeBootstrapInstallers.dockerDesktop.sha256
+      sha256 = if ($buildProfileSettings.IncludeRuntimeBootstrapInstallers) { $releaseContract.builderContract.runtimeBootstrapInstallers.dockerDesktop.sha256 } else { "" }
     }
   }
   fixtureBundle = [ordered]@{

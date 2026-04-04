@@ -91,6 +91,12 @@ Current default outputs:
 - `artifacts/windows-installer/vi-history-suite-setup-0.2.0-build.json`
 - `artifacts/windows-installer/SHA256SUMS.txt`
 
+Local host-iteration outputs:
+
+- `artifacts/windows-installer-host-iteration/vi-history-suite-host-iteration-setup-0.2.0.exe`
+- `artifacts/windows-installer-host-iteration/vi-history-suite-host-iteration-setup-0.2.0-build.json`
+- `artifacts/windows-installer-host-iteration/SHA256SUMS.txt`
+
 Example scaffold commands on a Windows host:
 
 ```powershell
@@ -100,6 +106,16 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File docker/windows-installer-builder/S
 pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/Sync-PinnedFixtureBundle.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File docker/windows-installer-builder/Invoke-InstallerBuild.ps1
 ```
+
+Host-machine iteration build on this machine:
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/Build-HostIterationInstaller.ps1
+```
+
+The `host-iteration` profile keeps the immutable VSIX and pinned fixture
+bundle, but omits the large runtime bootstrap installers and expects Visual
+Studio Code, Git, and Docker Desktop to already exist on the local machine.
 
 ## Not Yet Implemented
 
