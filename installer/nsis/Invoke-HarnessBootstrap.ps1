@@ -152,19 +152,52 @@ function Invoke-ExternalCommand {
     [int[]]$AllowedExitCodes = @(0)
   )
 
-  $output = & $FilePath @CommandArgs 2>&1
-  if ($LogPath) {
-    $output | Set-Content -LiteralPath $LogPath -Encoding ASCII
-  }
+  $stdoutPath = Join-Path ([System.IO.Path]::GetTempPath()) ("vi-history-suite-stdout-" + [guid]::NewGuid().ToString("N") + ".log")
+  $stderrPath = Join-Path ([System.IO.Path]::GetTempPath()) ("vi-history-suite-stderr-" + [guid]::NewGuid().ToString("N") + ".log")
 
-  $exitCode = $LASTEXITCODE
-  if ($AllowedExitCodes -notcontains $exitCode) {
-    throw "$FilePath $($CommandArgs -join ' ') failed with exit code $exitCode."
-  }
+  try {
+    $process = Start-Process `
+      -FilePath $FilePath `
+      -ArgumentList $CommandArgs `
+      -Wait `
+      -PassThru `
+      -NoNewWindow `
+      -RedirectStandardOutput $stdoutPath `
+      -RedirectStandardError $stderrPath
 
-  return [pscustomobject][ordered]@{
-    Output = $output
-    ExitCode = $exitCode
+    $output = New-Object System.Collections.Generic.List[string]
+    foreach ($path in @($stdoutPath, $stderrPath)) {
+      if (Test-Path -LiteralPath $path) {
+        foreach ($line in (Get-Content -LiteralPath $path -ErrorAction SilentlyContinue)) {
+          $output.Add([string]$line)
+        }
+      }
+    }
+
+    if ($LogPath) {
+      $output | Set-Content -LiteralPath $LogPath -Encoding ASCII
+    }
+
+    $exitCode = $process.ExitCode
+    if ($AllowedExitCodes -notcontains $exitCode) {
+      $details = ($output | Out-String).Trim()
+      if ($details) {
+        throw "$FilePath $($CommandArgs -join ' ') failed with exit code $exitCode. Output: $details"
+      }
+
+      throw "$FilePath $($CommandArgs -join ' ') failed with exit code $exitCode."
+    }
+
+    return [pscustomobject][ordered]@{
+      Output = $output
+      ExitCode = $exitCode
+    }
+  } finally {
+    foreach ($path in @($stdoutPath, $stderrPath)) {
+      if (Test-Path -LiteralPath $path) {
+        Remove-Item -LiteralPath $path -Force -ErrorAction SilentlyContinue
+      }
+    }
   }
 }
 
@@ -181,6 +214,28 @@ function Get-PropertyValueOrDefault {
   }
 
   return $DefaultValue
+}
+
+function Get-DockerRepoDigestsFromInspectOutput {
+  param([string[]]$Output)
+
+  $jsonText = ($Output | Out-String).Trim()
+  if (-not $jsonText) {
+    return @()
+  }
+
+  $parsed = $jsonText | ConvertFrom-Json
+  if ($parsed -is [array]) {
+    $image = $parsed[0]
+  } else {
+    $image = $parsed
+  }
+
+  if ($null -eq $image -or $null -eq $image.RepoDigests) {
+    return @()
+  }
+
+  return @($image.RepoDigests | ForEach-Object { [string]$_ })
 }
 
 function Wait-ForDockerServer {
@@ -292,9 +347,6 @@ function Ensure-DockerDesktopAndImage {
   $dockerContract = $ReleaseContract.builderContract.runtimeBootstrapInstallers.dockerDesktop
   $imageContract = $ReleaseContract.builderContract.runtimeContainerImages.labview2026q1Windows
   $dockerInstallerPath = Join-Path $InstallRoot ("bootstrap\docker\" + $dockerContract.fileName)
-  if (-not (Test-Path -LiteralPath $dockerInstallerPath)) {
-    throw "Docker Desktop bootstrap installer was not found at $dockerInstallerPath."
-  }
 
   $dockerInstallLogPath = Join-Path $LogRoot "docker-desktop-install.txt"
   $dockerDesktopStartLogPath = Join-Path $LogRoot "docker-desktop-start.txt"
@@ -308,6 +360,10 @@ function Ensure-DockerDesktopAndImage {
   $installExitCode = 0
 
   if ((-not $dockerCommandPath) -or (-not $dockerDesktopPath)) {
+    if (-not (Test-Path -LiteralPath $dockerInstallerPath)) {
+      throw "Docker Desktop bootstrap installer was not found at $dockerInstallerPath."
+    }
+
     Set-BootstrapStage -Stage "install-docker-desktop"
     $process = Start-Process -FilePath $dockerInstallerPath -ArgumentList $dockerContract.installArguments -Wait -PassThru -NoNewWindow
     $installExitCode = $process.ExitCode
@@ -356,10 +412,12 @@ function Ensure-DockerDesktopAndImage {
   Wait-ForWindowsEngine -DockerCommand $dockerCommandPath
 
   Set-BootstrapStage -Stage "inspect-pinned-image"
-  $repoDigestOutput = & $dockerCommandPath image inspect --format '{{join .RepoDigests "\n"}}' $imageContract.imageReference 2>&1
-  $repoDigestExitCode = $LASTEXITCODE
-  $repoDigestText = ($repoDigestOutput | Out-String).Trim()
-  $imagePresent = $repoDigestExitCode -eq 0 -and ($repoDigestText -match [regex]::Escape($imageContract.repositoryDigestReference))
+  $inspectProbe = Invoke-ExternalCommand -FilePath $dockerCommandPath -CommandArgs @("image", "inspect", $imageContract.imageReference) -LogPath "" -AllowedExitCodes @(0, 1, 125)
+  $probeRepoDigests = @()
+  if ($inspectProbe.ExitCode -eq 0) {
+    $probeRepoDigests = Get-DockerRepoDigestsFromInspectOutput -Output $inspectProbe.Output
+  }
+  $imagePresent = $inspectProbe.ExitCode -eq 0 -and (($probeRepoDigests -join "`n") -match [regex]::Escape($imageContract.repositoryDigestReference))
 
   if (-not $imagePresent) {
     Set-BootstrapStage -Stage "pull-pinned-image"
@@ -373,12 +431,7 @@ function Ensure-DockerDesktopAndImage {
 
   Set-BootstrapStage -Stage "verify-pinned-image"
   $inspectResult = Invoke-ExternalCommand -FilePath $dockerCommandPath -CommandArgs @("image", "inspect", $imageContract.imageReference) -LogPath $dockerImageInspectLogPath -AllowedExitCodes @(0)
-  $repoDigests = & $dockerCommandPath image inspect --format '{{join .RepoDigests "\n"}}' $imageContract.imageReference 2>&1
-  if ($LASTEXITCODE -ne 0) {
-    throw "Failed to inspect the pinned LabVIEW Windows container image."
-  }
-
-  $repoDigestsText = ($repoDigests | Out-String).Trim()
+  $repoDigestsText = (Get-DockerRepoDigestsFromInspectOutput -Output $inspectResult.Output) -join "`n"
   if ($repoDigestsText -notmatch [regex]::Escape($imageContract.repositoryDigestReference)) {
     throw "Pinned LabVIEW Windows container image digest mismatch. Expected $($imageContract.repositoryDigestReference)."
   }
