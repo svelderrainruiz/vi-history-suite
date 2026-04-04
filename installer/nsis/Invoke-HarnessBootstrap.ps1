@@ -146,19 +146,19 @@ function Resolve-DockerDesktopExecutable {
 function Invoke-ExternalCommand {
   param(
     [string]$FilePath,
-    [string[]]$Args,
+    [string[]]$CommandArgs,
     [string]$LogPath,
     [int[]]$AllowedExitCodes = @(0)
   )
 
-  $output = & $FilePath @Args 2>&1
+  $output = & $FilePath @CommandArgs 2>&1
   if ($LogPath) {
     $output | Set-Content -LiteralPath $LogPath -Encoding ASCII
   }
 
   $exitCode = $LASTEXITCODE
   if ($AllowedExitCodes -notcontains $exitCode) {
-    throw "$FilePath $($Args -join ' ') failed with exit code $exitCode."
+    throw "$FilePath $($CommandArgs -join ' ') failed with exit code $exitCode."
   }
 
   return [pscustomobject][ordered]@{
@@ -244,13 +244,13 @@ function Ensure-FixtureWorkspace {
   $logLines = New-Object System.Collections.Generic.List[string]
   $logLines.Add("Cloning pinned proof fixture from local bundle: $bundlePath")
   Set-BootstrapStage -Stage "clone-fixture-workspace"
-  $cloneResult = Invoke-ExternalCommand -FilePath $GitCommand -Args @("clone", $bundlePath, $workspacePath) -LogPath ""
+  $cloneResult = Invoke-ExternalCommand -FilePath $GitCommand -CommandArgs @("clone", $bundlePath, $workspacePath) -LogPath ""
   foreach ($line in $cloneResult.Output) {
     $logLines.Add([string]$line)
   }
 
   Set-BootstrapStage -Stage "checkout-fixture-commit"
-  $checkoutResult = Invoke-ExternalCommand -FilePath $GitCommand -Args @("-C", $workspacePath, "checkout", "--detach", $FixtureManifest.reference.commitSha) -LogPath ""
+  $checkoutResult = Invoke-ExternalCommand -FilePath $GitCommand -CommandArgs @("-C", $workspacePath, "checkout", "--detach", $FixtureManifest.reference.commitSha) -LogPath ""
   foreach ($line in $checkoutResult.Output) {
     $logLines.Add([string]$line)
   }
@@ -340,7 +340,7 @@ function Ensure-DockerDesktopAndImage {
   }
 
   Set-BootstrapStage -Stage "start-docker-desktop"
-  $startResult = Invoke-ExternalCommand -FilePath $dockerCommandPath -Args @("desktop", "start") -LogPath $dockerDesktopStartLogPath -AllowedExitCodes @(0)
+  $startResult = Invoke-ExternalCommand -FilePath $dockerCommandPath -CommandArgs @("desktop", "start") -LogPath $dockerDesktopStartLogPath -AllowedExitCodes @(0)
   if ($startResult.ExitCode -ne 0) {
     throw "Docker Desktop failed to start."
   }
@@ -350,7 +350,7 @@ function Ensure-DockerDesktopAndImage {
   @("Docker server version: $serverVersion") | Set-Content -LiteralPath $dockerVersionLogPath -Encoding ASCII
 
   Set-BootstrapStage -Stage "switch-to-windows-containers"
-  Invoke-ExternalCommand -FilePath $dockerCommandPath -Args @("desktop", "engine", "use", "windows") -LogPath $dockerEngineLogPath -AllowedExitCodes @(0) | Out-Null
+  Invoke-ExternalCommand -FilePath $dockerCommandPath -CommandArgs @("desktop", "engine", "use", "windows") -LogPath $dockerEngineLogPath -AllowedExitCodes @(0) | Out-Null
   Set-BootstrapStage -Stage "wait-for-windows-containers"
   Wait-ForWindowsEngine -DockerCommand $dockerCommandPath
 
@@ -362,7 +362,7 @@ function Ensure-DockerDesktopAndImage {
 
   if (-not $imagePresent) {
     Set-BootstrapStage -Stage "pull-pinned-image"
-    Invoke-ExternalCommand -FilePath $dockerCommandPath -Args @("pull", $imageContract.imageReference) -LogPath $dockerImagePullLogPath -AllowedExitCodes @(0) | Out-Null
+    Invoke-ExternalCommand -FilePath $dockerCommandPath -CommandArgs @("pull", $imageContract.imageReference) -LogPath $dockerImagePullLogPath -AllowedExitCodes @(0) | Out-Null
   } else {
     @(
       "Pinned image already present: $($imageContract.imageReference)",
@@ -371,7 +371,7 @@ function Ensure-DockerDesktopAndImage {
   }
 
   Set-BootstrapStage -Stage "verify-pinned-image"
-  $inspectResult = Invoke-ExternalCommand -FilePath $dockerCommandPath -Args @("image", "inspect", $imageContract.imageReference) -LogPath $dockerImageInspectLogPath -AllowedExitCodes @(0)
+  $inspectResult = Invoke-ExternalCommand -FilePath $dockerCommandPath -CommandArgs @("image", "inspect", $imageContract.imageReference) -LogPath $dockerImageInspectLogPath -AllowedExitCodes @(0)
   $repoDigests = & $dockerCommandPath image inspect --format '{{join .RepoDigests "\n"}}' $imageContract.imageReference 2>&1
   if ($LASTEXITCODE -ne 0) {
     throw "Failed to inspect the pinned LabVIEW Windows container image."
