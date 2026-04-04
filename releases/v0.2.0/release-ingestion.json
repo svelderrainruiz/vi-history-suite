@@ -35,7 +35,7 @@
     "githubReleaseTargetCommitish": "4985517f8c4dc9997f72f55100297bd354ac8d28",
     "githubReleaseWorkflow": {
       "path": ".github/workflows/publish-windows-installer.yml",
-      "runUrl": "https://github.com/svelderrainruiz/vi-history-suite/actions/runs/23972449623"
+      "runUrl": "https://github.com/svelderrainruiz/vi-history-suite/actions/runs/23972941672"
     },
     "intendedPublicAssets": [
       "GitHub release notes",
@@ -57,17 +57,17 @@
       },
       {
         "fileName": "vi-history-suite-setup-0.2.0.exe",
-        "sha256": "ea2274faa1eb81e6623f8b6d48893f8ec9502a910c0ababe7070deb21284e512",
+        "sha256": "fd66fa6dd3ef7d3e8f840f63dae172bff812c958224313531dcd051970961e72",
         "downloadUrl": "https://github.com/svelderrainruiz/vi-history-suite/releases/download/v0.2.0/vi-history-suite-setup-0.2.0.exe"
       },
       {
         "fileName": "SHA256SUMS.txt",
-        "sha256": "7a330a7dc04dc44c75bcf79f079168e205033e5357087dcf3c0305876de2b7d3",
+        "sha256": "9a1f6f657fce34393e085a20a2447dcba2835964aaf042abec39aa90a87805d2",
         "downloadUrl": "https://github.com/svelderrainruiz/vi-history-suite/releases/download/v0.2.0/SHA256SUMS.txt"
       },
       {
         "fileName": "vi-history-suite-setup-0.2.0-build.json",
-        "sha256": "5f9c022e8c9489f386842308b9259888e5d242fa08b1e68acf71ebbbc14ae023",
+        "sha256": "e060a260aea8f3359346406e9064ac1f114c580e1a7445baa456b45a54aa9470",
         "downloadUrl": "https://github.com/svelderrainruiz/vi-history-suite/releases/download/v0.2.0/vi-history-suite-setup-0.2.0-build.json"
       }
     ],

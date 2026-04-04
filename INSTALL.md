@@ -11,7 +11,7 @@ The first immutable release has been ingested into this public facade repo:
 - SHA-256: `dd9585dbd684939ce71eeed01ca435685bb8da305b601e4d2bde15dfb54c4cf3`
 - GitHub release: `https://github.com/svelderrainruiz/vi-history-suite/releases/tag/v0.2.0`
 - Windows installer: `vi-history-suite-setup-0.2.0.exe`
-- installer SHA-256: `ea2274faa1eb81e6623f8b6d48893f8ec9502a910c0ababe7070deb21284e512`
+- installer SHA-256: `fd66fa6dd3ef7d3e8f840f63dae172bff812c958224313531dcd051970961e72`
 
 Current state:
 
