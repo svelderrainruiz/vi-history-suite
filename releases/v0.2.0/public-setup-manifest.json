@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "status": "public-setup-primary",
   "release": {
     "id": "v0.2.0",
@@ -57,6 +57,32 @@
       "fileName": "labview-icon-editor-develop-e8945de7.json",
       "sha256": "bfed53a9376996749cc10e934416b577da29a3d9915f2f1e5e1997c3cd410191",
       "downloadUrl": "https://github.com/svelderrainruiz/vi-history-suite/releases/download/v0.2.0/labview-icon-editor-develop-e8945de7.json"
+    }
+  },
+  "acceptance": {
+    "windows11": {
+      "executionTarget": "host-machine",
+      "namedReviewer": "Sergio Velderrain",
+      "automationScript": {
+        "fileName": "Invoke-Windows11Acceptance.ps1",
+        "sha256": "1739af53aaa0690363e1f5e41c58d258f0af554201cdcc9f9046b78f2c788913",
+        "downloadUrl": "https://github.com/svelderrainruiz/vi-history-suite/releases/download/v0.2.0/Invoke-Windows11Acceptance.ps1"
+      },
+      "humanGateScript": {
+        "fileName": "Invoke-Windows11HumanGate.ps1",
+        "sha256": "f2a3d51deb1f09307585050ce1d0909be5d40dba66dabb18fc1d61807c787729",
+        "downloadUrl": "https://github.com/svelderrainruiz/vi-history-suite/releases/download/v0.2.0/Invoke-Windows11HumanGate.ps1"
+      },
+      "manualChecklist": {
+        "fileName": "manual-right-click-checklist.md",
+        "sha256": "58281a67b10862e70ad904faf305ceaa038467fec4b1a20709f43b66b0e7cb87",
+        "downloadUrl": "https://github.com/svelderrainruiz/vi-history-suite/releases/download/v0.2.0/manual-right-click-checklist.md"
+      },
+      "acceptanceRecordTemplate": {
+        "fileName": "acceptance-record.template.json",
+        "sha256": "47a138318dabb9c4dfa837f63fa7b5862026061854b70c51d6e09e6d3d1f44c8",
+        "downloadUrl": "https://github.com/svelderrainruiz/vi-history-suite/releases/download/v0.2.0/acceptance-record.template.json"
+      }
     }
   },
   "setup": {

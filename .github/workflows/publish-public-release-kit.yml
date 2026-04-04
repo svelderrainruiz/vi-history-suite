@@ -61,6 +61,7 @@ jobs:
             "- Primary public setup surface: release kit manifest plus Windows and Linux setup adapters.",
             "- Pinned labview-icon-editor fixture bundle is published for reproducible review setup.",
             "- Host-machine setup and acceptance are the active public proof path.",
+            "- The host-machine human UX gate now includes a dedicated closeout script, checklist, and acceptance record template.",
             "- Legacy NSIS installer assets are retired and removed from the public toolchain."
           )
 
@@ -77,6 +78,10 @@ jobs:
             "$publicSetupAssetRoot/labview-icon-editor-develop-e8945de7.json",
             "$publicSetupAssetRoot/setup/windows/Setup-VIHistorySuite.ps1",
             "$publicSetupAssetRoot/setup/linux/setup-vi-history-suite.sh",
+            "$publicSetupAssetRoot/acceptance/windows11/Invoke-Windows11Acceptance.ps1",
+            "$publicSetupAssetRoot/acceptance/windows11/Invoke-Windows11HumanGate.ps1",
+            "$publicSetupAssetRoot/acceptance/windows11/manual-right-click-checklist.md",
+            "$publicSetupAssetRoot/acceptance/windows11/acceptance-record.template.json",
             "$publicSetupAssetRoot/SHA256SUMS-public-setup.txt"
           )
 

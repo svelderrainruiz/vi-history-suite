@@ -41,6 +41,7 @@ downloads the public setup manifest and setup script into
 Current scaffold files:
 
 - [Invoke-Windows11Acceptance.ps1](./Invoke-Windows11Acceptance.ps1)
+- [Invoke-Windows11HumanGate.ps1](./Invoke-Windows11HumanGate.ps1)
 - [acceptance-record.template.json](./acceptance-record.template.json)
 
 ## Planned Human Gate
@@ -52,6 +53,13 @@ Current scaffold files:
 - Sergio Velderrain is the named maintainer reviewer for the current host-machine pass
 
 See [manual-right-click-checklist.md](./manual-right-click-checklist.md).
+
+Recommended human-gate commands on the host Windows 11 machine:
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File acceptance/windows11/Invoke-Windows11HumanGate.ps1 -Action prepare
+pwsh -NoProfile -ExecutionPolicy Bypass -File acceptance/windows11/Invoke-Windows11HumanGate.ps1 -Action complete
+```
 
 Example primary acceptance command on this Windows 11 host machine:
 

@@ -102,4 +102,5 @@ Current scaffold entrypoints:
 - Linux setup adapter: `bash setup/linux/setup-vi-history-suite.sh`
 - sync pinned fixture bundle: `pwsh -File scripts/Sync-PinnedFixtureBundle.ps1`
 - Windows 11 acceptance: `pwsh -File acceptance/windows11/Invoke-Windows11Acceptance.ps1 -ExecutionTarget host-machine`
+- Windows 11 human gate: `pwsh -File acceptance/windows11/Invoke-Windows11HumanGate.ps1 -Action prepare|complete`
 - publish workflow: `.github/workflows/publish-public-release-kit.yml`

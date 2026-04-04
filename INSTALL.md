@@ -88,6 +88,7 @@ Release provenance and acceptance inputs:
 - [.github/workflows/publish-public-release-kit.yml](.github/workflows/publish-public-release-kit.yml)
 - [scripts/Sync-PinnedFixtureBundle.ps1](scripts/Sync-PinnedFixtureBundle.ps1)
 - [acceptance/windows11/Invoke-Windows11Acceptance.ps1](acceptance/windows11/Invoke-Windows11Acceptance.ps1)
+- [acceptance/windows11/Invoke-Windows11HumanGate.ps1](acceptance/windows11/Invoke-Windows11HumanGate.ps1)
 
 Pinned Windows prerequisite identities:
 
@@ -104,6 +105,7 @@ Reference local release-kit commands:
 pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/Sync-PinnedFixtureBundle.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/Build-PublicSetupAssets.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File setup/windows/Setup-VIHistorySuite.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File acceptance/windows11/Invoke-Windows11HumanGate.ps1 -Action status
 ```
 
 ## Planned Trust Model

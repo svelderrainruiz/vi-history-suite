@@ -44,6 +44,10 @@
       "Public setup manifest",
       "Windows setup adapter",
       "Linux setup adapter",
+      "Windows 11 acceptance automation script",
+      "Windows 11 human gate closeout script",
+      "Windows 11 manual checklist",
+      "Windows 11 acceptance record template",
       "Pinned fixture manifest",
       "Pinned fixture bundle",
       "Pinned fixture metadata",
@@ -103,6 +107,10 @@
         "Primary public setup manifest",
         "Windows setup adapter",
         "Linux setup adapter",
+        "Windows 11 acceptance automation script",
+        "Windows 11 human gate closeout script",
+        "Windows 11 manual checklist",
+        "Windows 11 acceptance record template",
         "Pinned labview-icon-editor Git fixture bundle with develop commit history",
         "Pinned labview-icon-editor fixture manifest",
         "Pinned labview-icon-editor fixture metadata",
@@ -143,8 +151,10 @@
         "Future reproducible automation is intended to move to a published container image instead of a replay VM."
       ],
       "automationEntrypoint": "acceptance/windows11/Invoke-Windows11Acceptance.ps1",
+      "humanGateEntrypoint": "acceptance/windows11/Invoke-Windows11HumanGate.ps1",
       "manualChecklistPath": "acceptance/windows11/manual-right-click-checklist.md",
       "acceptanceRecordTemplatePath": "acceptance/windows11/acceptance-record.template.json",
+      "namedReviewer": "Sergio Velderrain",
       "fixtureManifestPath": "fixtures/labview-icon-editor.manifest.json"
     }
   }

@@ -55,6 +55,7 @@ Current scaffold entrypoints:
 - [scripts/Build-PublicSetupAssets.ps1](scripts/Build-PublicSetupAssets.ps1)
 - [scripts/Sync-PinnedFixtureBundle.ps1](scripts/Sync-PinnedFixtureBundle.ps1)
 - [acceptance/windows11/Invoke-Windows11Acceptance.ps1](acceptance/windows11/Invoke-Windows11Acceptance.ps1)
+- [acceptance/windows11/Invoke-Windows11HumanGate.ps1](acceptance/windows11/Invoke-Windows11HumanGate.ps1)
 - [acceptance/windows11/manual-right-click-checklist.md](acceptance/windows11/manual-right-click-checklist.md)
 - [acceptance/windows11/acceptance-record.template.json](acceptance/windows11/acceptance-record.template.json)
 

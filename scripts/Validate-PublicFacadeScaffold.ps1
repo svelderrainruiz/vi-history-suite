@@ -134,8 +134,8 @@ foreach ($asset in $retiredAssets) {
   }
 }
 
-if ($publicSetupManifest.schemaVersion -lt 1) {
-  throw "Public setup manifest schemaVersion must be at least 1."
+if ($publicSetupManifest.schemaVersion -lt 2) {
+  throw "Public setup manifest schemaVersion must be at least 2."
 }
 
 if ($publicSetupManifest.release.id -ne "v0.2.0") {
@@ -159,13 +159,21 @@ $fixtureBundlePath = Join-Path $repoRootPath "artifacts/fixtures/$($publicSetupM
 $fixtureMetadataPath = Join-Path $repoRootPath "artifacts/fixtures/$($publicSetupManifest.fixture.metadata.fileName)"
 $windowsSetupPath = Join-Path $repoRootPath "setup/windows/Setup-VIHistorySuite.ps1"
 $linuxSetupPath = Join-Path $repoRootPath "setup/linux/setup-vi-history-suite.sh"
+$acceptanceAutomationPath = Join-Path $repoRootPath "acceptance/windows11/Invoke-Windows11Acceptance.ps1"
+$acceptanceHumanGatePath = Join-Path $repoRootPath "acceptance/windows11/Invoke-Windows11HumanGate.ps1"
+$acceptanceChecklistPath = Join-Path $repoRootPath "acceptance/windows11/manual-right-click-checklist.md"
+$acceptanceRecordTemplatePath = Join-Path $repoRootPath "acceptance/windows11/acceptance-record.template.json"
 
 foreach ($requiredPath in @(
   $vsixPath,
   $fixtureBundlePath,
   $fixtureMetadataPath,
   $windowsSetupPath,
-  $linuxSetupPath
+  $linuxSetupPath,
+  $acceptanceAutomationPath,
+  $acceptanceHumanGatePath,
+  $acceptanceChecklistPath,
+  $acceptanceRecordTemplatePath
 )) {
   Assert-PathPresent -Path $requiredPath -Message "Missing required public setup asset at $requiredPath."
 }
@@ -199,12 +207,32 @@ if ((Get-Sha256 -Path $fixtureMetadataPath) -ne $publicSetupManifest.fixture.met
   throw "Fixture metadata hash does not match public-setup-manifest.json."
 }
 
+if ((Get-Sha256 -Path $acceptanceAutomationPath) -ne $publicSetupManifest.acceptance.windows11.automationScript.sha256) {
+  throw "Windows acceptance automation script hash does not match public-setup-manifest.json."
+}
+
+if ((Get-Sha256 -Path $acceptanceHumanGatePath) -ne $publicSetupManifest.acceptance.windows11.humanGateScript.sha256) {
+  throw "Windows human gate script hash does not match public-setup-manifest.json."
+}
+
+if ((Get-Sha256 -Path $acceptanceChecklistPath) -ne $publicSetupManifest.acceptance.windows11.manualChecklist.sha256) {
+  throw "Windows manual checklist hash does not match public-setup-manifest.json."
+}
+
+if ((Get-Sha256 -Path $acceptanceRecordTemplatePath) -ne $publicSetupManifest.acceptance.windows11.acceptanceRecordTemplate.sha256) {
+  throw "Windows acceptance record template hash does not match public-setup-manifest.json."
+}
+
 Assert-Matches -Value $releaseContract.sourceTruth.releaseManifest.vsixArtifact.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "VSIX SHA256 must be a lowercase 64-character hex string."
 Assert-Matches -Value $publicSetupManifest.assets.windowsSetupScript.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "Windows setup script SHA256 must be a lowercase 64-character hex string."
 Assert-Matches -Value $publicSetupManifest.assets.linuxSetupScript.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "Linux setup script SHA256 must be a lowercase 64-character hex string."
 Assert-Matches -Value $publicSetupManifest.fixture.manifest.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "Fixture manifest SHA256 must be a lowercase 64-character hex string."
 Assert-Matches -Value $publicSetupManifest.fixture.bundle.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "Fixture bundle SHA256 must be a lowercase 64-character hex string."
 Assert-Matches -Value $publicSetupManifest.fixture.metadata.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "Fixture metadata SHA256 must be a lowercase 64-character hex string."
+Assert-Matches -Value $publicSetupManifest.acceptance.windows11.automationScript.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "Windows acceptance automation SHA256 must be a lowercase 64-character hex string."
+Assert-Matches -Value $publicSetupManifest.acceptance.windows11.humanGateScript.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "Windows human gate script SHA256 must be a lowercase 64-character hex string."
+Assert-Matches -Value $publicSetupManifest.acceptance.windows11.manualChecklist.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "Windows manual checklist SHA256 must be a lowercase 64-character hex string."
+Assert-Matches -Value $publicSetupManifest.acceptance.windows11.acceptanceRecordTemplate.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "Windows acceptance record template SHA256 must be a lowercase 64-character hex string."
 
 foreach ($url in @(
   $publicSetupManifest.assets.vsix.downloadUrl,
@@ -213,6 +241,10 @@ foreach ($url in @(
   $publicSetupManifest.fixture.manifest.downloadUrl,
   $publicSetupManifest.fixture.bundle.downloadUrl,
   $publicSetupManifest.fixture.metadata.downloadUrl,
+  $publicSetupManifest.acceptance.windows11.automationScript.downloadUrl,
+  $publicSetupManifest.acceptance.windows11.humanGateScript.downloadUrl,
+  $publicSetupManifest.acceptance.windows11.manualChecklist.downloadUrl,
+  $publicSetupManifest.acceptance.windows11.acceptanceRecordTemplate.downloadUrl,
   $publicSetupManifest.setup.windows.prerequisites.vscode.downloadUrl,
   $publicSetupManifest.setup.windows.prerequisites.git.downloadUrl
 )) {
@@ -235,6 +267,7 @@ $requiredPaths = @(
   "fixtures/labview-icon-editor.manifest.json",
   "acceptance/windows11/README.md",
   "acceptance/windows11/Invoke-Windows11Acceptance.ps1",
+  "acceptance/windows11/Invoke-Windows11HumanGate.ps1",
   "acceptance/windows11/manual-right-click-checklist.md",
   "acceptance/windows11/acceptance-record.template.json",
   "scripts/Sync-ImmutableReleaseEvidence.ps1",
@@ -259,7 +292,8 @@ foreach ($ps1RelativePath in @(
   "scripts/Sync-ImmutableReleaseEvidence.ps1",
   "scripts/Sync-PinnedFixtureBundle.ps1",
   "setup/windows/Setup-VIHistorySuite.ps1",
-  "acceptance/windows11/Invoke-Windows11Acceptance.ps1"
+  "acceptance/windows11/Invoke-Windows11Acceptance.ps1",
+  "acceptance/windows11/Invoke-Windows11HumanGate.ps1"
 )) {
   Test-PowerShellSyntax -Path (Join-Path $repoRootPath $ps1RelativePath)
 }
@@ -287,7 +321,10 @@ foreach ($token in @(
   "./scripts/Sync-PinnedFixtureBundle.ps1",
   "./scripts/Build-PublicSetupAssets.ps1",
   "gh release delete-asset",
-  "SHA256SUMS-public-setup.txt"
+  "SHA256SUMS-public-setup.txt",
+  "Invoke-Windows11HumanGate.ps1",
+  "manual-right-click-checklist.md",
+  "acceptance-record.template.json"
 )) {
   if ($workflowContent -notmatch [regex]::Escape($token)) {
     throw "Publish workflow must retain token '$token'."
@@ -316,7 +353,9 @@ foreach ($token in @(
   "--new-window",
   "--goto",
   "setupStrategy",
-  "direct-release"
+  "direct-release",
+  "reviewScriptPath",
+  "checklistResults"
 )) {
   if ($acceptanceScriptContent -notmatch [regex]::Escape($token)) {
     throw "Acceptance harness must retain token '$token'."

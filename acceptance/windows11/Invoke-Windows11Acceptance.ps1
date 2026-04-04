@@ -39,6 +39,22 @@ function Read-JsonFile {
   return (Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json)
 }
 
+function Copy-HumanGateChecklistResults {
+  param([object[]]$ChecklistResults)
+
+  $copied = @()
+  foreach ($item in @($ChecklistResults)) {
+    $copied += [ordered]@{
+      id = $item.id
+      label = $item.label
+      status = $item.status
+      notes = @($item.notes)
+    }
+  }
+
+  return $copied
+}
+
 function Ensure-Directory {
   param([string]$Path)
 
@@ -376,6 +392,8 @@ Ensure-Directory -Path $setupInstallRoot
 
 $setupManifestResolvedPath = Resolve-LocalOrDownloadedSetupManifest -CandidatePath $PublicSetupManifestPath -RepoRootPath $repoRootPath -Tag $ReleaseTag -DownloadsRoot $downloadsRootPath
 $setupManifest = Read-JsonFile -Path $setupManifestResolvedPath
+$acceptanceTemplatePath = Join-Path $PSScriptRoot "acceptance-record.template.json"
+$acceptanceTemplate = Read-JsonFile -Path $acceptanceTemplatePath
 
 $codeVersionLogPath = Join-Path $workRootPath "cli-code-version.txt"
 $gitVersionLogPath = Join-Path $workRootPath "cli-git-version.txt"
@@ -506,10 +524,16 @@ try {
       selectionLaunchLogPath = $selectionLogPath
     }
     humanGate = [ordered]@{
-      checklistPath = "acceptance/windows11/manual-right-click-checklist.md"
+      checklistPath = $acceptanceTemplate.humanGate.checklistPath
+      reviewScriptPath = $acceptanceTemplate.humanGate.reviewScriptPath
       recordTemplatePath = "acceptance/windows11/acceptance-record.template.json"
-      reviewer = "Sergio Velderrain"
-      status = "pending-human-review"
+      reviewer = $acceptanceTemplate.humanGate.reviewer
+      status = $acceptanceTemplate.humanGate.status
+      reviewedAtUtc = $acceptanceTemplate.humanGate.reviewedAtUtc
+      summaryPath = $acceptanceTemplate.humanGate.summaryPath
+      notes = @($acceptanceTemplate.humanGate.notes)
+      screenshots = @($acceptanceTemplate.humanGate.screenshots)
+      checklistResults = @(Copy-HumanGateChecklistResults -ChecklistResults @($acceptanceTemplate.humanGate.checklistResults))
     }
     generatedAtUtc = (Get-Date).ToUniversalTime().ToString("o")
   }

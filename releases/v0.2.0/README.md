@@ -30,4 +30,5 @@ Public release-kit surfaces tied to this release:
 - [setup/linux/setup-vi-history-suite.sh](../../setup/linux/setup-vi-history-suite.sh)
 - [fixtures/labview-icon-editor.manifest.json](../../fixtures/labview-icon-editor.manifest.json)
 - [acceptance/windows11/Invoke-Windows11Acceptance.ps1](../../acceptance/windows11/Invoke-Windows11Acceptance.ps1)
+- [acceptance/windows11/Invoke-Windows11HumanGate.ps1](../../acceptance/windows11/Invoke-Windows11HumanGate.ps1)
 - [release-evidence/README.md](./release-evidence/README.md)
