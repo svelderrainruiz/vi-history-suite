@@ -21,8 +21,10 @@ The builder lane is not the final user-proof surface.
 ## Planned Responsibilities
 
 - download or stage the immutable released VSIX payload
-- stage pinned Visual Studio Code and Git bootstrap installers for the final
-  installer payload
+- stage pinned Visual Studio Code, Git, and Docker Desktop bootstrap installers
+  for the final installer payload
+- materialize the pinned `ni/labview-icon-editor` Git fixture bundle with
+  commit history for the final installer payload
 - stage the NSIS project inputs
 - build the versioned Windows installer artifact
 - retain bounded build metadata
@@ -39,14 +41,18 @@ Current scaffold files:
 - [Stage-NsisBootstrap.ps1](./Stage-NsisBootstrap.ps1)
 - [Stage-VsCodeBootstrap.ps1](./Stage-VsCodeBootstrap.ps1)
 - [Stage-GitBootstrap.ps1](./Stage-GitBootstrap.ps1)
+- [Stage-DockerDesktopBootstrap.ps1](./Stage-DockerDesktopBootstrap.ps1)
+- [../../scripts/Sync-PinnedFixtureBundle.ps1](../../scripts/Sync-PinnedFixtureBundle.ps1)
 - [vendor/README.md](./vendor/README.md)
 
 ## Bootstrap References
 
 The builder scaffold can bootstrap `makensis.exe` from the NSIS 3.11 setup
 installer and package pinned runtime prerequisite installers for Visual Studio
-Code and Git for Windows into the final NSIS payload so the Windows 11 proof VM
-can start from a fresh install.
+Code, Git for Windows, and Docker Desktop into the final NSIS payload so the
+Windows 11 proof VM can start from a fresh install. It also generates a pinned
+Git fixture bundle for `ni/labview-icon-editor` so the installer can materialize
+a local proof workspace with commit history.
 
 Pinned bootstrap references:
 
@@ -59,6 +65,9 @@ Pinned bootstrap references:
 - file: `Git-2.53.0-64-bit.exe`
 - SHA-256:
   `3b4e1b127dbebea2931f2ae9dfafa0c2343a488a1222009debfe78d5d335e6a9`
+- file: `Docker Desktop Installer.exe`
+- SHA-256:
+  `9e334622293ddf15eb7ecb935b829370899a93c92a53385a2e4c7749e5d57c77`
 
 Stage the local installers into the vendor path with:
 
@@ -66,6 +75,7 @@ Stage the local installers into the vendor path with:
 pwsh -NoProfile -ExecutionPolicy Bypass -File docker/windows-installer-builder/Stage-NsisBootstrap.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File docker/windows-installer-builder/Stage-VsCodeBootstrap.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File docker/windows-installer-builder/Stage-GitBootstrap.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File docker/windows-installer-builder/Stage-DockerDesktopBootstrap.ps1
 ```
 
 On this machine, the known local reference installers are:
@@ -73,6 +83,7 @@ On this machine, the known local reference installers are:
 - `C:\Users\sveld\Downloads\nsis-3.11-setup.exe`
 - `C:\Users\sveld\Downloads\VSCodeSetup-x64-1.109.3.exe`
 - `C:\Users\sveld\Downloads\Git-2.53.0-64-bit.exe`
+- `C:\Users\sveld\Downloads\Docker Desktop Installer.exe`
 
 Current default outputs:
 
@@ -85,6 +96,8 @@ Example scaffold commands on a Windows host:
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File docker/windows-installer-builder/Stage-VsCodeBootstrap.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File docker/windows-installer-builder/Stage-GitBootstrap.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File docker/windows-installer-builder/Stage-DockerDesktopBootstrap.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/Sync-PinnedFixtureBundle.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File docker/windows-installer-builder/Invoke-InstallerBuild.ps1
 ```
 

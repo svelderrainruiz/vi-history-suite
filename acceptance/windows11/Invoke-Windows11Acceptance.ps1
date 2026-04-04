@@ -100,8 +100,8 @@ function Resolve-CodeCommand {
 
 function Resolve-GitCommand {
   $candidates = @(
-    "git.exe",
-    "git"
+    "git",
+    "git.exe"
   )
 
   if ($env:LocalAppData) {
@@ -133,16 +133,86 @@ function Resolve-GitCommand {
   throw "Git executable was not found after installer execution. The Windows acceptance lane requires a real Git-backed workspace."
 }
 
+function Resolve-DockerCommand {
+  $candidates = @(
+    "docker.exe",
+    "docker"
+  )
+
+  if ($env:ProgramFiles) {
+    $candidates += (Join-Path $env:ProgramFiles "Docker\Docker\resources\bin\docker.exe")
+  }
+
+  if (${env:ProgramFiles(x86)}) {
+    $candidates += (Join-Path ${env:ProgramFiles(x86)} "Docker\Docker\resources\bin\docker.exe")
+  }
+
+  foreach ($item in $candidates | Where-Object { $_ }) {
+    if (Test-Path -LiteralPath $item) {
+      return (Resolve-Path -LiteralPath $item).Path
+    }
+
+    $command = Get-Command $item -ErrorAction SilentlyContinue
+    if ($command) {
+      return $command.Source
+    }
+  }
+
+  throw "Docker CLI was not found after installer execution. The harness installer is expected to bootstrap Docker Desktop for the Windows container proof lane."
+}
+
 function Invoke-Git {
   param(
     [string]$GitCommand,
-    [string[]]$Args
+    [string[]]$CommandArgs
   )
 
-  & $GitCommand @Args
+  & $GitCommand @CommandArgs
   if ($LASTEXITCODE -ne 0) {
-    throw "$GitCommand $($Args -join ' ') failed with exit code $LASTEXITCODE."
+    throw "$GitCommand $($CommandArgs -join ' ') failed with exit code $LASTEXITCODE."
   }
+}
+
+function Materialize-FixtureWorkspace {
+  param(
+    [string]$GitCommand,
+    [pscustomobject]$FixtureManifest,
+    [string]$InstalledFixtureWorkspacePath,
+    [string]$InstalledFixtureBundlePath,
+    [string]$DestinationPath,
+    [switch]$SkipProvisioning
+  )
+
+  if (Test-Path -LiteralPath $InstalledFixtureWorkspacePath) {
+    return (Resolve-Path -LiteralPath $InstalledFixtureWorkspacePath).Path
+  }
+
+  if ($SkipProvisioning.IsPresent) {
+    throw "Pinned fixture workspace was not present at $InstalledFixtureWorkspacePath and provisioning was skipped."
+  }
+
+  if (-not (Test-Path -LiteralPath $InstalledFixtureBundlePath)) {
+    throw "Pinned fixture bundle was not found at $InstalledFixtureBundlePath."
+  }
+
+  if (Test-Path -LiteralPath $DestinationPath) {
+    Remove-Item -LiteralPath $DestinationPath -Recurse -Force
+  }
+
+  Ensure-Directory -Path (Split-Path -Parent $DestinationPath)
+  Invoke-Git -GitCommand $GitCommand -CommandArgs @("clone", $InstalledFixtureBundlePath, $DestinationPath)
+  Invoke-Git -GitCommand $GitCommand -CommandArgs @("-C", $DestinationPath, "checkout", "--detach", $FixtureManifest.reference.commitSha)
+
+  $resolvedHead = ((& $GitCommand -C $DestinationPath rev-parse HEAD 2>&1) | Out-String).Trim()
+  if ($LASTEXITCODE -ne 0) {
+    throw "Failed to resolve HEAD for the materialized fixture workspace."
+  }
+
+  if ($resolvedHead -ne $FixtureManifest.reference.commitSha) {
+    throw "Materialized fixture workspace resolved HEAD $resolvedHead but expected $($FixtureManifest.reference.commitSha)."
+  }
+
+  return $DestinationPath
 }
 
 $repoRootPath = Resolve-PublicRepoRoot -Path $RepoRoot
@@ -163,10 +233,15 @@ $resolvedInstallerPath = if ($InstallerPath) {
 $automationLogPath = Join-Path $workRootPath "cli-extensions.txt"
 $codeVersionLogPath = Join-Path $workRootPath "cli-code-version.txt"
 $gitVersionLogPath = Join-Path $workRootPath "cli-git-version.txt"
+$dockerVersionLogPath = Join-Path $workRootPath "cli-docker-version.txt"
+$dockerEngineLogPath = Join-Path $workRootPath "docker-engine.txt"
+$dockerImageLogPath = Join-Path $workRootPath "docker-image.txt"
 $workspaceLogPath = Join-Path $workRootPath "workspace-launch.txt"
 $selectionLogPath = Join-Path $workRootPath "selection-launch.txt"
 $acceptanceRecordPath = Join-Path $workRootPath "acceptance-record.json"
 $fixtureRoot = Join-Path $workRootPath "fixture\labview-icon-editor"
+$installedFixtureWorkspacePath = Join-Path $env:LocalAppData "Programs\VI History Suite\fixtures-workspace\labview-icon-editor"
+$installedFixtureBundlePath = Join-Path $env:LocalAppData ("Programs\VI History Suite\" + $fixtureManifest.bundle.installerRelativePath.Replace('/', '\'))
 
 if (-not $SkipInstaller.IsPresent) {
   Assert-PathPresent -Path $resolvedInstallerPath -Message "Installer not found at $resolvedInstallerPath."
@@ -178,6 +253,7 @@ if (-not $SkipInstaller.IsPresent) {
 
 $codeCommandPath = Resolve-CodeCommand -Candidate $CodeCommand
 $gitCommandPath = Resolve-GitCommand
+$dockerCommandPath = Resolve-DockerCommand
 
 & $codeCommandPath --version 2>&1 | Set-Content -LiteralPath $codeVersionLogPath -Encoding ASCII
 if ($LASTEXITCODE -ne 0) {
@@ -189,6 +265,30 @@ if ($LASTEXITCODE -ne 0) {
   throw "Git version check failed with exit code $LASTEXITCODE."
 }
 
+& $dockerCommandPath version 2>&1 | Set-Content -LiteralPath $dockerVersionLogPath -Encoding ASCII
+if ($LASTEXITCODE -ne 0) {
+  throw "Docker CLI version check failed with exit code $LASTEXITCODE."
+}
+
+& $dockerCommandPath info --format "{{.OSType}}" 2>&1 | Set-Content -LiteralPath $dockerEngineLogPath -Encoding ASCII
+if ($LASTEXITCODE -ne 0) {
+  throw "Docker engine check failed with exit code $LASTEXITCODE."
+}
+
+& $dockerCommandPath image inspect $releaseContract.builderContract.runtimeContainerImages.labview2026q1Windows.imageReference 2>&1 | Set-Content -LiteralPath $dockerImageLogPath -Encoding ASCII
+if ($LASTEXITCODE -ne 0) {
+  throw "Pinned LabVIEW Windows container image was not present after installer execution."
+}
+
+$repoDigests = (& $dockerCommandPath image inspect --format '{{join .RepoDigests "\n"}}' $releaseContract.builderContract.runtimeContainerImages.labview2026q1Windows.imageReference 2>&1) | Out-String
+if ($LASTEXITCODE -ne 0) {
+  throw "Pinned LabVIEW Windows container image digest check failed."
+}
+
+if ($repoDigests -notmatch [regex]::Escape($releaseContract.builderContract.runtimeContainerImages.labview2026q1Windows.repositoryDigestReference)) {
+  throw "Pinned LabVIEW Windows container image digest mismatch."
+}
+
 $extensionsOutput = & $codeCommandPath --list-extensions --show-versions 2>&1
 $extensionsOutput | Set-Content -LiteralPath $automationLogPath -Encoding ASCII
 $expectedToken = "{0}@{1}" -f $releaseContract.builderContract.extensionIdentifier, $releaseContract.sourceTruth.releaseManifest.packageVersion
@@ -198,20 +298,12 @@ if ($extensionsOutput -notcontains $expectedToken) {
   }
 }
 
-if (-not $SkipClone.IsPresent) {
-  if (-not (Test-Path -LiteralPath $fixtureRoot)) {
-    Ensure-Directory -Path (Split-Path -Parent $fixtureRoot)
-    Invoke-Git -GitCommand $gitCommandPath -Args @("clone", $fixtureManifest.repositoryUrl, $fixtureRoot)
-  }
+$fixtureWorkspacePath = Materialize-FixtureWorkspace -GitCommand $gitCommandPath -FixtureManifest $fixtureManifest -InstalledFixtureWorkspacePath $installedFixtureWorkspacePath -InstalledFixtureBundlePath $installedFixtureBundlePath -DestinationPath $fixtureRoot -SkipProvisioning:$SkipClone.IsPresent
 
-  Invoke-Git -GitCommand $gitCommandPath -Args @("-C", $fixtureRoot, "fetch", "--all", "--tags", "--force")
-  Invoke-Git -GitCommand $gitCommandPath -Args @("-C", $fixtureRoot, "checkout", "--detach", $fixtureManifest.reference.commitSha)
-}
-
-$selectionPath = Join-Path $fixtureRoot ($fixtureManifest.selectionPath -replace '/', '\')
+$selectionPath = Join-Path $fixtureWorkspacePath ($fixtureManifest.selectionPath -replace '/', '\')
 Assert-PathPresent -Path $selectionPath -Message "Pinned canonical VI was not found at $selectionPath."
 
-& $codeCommandPath --new-window $fixtureRoot 2>&1 | Set-Content -LiteralPath $workspaceLogPath -Encoding ASCII
+& $codeCommandPath --new-window $fixtureWorkspacePath 2>&1 | Set-Content -LiteralPath $workspaceLogPath -Encoding ASCII
 $workspaceExitCode = $LASTEXITCODE
 & $codeCommandPath --goto $selectionPath 2>&1 | Set-Content -LiteralPath $selectionLogPath -Encoding ASCII
 $selectionExitCode = $LASTEXITCODE
@@ -231,13 +323,19 @@ $record = [ordered]@{
     fixtureId = $fixtureManifest.fixtureId
     repositoryUrl = $fixtureManifest.repositoryUrl
     commitSha = $fixtureManifest.reference.commitSha
+    bundledWorkspacePath = $fixtureWorkspacePath
+    bundledBundlePath = $installedFixtureBundlePath
     selectionPath = $fixtureManifest.selectionPath
   }
   automation = [ordered]@{
     codeCommand = $codeCommandPath
     gitCommand = $gitCommandPath
+    dockerCommand = $dockerCommandPath
     codeVersionLogPath = $codeVersionLogPath
     gitVersionLogPath = $gitVersionLogPath
+    dockerVersionLogPath = $dockerVersionLogPath
+    dockerEngineLogPath = $dockerEngineLogPath
+    dockerImageLogPath = $dockerImageLogPath
     installedExtensionToken = $expectedToken
     extensionsLogPath = $automationLogPath
     workspaceLaunchExitCode = $workspaceExitCode

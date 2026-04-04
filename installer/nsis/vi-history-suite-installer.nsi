@@ -29,6 +29,14 @@
   !define GIT_BOOTSTRAP_FILE "Git-64-bit.exe"
 !endif
 
+!ifndef DOCKER_DESKTOP_BOOTSTRAP_FILE
+  !define DOCKER_DESKTOP_BOOTSTRAP_FILE "Docker Desktop Installer.exe"
+!endif
+
+!ifndef HARNESS_BOOTSTRAP_SCRIPT_FILE
+  !define HARNESS_BOOTSTRAP_SCRIPT_FILE "Invoke-HarnessBootstrap.ps1"
+!endif
+
 !define UNINSTALL_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 
 Unicode True
@@ -172,9 +180,39 @@ Function FailInstall
   Abort
 FunctionEnd
 
+Function FailInstallPreserveInstallRoot
+  Pop $0
+  MessageBox MB_ICONEXCLAMATION|MB_OK "$0"
+  Abort
+FunctionEnd
+
+Function RunHarnessBootstrap
+  IfFileExists "$INSTDIR\scripts\${HARNESS_BOOTSTRAP_SCRIPT_FILE}" 0 missing_harness_bootstrap
+  DetailPrint "Preparing the pinned proof workspace and Docker Desktop harness prerequisites."
+  ExecWait '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -File "$INSTDIR\scripts\${HARNESS_BOOTSTRAP_SCRIPT_FILE}" -InstallRoot "$INSTDIR" -ReleaseContractPath "$INSTDIR\contracts\release-ingestion.json" -FixtureManifestPath "$INSTDIR\fixtures\labview-icon-editor.manifest.json" -GitCommand "$GitCommand"' $0
+  ${If} $0 == 3010
+    Push "Docker Desktop requested a Windows restart before the harness could finish. Restart Windows and rerun this installer to complete the pinned Windows container image preparation."
+    Call FailInstallPreserveInstallRoot
+  ${EndIf}
+  ${If} $0 == 1641
+    Push "Docker Desktop triggered a restart request before the harness could finish. Restart Windows and rerun this installer to complete the pinned Windows container image preparation."
+    Call FailInstallPreserveInstallRoot
+  ${EndIf}
+  ${If} $0 != 0
+    Push "Harness bootstrap failed. See $INSTDIR\logs for the retained proof-workspace and Docker preparation logs. Exit code: $0"
+    Call FailInstall
+  ${EndIf}
+  Return
+
+missing_harness_bootstrap:
+  Push "Harness bootstrap script was not staged with this build."
+  Call FailInstall
+FunctionEnd
+
 Function InstallExtensionWithCode
   Call EnsureVisualStudioCode
   Call EnsureGit
+  Call RunHarnessBootstrap
 
   DetailPrint "Installing ${EXTENSION_IDENTIFIER} from the immutable staged VSIX."
   ExecWait '"$CodeCommand" --install-extension "$INSTDIR\payload\vi-history-suite-${PRODUCT_VERSION}.vsix" --force' $0
@@ -209,7 +247,7 @@ Section "Uninstall"
     ExecWait '"$CodeCommand" --uninstall-extension "${EXTENSION_IDENTIFIER}"' $0
   ${EndIf}
 
-  DetailPrint "Leaving shared Visual Studio Code and Git installations untouched."
+  DetailPrint "Leaving shared Visual Studio Code, Git, and Docker Desktop installations untouched."
   Delete "$INSTDIR\Uninstall VI History Suite.exe"
   RMDir /r "$INSTDIR"
   DeleteRegKey HKCU "${UNINSTALL_KEY}"

@@ -211,9 +211,34 @@ function Assert-ExactVsix {
   return $vsixPath
 }
 
+function Resolve-FixtureBundle {
+  param(
+    [string]$RepoRoot,
+    [string]$FixtureManifestPath
+  )
+
+  $fixtureManifest = Read-JsonFile -Path $FixtureManifestPath
+  $bundleSyncScriptPath = Join-Path $RepoRoot $fixtureManifest.bundle.builderEntrypoint
+  Assert-PathPresent -Path $bundleSyncScriptPath -Message "Missing fixture bundle sync entrypoint at $bundleSyncScriptPath."
+
+  & $bundleSyncScriptPath -RepoRoot $RepoRoot
+
+  $bundlePath = Join-Path $RepoRoot $fixtureManifest.bundle.defaultGeneratedRelativePath
+  $metadataPath = Join-Path $RepoRoot $fixtureManifest.bundle.metadataRelativePath
+  Assert-PathPresent -Path $bundlePath -Message "Pinned fixture bundle was not generated at $bundlePath."
+  Assert-PathPresent -Path $metadataPath -Message "Pinned fixture bundle metadata was not generated at $metadataPath."
+
+  return [ordered]@{
+    Manifest = $fixtureManifest
+    BundlePath = $bundlePath
+    MetadataPath = $metadataPath
+  }
+}
+
 $repoRootPath = Resolve-PublicRepoRoot -Path $RepoRoot
 $releaseDirPath = if ($ReleaseDir) { (Resolve-Path -LiteralPath $ReleaseDir).Path } else { Join-Path $repoRootPath "releases/v0.2.0" }
 $releaseContractPath = Join-Path $releaseDirPath "release-ingestion.json"
+$fixtureManifestPath = Join-Path $repoRootPath "fixtures/labview-icon-editor.manifest.json"
 $releaseContract = Read-JsonFile -Path $releaseContractPath
 
 foreach ($required in $releaseContract.builderContract.stagingRequirements.requiredBeforeInstallerBuild) {
@@ -221,9 +246,11 @@ foreach ($required in $releaseContract.builderContract.stagingRequirements.requi
 }
 
 $vsixPath = Assert-ExactVsix -Contract $releaseContract -ReleaseRoot $releaseDirPath
+$fixtureBundleInfo = Resolve-FixtureBundle -RepoRoot $repoRootPath -FixtureManifestPath $fixtureManifestPath
 $nsisBootstrapInstallerPath = Resolve-NsisBootstrapInstaller -RepoRoot $repoRootPath -Contract $releaseContract -Candidate $NsisBootstrapInstaller
 $vsCodeBootstrapInstallerPath = Resolve-StagedBootstrapInstaller -RepoRoot $repoRootPath -BootstrapInstaller $releaseContract.builderContract.runtimeBootstrapInstallers.vscode -Label "Visual Studio Code"
 $gitBootstrapInstallerPath = Resolve-StagedBootstrapInstaller -RepoRoot $repoRootPath -BootstrapInstaller $releaseContract.builderContract.runtimeBootstrapInstallers.git -Label "Git"
+$dockerDesktopBootstrapInstallerPath = Resolve-StagedBootstrapInstaller -RepoRoot $repoRootPath -BootstrapInstaller $releaseContract.builderContract.runtimeBootstrapInstallers.dockerDesktop -Label "Docker Desktop"
 $makensis = Resolve-MakensisPath -Contract $releaseContract -RepoRoot $repoRootPath -Candidate $MakensisPath -BootstrapInstallerPath $nsisBootstrapInstallerPath
 $outputDirPath = if ($OutputDir) { [IO.Path]::GetFullPath($OutputDir) } else { Join-Path $repoRootPath "artifacts/windows-installer" }
 Ensure-Directory -Path $outputDirPath
@@ -234,6 +261,9 @@ $payloadRoot = Join-Path $stageRoot "payload"
 $bootstrapRoot = Join-Path $stageRoot "bootstrap"
 $vsCodeBootstrapRoot = Join-Path $bootstrapRoot "vscode"
 $gitBootstrapRoot = Join-Path $bootstrapRoot "git"
+$dockerBootstrapRoot = Join-Path $bootstrapRoot "docker"
+$scriptsRoot = Join-Path $stageRoot "scripts"
+$fixturesRoot = Join-Path $stageRoot "fixtures"
 $docsRoot = Join-Path $stageRoot "docs"
 $contractsRoot = Join-Path $stageRoot "contracts"
 $installerRelativePath = $releaseContract.builderContract.installerBuild.defaultOutputRelativePath
@@ -246,12 +276,19 @@ $nsisScriptPath = Join-Path $repoRootPath $releaseContract.builderContract.insta
 Ensure-Directory -Path $payloadRoot
 Ensure-Directory -Path $vsCodeBootstrapRoot
 Ensure-Directory -Path $gitBootstrapRoot
+Ensure-Directory -Path $dockerBootstrapRoot
+Ensure-Directory -Path $scriptsRoot
+Ensure-Directory -Path $fixturesRoot
 Ensure-Directory -Path $docsRoot
 Ensure-Directory -Path $contractsRoot
 
 Copy-Item -LiteralPath $vsixPath -Destination (Join-Path $payloadRoot (Split-Path -Leaf $vsixPath)) -Force
 Copy-Item -LiteralPath $vsCodeBootstrapInstallerPath -Destination (Join-Path $vsCodeBootstrapRoot (Split-Path -Leaf $vsCodeBootstrapInstallerPath)) -Force
 Copy-Item -LiteralPath $gitBootstrapInstallerPath -Destination (Join-Path $gitBootstrapRoot (Split-Path -Leaf $gitBootstrapInstallerPath)) -Force
+Copy-Item -LiteralPath $dockerDesktopBootstrapInstallerPath -Destination (Join-Path $dockerBootstrapRoot (Split-Path -Leaf $dockerDesktopBootstrapInstallerPath)) -Force
+Copy-Item -LiteralPath (Join-Path $repoRootPath "installer/nsis/Invoke-HarnessBootstrap.ps1") -Destination (Join-Path $scriptsRoot "Invoke-HarnessBootstrap.ps1") -Force
+Copy-Item -LiteralPath $fixtureManifestPath -Destination (Join-Path $fixturesRoot "labview-icon-editor.manifest.json") -Force
+Copy-Item -LiteralPath $fixtureBundleInfo.BundlePath -Destination (Join-Path $fixturesRoot $fixtureBundleInfo.Manifest.bundle.fileName) -Force
 foreach ($doc in @("README.md", "INSTALL.md", "SUPPORT.md", "LICENSE")) {
   Copy-Item -LiteralPath (Join-Path $repoRootPath $doc) -Destination (Join-Path $docsRoot $doc) -Force
 }
@@ -263,6 +300,8 @@ $makensisArgs = @(
   "/DEXTENSION_IDENTIFIER=$($releaseContract.builderContract.extensionIdentifier)",
   "/DVSCODE_BOOTSTRAP_FILE=$($releaseContract.builderContract.runtimeBootstrapInstallers.vscode.fileName)",
   "/DGIT_BOOTSTRAP_FILE=$($releaseContract.builderContract.runtimeBootstrapInstallers.git.fileName)",
+  "/DDOCKER_DESKTOP_BOOTSTRAP_FILE=$($releaseContract.builderContract.runtimeBootstrapInstallers.dockerDesktop.fileName)",
+  "/DHARNESS_BOOTSTRAP_SCRIPT_FILE=Invoke-HarnessBootstrap.ps1",
   "/DSTAGING_ROOT=$stageRoot",
   "/DOUTPUT_FILE=$installerPath",
   $nsisScriptPath
@@ -311,6 +350,24 @@ $metadata = [ordered]@{
     git = [ordered]@{
       path = $gitBootstrapInstallerPath
       sha256 = $releaseContract.builderContract.runtimeBootstrapInstallers.git.sha256
+    }
+    dockerDesktop = [ordered]@{
+      path = $dockerDesktopBootstrapInstallerPath
+      sha256 = $releaseContract.builderContract.runtimeBootstrapInstallers.dockerDesktop.sha256
+    }
+  }
+  fixtureBundle = [ordered]@{
+    path = $fixtureBundleInfo.BundlePath
+    sha256 = (Get-Sha256 -Path $fixtureBundleInfo.BundlePath)
+    manifestPath = $fixtureManifestPath
+    fixtureId = $fixtureBundleInfo.Manifest.fixtureId
+    commitSha = $fixtureBundleInfo.Manifest.reference.commitSha
+    branch = $fixtureBundleInfo.Manifest.reference.branch
+  }
+  runtimeContainerImages = [ordered]@{
+    labview2026q1Windows = [ordered]@{
+      imageReference = $releaseContract.builderContract.runtimeContainerImages.labview2026q1Windows.imageReference
+      repositoryDigestReference = $releaseContract.builderContract.runtimeContainerImages.labview2026q1Windows.repositoryDigestReference
     }
   }
   generatedAtUtc = (Get-Date).ToUniversalTime().ToString("o")

@@ -55,9 +55,11 @@ code --list-extensions --show-versions
 
 The first public Windows installer lane:
 - consume only immutable released VSIX artifacts
-- is built and published through the GitHub repo workflow, using the Windows Docker + NSIS build lane contract
-- treat the Windows 11 proof VM as a fresh install with no preinstalled Visual Studio Code or Git
-- bootstrap pinned Visual Studio Code and Git installers before using the VS Code CLI to install the exact released extension
+- is built and published through the GitHub repo workflow on a Windows runner, using the NSIS build lane contract and the retained Windows builder scaffold
+- treat the Windows 11 proof VM as a fresh install with no preinstalled Visual Studio Code, Git, or Docker Desktop
+- bootstrap pinned Visual Studio Code, Git, and Docker Desktop installers before using the VS Code CLI to install the exact released extension
+- switch Docker Desktop to the Windows containers engine and verify the pinned LabVIEW Windows container image digest
+- materialize a local `ni/labview-icon-editor` Git fixture workspace from a bundled fixture bundle so commit history is available without remote clone credentials
 
 The installer build lane is not the installed-user proof lane. Installed-user proof remains a separate fresh Windows 11 VM flow.
 
@@ -69,8 +71,12 @@ Authoritative installer input for the current release:
 - [docker/windows-installer-builder/Stage-NsisBootstrap.ps1](docker/windows-installer-builder/Stage-NsisBootstrap.ps1)
 - [docker/windows-installer-builder/Stage-VsCodeBootstrap.ps1](docker/windows-installer-builder/Stage-VsCodeBootstrap.ps1)
 - [docker/windows-installer-builder/Stage-GitBootstrap.ps1](docker/windows-installer-builder/Stage-GitBootstrap.ps1)
+- [docker/windows-installer-builder/Stage-DockerDesktopBootstrap.ps1](docker/windows-installer-builder/Stage-DockerDesktopBootstrap.ps1)
+- [scripts/Sync-PinnedFixtureBundle.ps1](scripts/Sync-PinnedFixtureBundle.ps1)
 - [docker/windows-installer-builder/Invoke-InstallerBuild.ps1](docker/windows-installer-builder/Invoke-InstallerBuild.ps1)
 - [installer/nsis/vi-history-suite-installer.nsi](installer/nsis/vi-history-suite-installer.nsi)
+- [installer/nsis/Invoke-HarnessBootstrap.ps1](installer/nsis/Invoke-HarnessBootstrap.ps1)
+- [fixtures/labview-icon-editor.manifest.json](fixtures/labview-icon-editor.manifest.json)
 
 Pinned bootstrap references for the Windows builder scaffold:
 
@@ -83,6 +89,17 @@ Pinned bootstrap references for the Windows builder scaffold:
 - file: `Git-2.53.0-64-bit.exe`
 - SHA-256:
   `3b4e1b127dbebea2931f2ae9dfafa0c2343a488a1222009debfe78d5d335e6a9`
+- file: `Docker Desktop Installer.exe`
+- SHA-256:
+  `9e334622293ddf15eb7ecb935b829370899a93c92a53385a2e4c7749e5d57c77`
+
+Pinned Windows container fixture identities:
+
+- image reference: `nationalinstruments/labview:2026q1-windows`
+- image digest:
+  `sha256:57c453dabd2ff0185ce718d88704921bb82eb83189f4049205ed9b4da7df7bcd`
+- bundled fixture bundle:
+  `labview-icon-editor-develop-e8945de7.bundle`
 
 Reference local build commands on a Windows host with NSIS available:
 
@@ -90,6 +107,8 @@ Reference local build commands on a Windows host with NSIS available:
 pwsh -NoProfile -ExecutionPolicy Bypass -File docker/windows-installer-builder/Stage-NsisBootstrap.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File docker/windows-installer-builder/Stage-VsCodeBootstrap.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File docker/windows-installer-builder/Stage-GitBootstrap.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File docker/windows-installer-builder/Stage-DockerDesktopBootstrap.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/Sync-PinnedFixtureBundle.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File docker/windows-installer-builder/Invoke-InstallerBuild.ps1
 ```
 

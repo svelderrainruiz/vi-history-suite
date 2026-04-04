@@ -19,9 +19,10 @@ This directory defines the installed-user acceptance lane for `vi-history-suite`
 ## Planned Automated Proof
 
 - invoke the public installer
-- confirm the installer bootstraps Visual Studio Code and Git on a fresh VM
+- confirm the installer bootstraps Visual Studio Code, Git, and Docker Desktop on a fresh VM
+- confirm Docker Desktop is running the Windows containers engine and that the pinned LabVIEW image digest is present
 - verify the installed extension version
-- launch the pinned proof workspace
+- launch the pinned proof workspace materialized from the bundled Git fixture
 - retain CLI outputs and acceptance artifacts
 
 Current scaffold files:

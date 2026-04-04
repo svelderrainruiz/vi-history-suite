@@ -14,6 +14,9 @@ Current expected bootstrap installers:
 - file: `Git-2.53.0-64-bit.exe`
 - SHA-256:
   `3b4e1b127dbebea2931f2ae9dfafa0c2343a488a1222009debfe78d5d335e6a9`
+- file: `Docker Desktop Installer.exe`
+- SHA-256:
+  `9e334622293ddf15eb7ecb935b829370899a93c92a53385a2e4c7749e5d57c77`
 
 Stage the local bootstrap installers into this directory with:
 
@@ -21,6 +24,7 @@ Stage the local bootstrap installers into this directory with:
 pwsh -NoProfile -ExecutionPolicy Bypass -File docker/windows-installer-builder/Stage-NsisBootstrap.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File docker/windows-installer-builder/Stage-VsCodeBootstrap.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File docker/windows-installer-builder/Stage-GitBootstrap.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File docker/windows-installer-builder/Stage-DockerDesktopBootstrap.ps1
 ```
 
 On this machine, the known local reference installers are:
@@ -28,6 +32,7 @@ On this machine, the known local reference installers are:
 - `C:\Users\sveld\Downloads\nsis-3.11-setup.exe`
 - `C:\Users\sveld\Downloads\VSCodeSetup-x64-1.109.3.exe`
 - `C:\Users\sveld\Downloads\Git-2.53.0-64-bit.exe`
+- `C:\Users\sveld\Downloads\Docker Desktop Installer.exe`
 
 The staged `.exe` and generated metadata `.json` are intentionally ignored by
 Git.

@@ -86,8 +86,10 @@ $releaseContract = Read-JsonFile -Path $releaseContractPath
 
 $vsCodeContract = $releaseContract.builderContract.runtimeBootstrapInstallers.vscode
 $gitContract = $releaseContract.builderContract.runtimeBootstrapInstallers.git
+$dockerDesktopContract = $releaseContract.builderContract.runtimeBootstrapInstallers.dockerDesktop
 
 Save-BootstrapInstaller -DestinationPath (Join-Path $repoRootPath $vsCodeContract.vendorRelativePath) -Contract $vsCodeContract
 Save-BootstrapInstaller -DestinationPath (Join-Path $repoRootPath $gitContract.vendorRelativePath) -Contract $gitContract
+Save-BootstrapInstaller -DestinationPath (Join-Path $repoRootPath $dockerDesktopContract.vendorRelativePath) -Contract $dockerDesktopContract
 
 Write-Host "Pinned workflow runtime bootstrap inputs are staged and verified."

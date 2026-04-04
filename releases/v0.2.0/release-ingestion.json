@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "status": "published-on-github-facade",
   "sourceTruth": {
     "provider": "private-gitlab-release",
@@ -82,8 +82,9 @@
     "extensionIdentifier": "svelderrainruiz.vi-history-suite",
     "windowsVmAssumptions": [
       "The Windows 11 acceptance VM may be a fresh install with neither Visual Studio Code nor Git preinstalled.",
-      "The canonical proof repo is provisioned separately from the installer.",
-      "The installer bootstraps pinned Visual Studio Code and Git installers, then uses the Visual Studio Code CLI to install the exact released VSIX and verify the public proof surface."
+      "The Windows 11 acceptance VM may also be missing Docker Desktop and the pinned Windows container image required for isolated LabVIEW execution.",
+      "The installer carries a pinned `ni/labview-icon-editor` Git fixture bundle with commit history and materializes the canonical proof workspace locally.",
+      "The installer bootstraps pinned Visual Studio Code, Git, and Docker Desktop installers, then uses the Visual Studio Code CLI to install the exact released VSIX and prepare the pinned Windows container image required by the product."
     ],
     "stagingRequirements": {
       "releaseEvidenceRoot": "releases/v0.2.0/release-evidence",
@@ -116,6 +117,10 @@
         "Exact released VSIX payload",
         "Pinned Visual Studio Code bootstrap installer",
         "Pinned Git for Windows bootstrap installer",
+        "Pinned Docker Desktop bootstrap installer",
+        "Pinned harness bootstrap script",
+        "Pinned labview-icon-editor Git fixture bundle with develop commit history",
+        "Pinned labview-icon-editor fixture manifest",
         "README.md",
         "INSTALL.md",
         "SUPPORT.md",
@@ -141,6 +146,39 @@
         "downloadUrl": "https://github.com/git-for-windows/git/releases/download/v2.53.0.windows.1/Git-2.53.0-64-bit.exe",
         "stageEntrypoint": "docker/windows-installer-builder/Stage-GitBootstrap.ps1",
         "vendorRelativePath": "docker/windows-installer-builder/vendor/Git-2.53.0-64-bit.exe"
+      },
+      "dockerDesktop": {
+        "productName": "Docker Desktop",
+        "version": "4.67.0",
+        "fileName": "Docker Desktop Installer.exe",
+        "sha256": "9e334622293ddf15eb7ecb935b829370899a93c92a53385a2e4c7749e5d57c77",
+        "downloadUrl": "https://desktop.docker.com/win/main/amd64/222858/Docker%20Desktop%20Installer.exe",
+        "checksumUrl": "https://desktop.docker.com/win/main/amd64/222858/checksums.txt",
+        "installArguments": [
+          "install",
+          "--quiet",
+          "--accept-license",
+          "--backend=windows",
+          "--always-run-service"
+        ],
+        "stageEntrypoint": "docker/windows-installer-builder/Stage-DockerDesktopBootstrap.ps1",
+        "vendorRelativePath": "docker/windows-installer-builder/vendor/Docker Desktop Installer.exe"
+      }
+    },
+    "runtimeContainerImages": {
+      "labview2026q1Windows": {
+        "productName": "LabVIEW Windows container image",
+        "imageReference": "nationalinstruments/labview:2026q1-windows",
+        "pullReference": "nationalinstruments/labview:2026q1-windows@sha256:57c453dabd2ff0185ce718d88704921bb82eb83189f4049205ed9b4da7df7bcd",
+        "repositoryDigestReference": "nationalinstruments/labview@sha256:57c453dabd2ff0185ce718d88704921bb82eb83189f4049205ed9b4da7df7bcd",
+        "expectedDigest": "sha256:57c453dabd2ff0185ce718d88704921bb82eb83189f4049205ed9b4da7df7bcd",
+        "pullEntrypoint": "installer/nsis/Invoke-HarnessBootstrap.ps1",
+        "verificationCommand": [
+          "docker",
+          "image",
+          "inspect",
+          "nationalinstruments/labview:2026q1-windows"
+        ]
       }
     },
     "toolchainReferences": {

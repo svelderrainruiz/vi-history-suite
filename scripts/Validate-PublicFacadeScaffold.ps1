@@ -67,8 +67,8 @@ $fixtureManifest = Read-JsonFile -Path $fixtureManifestPath
 Assert-PathPresent -Path $releaseContractPath -Message "Missing immutable release contract at $releaseContractPath."
 Assert-PathPresent -Path $fixtureManifestPath -Message "Missing pinned fixture manifest at $fixtureManifestPath."
 
-if ($releaseContract.schemaVersion -lt 3) {
-  throw "Release contract schemaVersion must be at least 3."
+if ($releaseContract.schemaVersion -lt 4) {
+  throw "Release contract schemaVersion must be at least 4."
 }
 
 if ($releaseContract.sourceTruth.releaseTag -ne "v0.2.0") {
@@ -83,14 +83,20 @@ Assert-Matches -Value $releaseContract.sourceTruth.releaseManifest.vsixArtifact.
 Assert-Matches -Value $releaseContract.builderContract.toolchainReferences.nsis.bootstrapInstaller.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "Pinned NSIS bootstrap installer SHA256 must be a lowercase 64-character hex string."
 Assert-Matches -Value $releaseContract.builderContract.runtimeBootstrapInstallers.vscode.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "Pinned Visual Studio Code bootstrap installer SHA256 must be a lowercase 64-character hex string."
 Assert-Matches -Value $releaseContract.builderContract.runtimeBootstrapInstallers.git.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "Pinned Git bootstrap installer SHA256 must be a lowercase 64-character hex string."
+Assert-Matches -Value $releaseContract.builderContract.runtimeBootstrapInstallers.dockerDesktop.sha256.ToString() -Pattern '^[0-9a-f]{64}$' -Message "Pinned Docker Desktop bootstrap installer SHA256 must be a lowercase 64-character hex string."
 Assert-Matches -Value $releaseContract.builderContract.toolchainReferences.nsis.bootstrapInstaller.downloadUrl.ToString() -Pattern '^https://.+' -Message "Pinned NSIS bootstrap installer downloadUrl must be an https URL."
 Assert-Matches -Value $releaseContract.builderContract.runtimeBootstrapInstallers.vscode.downloadUrl.ToString() -Pattern '^https://.+' -Message "Pinned Visual Studio Code bootstrap installer downloadUrl must be an https URL."
 Assert-Matches -Value $releaseContract.builderContract.runtimeBootstrapInstallers.git.downloadUrl.ToString() -Pattern '^https://.+' -Message "Pinned Git bootstrap installer downloadUrl must be an https URL."
+Assert-Matches -Value $releaseContract.builderContract.runtimeBootstrapInstallers.dockerDesktop.downloadUrl.ToString() -Pattern '^https://.+' -Message "Pinned Docker Desktop bootstrap installer downloadUrl must be an https URL."
+Assert-Matches -Value $releaseContract.builderContract.runtimeBootstrapInstallers.dockerDesktop.checksumUrl.ToString() -Pattern '^https://.+' -Message "Pinned Docker Desktop bootstrap installer checksumUrl must be an https URL."
+Assert-Matches -Value $releaseContract.builderContract.runtimeContainerImages.labview2026q1Windows.expectedDigest.ToString() -Pattern '^sha256:[0-9a-f]{64}$' -Message "Pinned LabVIEW Windows container digest must be a sha256 reference."
 
 foreach ($required in $releaseContract.builderContract.stagingRequirements.requiredBeforeInstallerBuild) {
   $path = Join-Path $repoRootPath $required.relativePath
   Assert-PathPresent -Path $path -Message "Missing staged release-evidence path required by the contract: $($required.relativePath)"
 }
+
+Assert-PathPresent -Path (Join-Path $repoRootPath $fixtureManifest.bundle.builderEntrypoint) -Message "Missing pinned fixture bundle sync entrypoint."
 
 $requiredPaths = @(
   "README.md",
@@ -98,6 +104,7 @@ $requiredPaths = @(
   "SUPPORT.md",
   ".github/workflows/publish-windows-installer.yml",
   "installer/nsis/README.md",
+  "installer/nsis/Invoke-HarnessBootstrap.ps1",
   "installer/nsis/vi-history-suite-installer.nsi",
   "docker/windows-installer-builder/README.md",
   "docker/windows-installer-builder/Dockerfile",
@@ -106,12 +113,14 @@ $requiredPaths = @(
   "docker/windows-installer-builder/Stage-NsisBootstrap.ps1",
   "docker/windows-installer-builder/Stage-VsCodeBootstrap.ps1",
   "docker/windows-installer-builder/Stage-GitBootstrap.ps1",
+  "docker/windows-installer-builder/Stage-DockerDesktopBootstrap.ps1",
   "docker/windows-installer-builder/vendor/README.md",
   "acceptance/windows11/README.md",
   "acceptance/windows11/Invoke-Windows11Acceptance.ps1",
   "acceptance/windows11/manual-right-click-checklist.md",
   "acceptance/windows11/acceptance-record.template.json",
   "scripts/Sync-ImmutableReleaseEvidence.ps1",
+  "scripts/Sync-PinnedFixtureBundle.ps1",
   "scripts/Validate-PublicFacadeScaffold.ps1"
 )
 
@@ -122,11 +131,14 @@ foreach ($relativePath in $requiredPaths) {
 foreach ($ps1RelativePath in @(
   "scripts/Validate-PublicFacadeScaffold.ps1",
   "scripts/Sync-ImmutableReleaseEvidence.ps1",
+  "scripts/Sync-PinnedFixtureBundle.ps1",
   "docker/windows-installer-builder/Fetch-WorkflowBootstrapInputs.ps1",
   "docker/windows-installer-builder/Invoke-InstallerBuild.ps1",
   "docker/windows-installer-builder/Stage-NsisBootstrap.ps1",
   "docker/windows-installer-builder/Stage-VsCodeBootstrap.ps1",
   "docker/windows-installer-builder/Stage-GitBootstrap.ps1",
+  "docker/windows-installer-builder/Stage-DockerDesktopBootstrap.ps1",
+  "installer/nsis/Invoke-HarnessBootstrap.ps1",
   "acceptance/windows11/Invoke-Windows11Acceptance.ps1"
 )) {
   Test-PowerShellSyntax -Path (Join-Path $repoRootPath $ps1RelativePath)
@@ -140,6 +152,12 @@ if (-not $fixtureManifest.selectionCommitVerified) {
   throw "Fixture manifest must retain selectionCommitVerified=true."
 }
 
+if (-not $fixtureManifest.bundle.fileName.ToString().EndsWith(".bundle")) {
+  throw "Fixture manifest bundle.fileName must end with .bundle."
+}
+
+Assert-Matches -Value $fixtureManifest.bundle.defaultGeneratedRelativePath.ToString() -Pattern '^artifacts/.+\.bundle$' -Message "Fixture manifest default bundle path must stay under artifacts/ and end with .bundle."
+
 $nsisPath = Join-Path $repoRootPath "installer/nsis/vi-history-suite-installer.nsi"
 $nsisContent = Get-Content -LiteralPath $nsisPath -Raw
 foreach ($token in @(
@@ -148,12 +166,30 @@ foreach ($token in @(
   'release-ingestion.json',
   'Visual Studio Code',
   'Git',
+  'Docker Desktop',
   'bootstrap\vscode',
   'bootstrap\git',
+  'DOCKER_DESKTOP_BOOTSTRAP_FILE',
+  'Invoke-HarnessBootstrap.ps1',
   'svelderrainruiz.vi-history-suite'
 )) {
   if ($nsisContent -notmatch [regex]::Escape($token)) {
     throw "NSIS scaffold must retain token '$token'."
+  }
+}
+
+$harnessScriptPath = Join-Path $repoRootPath "installer/nsis/Invoke-HarnessBootstrap.ps1"
+$harnessScriptContent = Get-Content -LiteralPath $harnessScriptPath -Raw
+foreach ($token in @(
+  'Docker Desktop',
+  '"desktop", "engine", "use", "windows"',
+  '"image", "inspect"',
+  'labview-icon-editor',
+  '.bundle',
+  'fixtures-workspace'
+)) {
+  if ($harnessScriptContent -notmatch [regex]::Escape($token)) {
+    throw "Harness bootstrap script must retain token '$token'."
   }
 }
 

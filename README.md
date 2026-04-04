@@ -32,8 +32,12 @@ Scaffold status:
 
 - immutable release contract is retained here for `v0.2.0`
 - pinned NSIS 3.11 bootstrap reference is retained in the release/build contract
-- pinned Visual Studio Code and Git bootstrap references are retained for fresh
-  Windows 11 VM proof
+- pinned Visual Studio Code, Git, and Docker Desktop bootstrap references are
+  retained for fresh Windows 11 VM proof
+- pinned Docker Desktop bootstrap and LabVIEW Windows container image identities
+  are retained for the Windows container proof lane
+- a pinned `ni/labview-icon-editor` Git fixture bundle with commit history is
+  generated for the installer harness
 - Windows Docker builder entrypoint is scaffolded
 - NSIS installer entrypoint is scaffolded
 - Windows 11 acceptance harness and manual checklist are scaffolded
@@ -62,6 +66,8 @@ Scaffold status:
 - [Stage NSIS Bootstrap](docker/windows-installer-builder/Stage-NsisBootstrap.ps1)
 - [Stage Visual Studio Code Bootstrap](docker/windows-installer-builder/Stage-VsCodeBootstrap.ps1)
 - [Stage Git Bootstrap](docker/windows-installer-builder/Stage-GitBootstrap.ps1)
+- [Stage Docker Desktop Bootstrap](docker/windows-installer-builder/Stage-DockerDesktopBootstrap.ps1)
+- [Sync Pinned Fixture Bundle](scripts/Sync-PinnedFixtureBundle.ps1)
 
 ## Public Support Scope
 
@@ -78,6 +84,8 @@ Do not use this repository to request private engineering artifacts, internal ga
 This facade repo is the intended public surface for:
 - Windows installer artifacts built from immutable released VSIX packages
 - pinned prerequisite bootstrap installers for fresh-machine proof
+- a pinned Git fixture bundle and materialized proof workspace for
+  `ni/labview-icon-editor`
 - release-facing documentation
 - installed-user acceptance guidance
 
@@ -95,5 +103,7 @@ Current scaffold entrypoints:
 - stage NSIS bootstrap: `pwsh -File docker/windows-installer-builder/Stage-NsisBootstrap.ps1`
 - stage Visual Studio Code bootstrap: `pwsh -File docker/windows-installer-builder/Stage-VsCodeBootstrap.ps1`
 - stage Git bootstrap: `pwsh -File docker/windows-installer-builder/Stage-GitBootstrap.ps1`
+- stage Docker Desktop bootstrap: `pwsh -File docker/windows-installer-builder/Stage-DockerDesktopBootstrap.ps1`
+- sync pinned fixture bundle: `pwsh -File scripts/Sync-PinnedFixtureBundle.ps1`
 - Windows installer build: `pwsh -File docker/windows-installer-builder/Invoke-InstallerBuild.ps1`
 - Windows 11 acceptance: `pwsh -File acceptance/windows11/Invoke-Windows11Acceptance.ps1`
