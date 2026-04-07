@@ -7,6 +7,27 @@ Retained exact-version releases now include `v0.2.0`, `v1.0.0`, `v1.0.1`,
 
 Burned exact-version releases now include `v1.0.2`.
 
+## [1.1.0] - Unreleased
+
+### Changed
+
+- `v1.0.6` remains the exact public release line until `release/1.1.0` is
+  promoted to `main` and published as exact `v1.1.0`
+- `release/1.1.0` is now the governed release-candidate branch for the exact
+  `v1.1.0` promotion, while `develop` stays aligned to `1.1.0` until the next
+  line opens
+- the control plane now retains one explicit hosted branch-protection and CI
+  governance matrix across authority GitLab, the public GitHub facade, and the
+  GitHub experiment workflows instead of leaving those boundaries scattered
+  across YAML and branch-protection settings
+- the authority GitLab package-preview lane is now admitted on `develop`,
+  `main`, `release/*`, `hotfix/*`, and exact tags, while feature work relies
+  on merge-request admission instead of a generic branch-push preview lane
+- the configuration-management and release-control docs now fail closed on the
+  real branch model: `develop` is the integration branch, `main` is the exact
+  release branch, and GitHub's default branch stays `main` while `develop`
+  carries the next candidate
+
 ## [1.0.6] - 2026-04-07
 
 ### Changed
