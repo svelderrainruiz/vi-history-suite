@@ -6,7 +6,12 @@ on:
     branches:
       - develop
       - main
+      - 'release/**'
+      - 'hotfix/**'
   pull_request:
+    branches:
+      - develop
+      - main
     paths:
       - '.devcontainer/**'
       - '.github/workflows/public-facade-package-preview.yml'
