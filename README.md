@@ -85,6 +85,10 @@ For the step-by-step fork-owner walkthrough that ends at
 
 - `https://github.com/svelderrainruiz/vi-history-suite/wiki/Fork-Codespace-Quickstart`
 
+That page is the easier first fork-owner path because the repo ships a helper
+for `ni/labview-icon-editor` and now includes the exact Codespaces machine
+selection plus browser/open-folder steps.
+
 For the separate manual-clone walkthrough for `ni/actor-framework`, use:
 
 - `https://github.com/svelderrainruiz/vi-history-suite/wiki/Manual-Actor-Framework-Clone`
