@@ -3,19 +3,19 @@
 This changelog is the governed version-line summary for `vi-history-suite`.
 
 Retained exact-version releases now include `v0.2.0`, `v1.0.0`, `v1.0.1`,
-`v1.0.2`, `v1.0.3`, `v1.0.4`, `v1.0.5`, and `v1.0.6`.
+`v1.0.2`, `v1.0.3`, `v1.0.4`, `v1.0.5`, `v1.0.6`, and `v1.1.0`.
 
 Burned exact-version releases now include `v1.0.2`.
 
-## [1.1.0] - Unreleased
+## [1.1.0] - 2026-04-07
 
 ### Changed
 
-- `v1.0.6` remains the exact public release line until `release/1.1.0` is
-  promoted to `main` and published as exact `v1.1.0`
-- `release/1.1.0` is now the governed release-candidate branch for the exact
-  `v1.1.0` promotion, while `develop` stays aligned to `1.1.0` until the next
-  line opens
+- `v1.1.0` is now the exact public release line on `main`, while `develop`
+  remains the public evaluation branch and still carries `1.1.0` until the
+  next exact release candidate opens
+- the `release/1.1.0` promotion lane is now closed, and no newer exact public
+  release candidate is active yet
 - the control plane now retains one explicit hosted branch-protection and CI
   governance matrix across authority GitLab, the public GitHub facade, and the
   GitHub experiment workflows instead of leaving those boundaries scattered
