@@ -28,9 +28,11 @@ describe('bootstrapLinuxVsCodeHost', () => {
 
     expect(debianPlan.packageFamily).toBe('debian');
     expect(debianPlan.packages).toContain('xvfb');
+    expect(debianPlan.packages).toContain('xauth');
     expect(debianPlan.packages).toContain('libasound2');
     expect(ubuntuPlan.packageFamily).toBe('ubuntu');
     expect(ubuntuPlan.packages).toContain('xvfb');
+    expect(ubuntuPlan.packages).toContain('xauth');
     expect(ubuntuPlan.packages).toContain('libasound2t64');
     expect(debianPlan.commands).toEqual([
       ['sudo', 'apt-get', 'update'],
