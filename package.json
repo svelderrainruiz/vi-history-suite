@@ -131,6 +131,7 @@
     "test:design-contract": "npm exec -- vitest run tests/unit/publicRepoPackageSurface.test.ts tests/unit/publicDevcontainerSurface.test.ts tests/unit/publicFacadeLinuxSmoke.test.ts tests/unit/linuxContainerRuntimeExecutionSurface.test.ts",
     "test": "npm run test:design-contract",
     "public:smoke:linux": "npm run compile && node scripts/runPublicFacadeLinuxSmoke.js",
+    "public:fixture:icon-editor": "node scripts/preparePublicTestFixture.js",
     "package:audit": "node scripts/auditPackagedRuntimeSurface.js",
     "package": "npm run compile && npm run package:audit && node scripts/runPinnedVsce.js package"
   },
