@@ -87,6 +87,10 @@ describe('public facade linux smoke', () => {
 
     expect(workflow).toContain('name: Public Facade Linux Smoke');
     expect(workflow).toContain('workflow_dispatch:');
+    expect(workflow).toContain("      - 'release/**'");
+    expect(workflow).toContain("      - 'hotfix/**'");
+    expect(workflow).toContain('  pull_request:');
+    expect(workflow).not.toContain('feature/**');
     expect(workflow).toContain('runs-on: ubuntu-24.04');
     expect(workflow).toContain("docker info --format '{{.OSType}}'");
     expect(workflow).toContain('npm run public:smoke:linux -- --evidence-dir artifacts/public-facade-linux-smoke');
