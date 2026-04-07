@@ -1,5 +1,5 @@
 name: Bug report
-description: Report a user-facing defect in the installed extension.
+description: Report a problem in the public VI History Suite product surface
 title: "[Bug]: "
 labels:
   - bug
@@ -7,63 +7,50 @@ body:
   - type: markdown
     attributes:
       value: |
-        Use this form for installed-extension defects only. Do not include private repository content that should not be disclosed publicly.
+        Use this template for public product issues only. Do not include private GitLab control-plane material.
   - type: input
     id: extension_version
     attributes:
       label: Extension version
-      description: The installed `vi-history-suite` version.
-      placeholder: 0.1.0
+      description: Example `1.0.0` or preview VSIX version
     validations:
       required: true
+  - type: dropdown
+    id: host
+    attributes:
+      label: Host and Docker engine
+      options:
+        - Windows host + Linux engine
+        - Windows host + Windows engine
+        - Linux host
+    validations:
+      required: true
+  - type: input
+    id: docker_version
+    attributes:
+      label: Docker version
+      description: Output from `docker version`
   - type: input
     id: vscode_version
     attributes:
       label: VS Code version
-      description: Output from `code --version`.
-    validations:
-      required: true
-  - type: input
-    id: operating_system
-    attributes:
-      label: Operating system
-      placeholder: Windows 11 / Ubuntu 24.04 / macOS 15
-    validations:
-      required: true
-  - type: dropdown
-    id: workspace_trust
-    attributes:
-      label: Workspace trust
-      options:
-        - Trusted
-        - Untrusted
-        - Unknown
-    validations:
-      required: true
-  - type: textarea
-    id: command
-    attributes:
-      label: Command or action used
-      description: Which extension action you used and on which kind of VI/repo state.
-      placeholder: Right-click eligible VI -> VI History -> Open dashboard
-    validations:
-      required: true
+      description: Output from `code --version`
   - type: textarea
     id: expected
     attributes:
-      label: Expected behavior
+      label: What did you expect?
     validations:
       required: true
   - type: textarea
     id: actual
     attributes:
-      label: Actual behavior
+      label: What happened instead?
     validations:
       required: true
   - type: textarea
-    id: diagnostics
+    id: reproduction
     attributes:
-      label: Optional diagnostics
-      description: Include relevant `code --list-extensions --show-versions` output or bounded error text if available.
+      label: Reproduction steps
+      description: Include whether this was a cold image pull or warm image run
     validations:
-      required: false
+      required: true

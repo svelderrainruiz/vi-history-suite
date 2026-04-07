@@ -1,0 +1,148 @@
+{
+  "name": "vi-history-suite",
+  "displayName": "VI History Suite",
+  "description": "VS Code extension for content-detected LabVIEW VI history review in Git repositories.",
+  "version": "1.0.0",
+  "publisher": "svelderrainruiz",
+  "license": "SEE LICENSE IN LICENSE",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/svelderrainruiz/vi-history-suite.git"
+  },
+  "homepage": "https://github.com/svelderrainruiz/vi-history-suite",
+  "bugs": {
+    "url": "https://github.com/svelderrainruiz/vi-history-suite/issues"
+  },
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "VI History disables background indexing and governed Docker comparison-report execution in untrusted workspaces.",
+      "restrictedConfigurations": [
+        "viHistorySuite.windowsContainerImage",
+        "viHistorySuite.linuxContainerImage"
+      ]
+    }
+  },
+  "categories": [
+    "Other",
+    "SCM Providers"
+  ],
+  "main": "./out/extension.js",
+  "files": [
+    "out/**",
+    "resources/**",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "activationEvents": [
+    "onStartupFinished",
+    "onCommand:labviewViHistory.open",
+    "onCommand:labviewViHistory.openDocumentation"
+  ],
+  "extensionDependencies": [
+    "vscode.git"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "labviewViHistory.open",
+        "title": "VI History",
+        "category": "VI History"
+      },
+      {
+        "command": "labviewViHistory.openDocumentation",
+        "title": "Open Documentation",
+        "category": "VI History"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "labviewViHistory.open",
+          "group": "3_compare",
+          "when": "resourcePath in labviewViHistory.eligiblePaths && isWorkspaceTrusted && gitOpenRepositoryCount >= 1"
+        }
+      ],
+      "editor/title/context": [
+        {
+          "command": "labviewViHistory.open",
+          "group": "3_compare",
+          "when": "resourcePath in labviewViHistory.eligiblePaths && isWorkspaceTrusted && gitOpenRepositoryCount >= 1"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "VI History Suite",
+      "properties": {
+        "viHistorySuite.strictRsrcHeader": {
+          "type": "boolean",
+          "default": false,
+          "description": "When enabled, require the leading RSRC CRLF bytes in addition to LVIN/LVCC at offset 8."
+        },
+        "viHistorySuite.maxIndexedConcurrency": {
+          "type": "number",
+          "default": 6,
+          "minimum": 1,
+          "maximum": 16,
+          "description": "Maximum concurrent eligibility checks during repository indexing."
+        },
+        "viHistorySuite.historyWindowMode": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "capped"
+          ],
+          "default": "auto",
+          "description": "How the VI History panel chooses its retained commit window. Auto loads the full file history when it fits within the automatic safety ceiling; capped uses the explicit maxHistoryEntries limit."
+        },
+        "viHistorySuite.maxHistoryEntries": {
+          "type": "number",
+          "default": 100,
+          "minimum": 2,
+          "maximum": 5000,
+          "description": "Explicit retained-commit ceiling when historyWindowMode is capped."
+        },
+        "viHistorySuite.windowsContainerImage": {
+          "type": "string",
+          "default": "nationalinstruments/labview:2026q1-windows",
+          "description": "Required governed Windows-engine LabVIEW container image for Docker-only comparison-report execution when Docker runs in Windows-container mode."
+        },
+        "viHistorySuite.linuxContainerImage": {
+          "type": "string",
+          "default": "nationalinstruments/labview:2026q1-linux",
+          "description": "Required governed Linux-engine LabVIEW container image for Docker-only comparison-report execution when Docker runs in Linux-container mode."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "clean": "rimraf out coverage",
+    "compile": "tsc -p .",
+    "check": "tsc -p . --noEmit",
+    "dev:watch": "tsc -p . --watch --preserveWatchOutput",
+    "test:integration:compile": "tsc -p tsconfig.integration.json",
+    "test:integration": "npm run compile && npm run test:integration:compile && node out-tests/tests/integration/runTests.js",
+    "test:integration:linux": "VI_HISTORY_SUITE_INTEGRATION_HOST=linux npm run test:integration",
+    "test:design-contract": "npm exec -- vitest run tests/unit/publicRepoPackageSurface.test.ts tests/unit/publicDevcontainerSurface.test.ts tests/unit/publicFacadeLinuxSmoke.test.ts tests/unit/linuxContainerRuntimeExecutionSurface.test.ts",
+    "test": "npm run test:design-contract",
+    "public:smoke:linux": "npm run compile && node scripts/runPublicFacadeLinuxSmoke.js",
+    "package:audit": "node scripts/auditPackagedRuntimeSurface.js",
+    "package": "npm run compile && npm run package:audit && node scripts/runPinnedVsce.js package"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^24.6.0",
+    "@types/vscode": "^1.90.0",
+    "@vitest/coverage-v8": "^4.1.2",
+    "@vscode/test-electron": "^2.5.2",
+    "marked": "^17.0.5",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.2"
+  }
+}

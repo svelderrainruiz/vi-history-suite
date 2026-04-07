@@ -1,84 +1,53 @@
 # Support
 
-## Public Support Surface
+## Public Support Boundary
 
-This repository is the public issue and release-facing surface for `vi-history-suite`.
+Use this public GitHub repo for:
 
-Private requirements, internal implementation work, and retained engineering
-evidence remain on the private GitLab side. This public repo only carries
-release, setup, and support material.
+- installed-extension bugs
+- compare-generation issues
+- Docker image acquisition/runtime issues
+- checkbox-selected compare UX feedback
+- public documentation problems
 
-## Before Filing An Issue
+Do not use this repo to request:
+
+- private GitLab access
+- internal control-plane artifacts
+- benchmark-governance packets
+- maintainer-only review evidence
+
+## Useful Issue Facts
 
 Please include:
-- release contract id, for example `v0.2.0`
-- VS Code version
-- Git version
-- Docker Desktop version only if the issue involves an optional Docker-backed provider path
+
+- extension version
 - operating system
-- installed extension version
 - whether the workspace was trusted
-- whether the target file was an eligible LabVIEW VI
-- the command or action you used
+- whether the target file was an eligible tracked LabVIEW VI
+- whether the issue happened on first-use image pull or on a warm image
+- Docker engine and host combination
+  - Windows host with Linux engine
+  - Windows host with Windows engine
+  - Linux host
 - what you expected
 - what happened instead
 
-Useful VS Code CLI output:
+Useful command output:
 
 ```bash
 code --version
 code --list-extensions --show-versions
 git --version
-```
-
-Optional provider output when relevant:
-
-```bash
 docker version
+docker info --format '{{.OSType}}'
 ```
 
-## Planned Acceptance Split
+## Current Product Boundary
 
-The intended acceptance split for the current public release-kit lane is:
-- automation via PowerShell plus the public setup manifest, setup adapters, and
-  VS Code CLI for install, version verification, and workspace launch from the
-  bundled Git fixture
-- a maintainer-operated human manual right-click pass by Sergio Velderrain on the current Windows 11 proof machine for the final UX gate
+The public product contract is Docker-only and x64-only.
 
-That split exists because VS Code CLI can verify installation and launch surfaces, but cannot replace the real right-click interaction proof.
+The extension does not use host LabVIEW as an installed-user fallback path.
 
-Current scaffold entrypoints:
-
-- [releases/v0.2.0/public-setup-manifest.json](releases/v0.2.0/public-setup-manifest.json)
-- [setup/windows/Setup-VIHistorySuite.ps1](setup/windows/Setup-VIHistorySuite.ps1)
-- [setup/linux/setup-vi-history-suite.sh](setup/linux/setup-vi-history-suite.sh)
-- [scripts/Build-PublicSetupAssets.ps1](scripts/Build-PublicSetupAssets.ps1)
-- [scripts/Sync-PinnedFixtureBundle.ps1](scripts/Sync-PinnedFixtureBundle.ps1)
-- [acceptance/windows11/Invoke-Windows11Acceptance.ps1](acceptance/windows11/Invoke-Windows11Acceptance.ps1)
-- [acceptance/windows11/Invoke-Windows11HumanGate.ps1](acceptance/windows11/Invoke-Windows11HumanGate.ps1)
-- [acceptance/windows11/manual-right-click-checklist.md](acceptance/windows11/manual-right-click-checklist.md)
-- [acceptance/windows11/acceptance-record.template.json](acceptance/windows11/acceptance-record.template.json)
-
-## Good Issue Topics
-
-- extension command behavior
-- comparison report generation issues
-- dashboard review issues
-- documentation problems
-- installation and upgrade problems
-
-## Not In Scope For Public Issues
-
-- requests for private engineering artifacts
-- requests for private GitLab access
-- private repository contents that should not be disclosed publicly
-
-## Future Support Direction
-
-Planned future hardening includes an extension-side support-bundle export so issue reports can include bounded product evidence without requiring private repo access.
-
-Current immutable reference for support and future setup work:
-
-- [releases/v0.2.0/public-setup-manifest.json](releases/v0.2.0/public-setup-manifest.json)
-- [releases/v0.2.0/release-ingestion.json](releases/v0.2.0/release-ingestion.json)
-- [fixtures/labview-icon-editor.manifest.json](fixtures/labview-icon-editor.manifest.json)
+If Docker is unavailable or the governed image cannot be acquired, the product
+should fail closed with visible next-step guidance.

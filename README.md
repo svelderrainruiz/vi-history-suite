@@ -1,110 +1,83 @@
 # VI History Suite
 
-Public support and release surface for the `vi-history-suite` Visual Studio Code extension.
+`vi-history-suite` is a Visual Studio Code extension for reviewing LabVIEW VI
+history in Git repositories.
 
-This repository is intended for:
-- public issue intake
-- public install and support guidance
-- public release notes and VSIX distribution links
-- public setup adapters, fixture assets, and Windows acceptance scaffolding
+This public GitHub repo is the source-facing product surface for extension
+users and public contributors.
 
-This repository is not a publication surface for private requirements, design
-gates, or retained engineering evidence. It exists only for public release,
-setup, and support material, while private engineering control stays on the
-private GitLab side.
+It is intentionally bounded:
 
-## Current Status
+- Docker-only compare execution
+- x64 container surfaces only
+- repo-agnostic two-commit checkbox-selected compare flow
+- devcontainer/Codespaces-capable development path
+- no host-LabVIEW runtime competition in the installed-extension workflow
 
-An immutable `vi-history-suite` release now exists:
+This repo does not publish the internal GitLab control plane, benchmark
+governance, or maintainer-only acceptance evidence.
 
-- release tag: `v0.2.0`
-- package version: `0.2.0`
-- authoritative VSIX: `vi-history-suite-0.2.0.vsix`
-- SHA-256: `dd9585dbd684939ce71eeed01ca435685bb8da305b601e4d2bde15dfb54c4cf3`
-- public GitHub release: `https://github.com/svelderrainruiz/vi-history-suite/releases/tag/v0.2.0`
-- current public state: the release kit is the active publication surface and the exact VSIX remains the authoritative payload identity
+## Public Product Shape
 
-Machine-readable public release/setup surfaces:
+- Open a trusted Git repository containing an eligible LabVIEW VI.
+- Run `VI History`.
+- Select one commit checkbox.
+- Select a second distinct commit checkbox.
+- The second checkbox selection triggers compare generation automatically.
 
-- [releases/v0.2.0/public-setup-manifest.json](releases/v0.2.0/public-setup-manifest.json)
-- [releases/v0.2.0/release-ingestion.json](releases/v0.2.0/release-ingestion.json)
-- [releases/v0.2.0/README.md](releases/v0.2.0/README.md)
+The compare surface is Docker-only:
 
-Scaffold status:
+- Windows hosts use the governed image that matches the current Docker daemon
+  engine.
+- Linux hosts use the governed Linux image.
+- Missing governed images are pulled on first use with visible progress.
+- If Docker is unavailable or the selected image cannot be acquired, the
+  extension fails closed instead of probing host LabVIEW.
 
-- immutable release contract is retained here for `v0.2.0`
-- direct-release setup manifest and Windows/Linux setup adapters are now scaffolded as the primary public setup surface
-- a pinned `ni/labview-icon-editor` fixture bundle with commit history is generated for the release kit
-- Docker is no longer part of the default public setup path
-- legacy installer assets are retired from the active public toolchain
-- pinned Visual Studio Code and Git prerequisite identities remain in the public setup contracts
-- Windows 11 acceptance harness and manual checklist are scaffolded
-- public binary publication is complete through the GitHub workflow
-- automated Windows 11 host-machine proof is the active acceptance lane
-- future reproducible automation is intended to move to a published container image
-- a container public-release-kit smoke recipe is now scaffolded for the future automation lane
+## Public Development Path
 
-## Planned User Flows
+This repo is expected to work in a Docker-capable devcontainer or Codespace.
 
-- Install a released `.vsix` from GitHub Releases or the VS Code Marketplace.
-- Open a trusted Git repository in VS Code.
-- Right-click an eligible LabVIEW VI and use `VI History`.
-- Generate or open retained comparison reports.
-- Open the review dashboard for multi-commit VI review.
-- Open bundled documentation from inside the extension.
+## Public Devcontainer And Codespaces
 
-## Documentation
+The public GitHub facade is expected to support evaluation inside Codespaces or
+a local devcontainer.
+
+- A Linux-hosted development session uses the governed Linux container image.
+- No host LabVIEW installation is required for the installed extension path.
+
+Typical public fast loop:
+
+```bash
+npm ci
+npm run compile
+npm run test:design-contract
+```
+
+Then press `F5` in VS Code to launch the extension host.
+
+The public Linux cold-pull smoke surface is:
+
+```bash
+npm run public:smoke:linux
+```
+
+The guarded package path is:
+
+```bash
+npm run package -- --out /tmp/vi-history-suite-public-preview.vsix
+```
+
+## Start Here
 
 - [Install](INSTALL.md)
 - [Support](SUPPORT.md)
-- [Public Setup Surface](setup/README.md)
-- [Release Ingestion](releases/v0.2.0/README.md)
-- [Windows 11 Acceptance Scaffold](acceptance/windows11/README.md)
-- [Scaffold Validation Script](scripts/Validate-PublicFacadeScaffold.ps1)
-- [Publish Public Release Kit Workflow](.github/workflows/publish-public-release-kit.yml)
-- [Container Public Release-Kit Smoke Workflow](.github/workflows/container-public-release-kit-smoke.yml)
-- [Sync Pinned Fixture Bundle](scripts/Sync-PinnedFixtureBundle.ps1)
+- [Contributing](CONTRIBUTING.md)
+- Public GitHub wiki: `https://github.com/svelderrainruiz/vi-history-suite/wiki`
 
-## Public Support Scope
+## Current Version Line
 
-Use this repository for:
-- bugs in the installed extension experience
-- product feedback
-- documentation feedback
-- release-facing requests
-
-Do not use this repository to request private engineering artifacts, internal gate evidence, or private GitLab access.
-
-## Public Setup Direction
-
-This facade repo is the intended public surface for:
-- exact released VSIX packages
-- public setup manifest plus Windows and Linux setup adapters
-- a pinned Git fixture bundle and materialized proof workspace for
-  `ni/labview-icon-editor`
-- release-facing documentation
-- installed-user acceptance guidance
-
-Trust boundary:
-- private GitLab release remains the engineering source of truth for the exact released VSIX
-- private requirements, design gates, and retained engineering evidence are intentionally not mirrored here
-- this public repo is the consumer-facing distribution and support facade
-- `public-setup-manifest.json` is the primary public release/setup manifest
-- `release-ingestion.json` is retained as a bounded public release-provenance ledger
-- the GitHub workflow now publishes the release kit only and deletes retired legacy installer assets when present
-- the current Windows 11 host machine is the active installed-user proof surface
-- a future published container image is the preferred reproducible automation follow-on
-- the public repo now includes a scaffolded container smoke recipe at `docker/public-release-kit-smoke/` while published-image automation remains a follow-on
-- public GitHub issues are supplemental field feedback, not the proof gate
-
-Current scaffold entrypoints:
-
-- build validation: `pwsh -File scripts/Validate-PublicFacadeScaffold.ps1`
-- build public setup assets: `pwsh -File scripts/Build-PublicSetupAssets.ps1`
-- Windows setup adapter: `pwsh -File setup/windows/Setup-VIHistorySuite.ps1`
-- Linux setup adapter: `bash setup/linux/setup-vi-history-suite.sh`
-- sync pinned fixture bundle: `pwsh -File scripts/Sync-PinnedFixtureBundle.ps1`
-- Windows 11 acceptance: `pwsh -File acceptance/windows11/Invoke-Windows11Acceptance.ps1 -ExecutionTarget host-machine`
-- Windows 11 human gate: `pwsh -File acceptance/windows11/Invoke-Windows11HumanGate.ps1 -Action prepare|complete`
-- container smoke: `docker build docker/public-release-kit-smoke -t vi-history-suite-public-release-kit-smoke:local`
-- publish workflow: `.github/workflows/publish-public-release-kit.yml`
+- retained exact release: `v0.2.0`
+- active development baseline: `1.0.0`
+- this repo is the public source product for the next governed exact-version
+  line

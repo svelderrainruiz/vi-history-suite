@@ -1,0 +1,41 @@
+<h1>Comparison Reports And Dashboard Review</h1>
+<h2>Comparison Report Contract</h2>
+<p><code>vi-history-suite</code> treats a VI comparison report as retained review evidence, not as transient shell output.</p>
+<p>The installed comparison-report flow covers:</p>
+<ul>
+<li>revision-pair preflight for eligible VI revisions</li>
+<li>runtime selection</li>
+<li>retained packet and metadata persistence</li>
+<li>rendering of retained comparison evidence inside the extension</li>
+</ul>
+<p>The embedded compare view now leads with a white <code>Comparison context</code> block that foregrounds selected/base commit hash, date, author, and subject facts.
+Runtime-diagnostic and process-observation detail remain retained for diagnosis, but they do not lead the embedded compare view.</p>
+<h2>Runtime Doctor</h2>
+<p>The comparison-report subsystem also retains a compact runtime summary so you do not need raw logs first.</p>
+<p>That retained summary stays on packet/runtime evidence surfaces instead of replacing the commit-first compare header.</p>
+<p>That runtime summary includes:</p>
+<ul>
+<li>selected provider</li>
+<li>selected engine</li>
+<li>platform</li>
+<li>blocked or failure reason when present</li>
+<li>one bounded next action</li>
+</ul>
+<h2>Retained Pair Review</h2>
+<p>At the history-panel level, pair review is checkbox-driven.</p>
+<ul>
+<li>the primary compare path is selecting two retained revisions with the checkbox column</li>
+<li>the second checkbox selection generates the comparison automatically for that exact selected/base pair</li>
+<li>the oldest retained revision can still serve as the older/base side of a checkbox-selected pair</li>
+<li>there is no separate compare button on commit rows for extension users</li>
+<li><code>Diff prev</code> uses retained comparison evidence for governed VI review instead of falling back to VS Code text diff on binary VI content</li>
+</ul>
+<h2>Progress, Cancellation, And Trust</h2>
+<p>Comparison work is long-running enough that the extension treats it as an explicit progress surface.</p>
+<p>Current behavior includes:</p>
+<ul>
+<li>bounded progress during comparison-report generation</li>
+<li>trust-aware refusal in untrusted workspaces</li>
+<li>retained partial evidence when cancellation happens after artifacts are built</li>
+<li>cancellation honored before a comparison-report panel opens</li>
+</ul>
