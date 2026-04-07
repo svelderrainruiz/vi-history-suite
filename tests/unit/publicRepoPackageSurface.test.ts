@@ -89,10 +89,15 @@ describe('public repo package surface', () => {
     expect(contributing).toContain('npm run public:host:bootstrap-linux');
     expect(contributing).toContain('npm run public:fixture:icon-editor');
     expect(previewWorkflow).toContain('name: Public Facade Package Preview');
+    expect(previewWorkflow).toContain('  push:');
     expect(previewWorkflow).toContain("      - 'release/**'");
     expect(previewWorkflow).toContain("      - 'hotfix/**'");
+    expect(previewWorkflow).toContain("      - '.devcontainer/**'");
+    expect(previewWorkflow).toContain("      - 'src/**'");
     expect(previewWorkflow).toContain('  pull_request:');
     expect(previewWorkflow).not.toContain('feature/**');
+    expect(previewWorkflow).toContain('concurrency:');
+    expect(previewWorkflow).toContain('cancel-in-progress: true');
     expect(previewWorkflow).toContain('npm run test:design-contract');
     expect(previewWorkflow).toContain('mkdir -p artifacts');
     expect(previewWorkflow).toContain('npm run package -- --out artifacts/vi-history-suite-public-preview.vsix');
