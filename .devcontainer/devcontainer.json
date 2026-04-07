@@ -10,7 +10,7 @@
   },
   "overrideCommand": true,
   "remoteUser": "node",
-  "postCreateCommand": "npm ci",
+  "postCreateCommand": "sudo install -m 0755 scripts/bootstrapLinuxVsCodeHost.js /usr/local/bin/vihs-bootstrap-vscode-linux-host && npm run public:host:bootstrap-linux && npm ci",
   "postStartCommand": "npm run compile",
   "customizations": {
     "vscode": {
