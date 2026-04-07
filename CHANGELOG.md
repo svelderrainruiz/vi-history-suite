@@ -3,7 +3,7 @@
 This changelog is the governed version-line summary for `vi-history-suite`.
 
 Retained exact-version releases now include `v0.2.0`, `v1.0.0`, `v1.0.1`,
-`v1.0.2`, `v1.0.3`, and `v1.0.4`.
+`v1.0.2`, `v1.0.3`, `v1.0.4`, and `v1.0.5`.
 
 Burned exact-version releases now include `v1.0.2`.
 
@@ -11,9 +11,8 @@ Burned exact-version releases now include `v1.0.2`.
 
 ### Changed
 
-- `develop` is now the explicit public `1.0.5` integration candidate line,
-  while `main` remains aligned to the exact released `v1.0.4` public line
-  until the next exact release is published
+- the public release line is now exact `v1.0.5` on `main`, and `develop`
+  remains aligned to `1.0.5` until the next exact release candidate is opened
 - the public fork-owner first-use Codespaces procedure is now tighter for a
   LabVIEW-first reader: it keeps the `develop` fork requirement, the
   `Codespaces` `...` -> `New with options` path, the `16-core` machine
