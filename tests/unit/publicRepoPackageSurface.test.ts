@@ -127,7 +127,9 @@ describe('public repo package surface', () => {
     expect(bundledComparisonReview).toContain(
       'retained comparison evidence opens from the checkbox-selected pair'
     );
+    expect(bundledComparisonReview).toContain('<h2>Checkbox-Selected Pair Review</h2>');
     expect(bundledComparisonReview).not.toContain('<code>Diff prev</code>');
+    expect(bundledComparisonReview).not.toContain('<h2>Retained Pair Review</h2>');
     expect(previewWorkflow).toContain('name: Public Facade Package Preview');
     expect(previewWorkflow).toContain('  push:');
     expect(previewWorkflow).toContain("      - 'release/**'");
