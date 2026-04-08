@@ -110,6 +110,47 @@ The full first-time walkthrough is on the public wiki:
 That first-time walkthrough is the canonical step-by-step path for a brand new
 fork and a brand new Codespace. This README keeps only the short summary.
 
+## Branch Use
+
+- Branches matter only when you are evaluating or contributing to the source
+  repo. Marketplace and installed-extension users do not need this branch
+  model to use the product locally.
+- If you are here to evaluate the next public candidate, use `develop`. Stay
+  on `main` only if you want the latest exact released source.
+- `main` is the public default branch and tracks the latest exact released
+  source line.
+- `develop` is the public evaluation branch for the next governed candidate
+  line.
+- If you only want the latest released source or release-facing docs, stay on
+  `main`; if you are following the first-time Codespaces or devcontainer
+  evaluation flow, explicitly choose `develop`.
+- Exact release numbers and retained version facts are listed later in
+  `Current Version Line`.
+
+## Fastest First Fork-Owner Run
+
+If this is your first time using the public fork path, use this order:
+
+1. Fork the repo and clear `Copy the main branch only` so your fork keeps
+   `develop`. Your fork can still keep `main` as its default branch.
+2. Create a Codespace from `develop` with `Codespace repository configuration`
+   -> `New with options` and choose a `16-core` machine. Treat `16-core` as
+   the supported first-time machine. If GitHub does not offer `16-core` on
+   your account, choose the largest machine available and treat that as
+   best-effort instead of equivalent support.
+3. Wait for the browser message
+   `Setting up remote connection: Building codespace` to finish.
+4. Run `npm run public:fixture:icon-editor`.
+5. Press `F5`, open `/workspaces/labview-icon-editor`, then right-click
+   `resource/plugins/lv_icon.vi` and choose `VI History`.
+
+The full first-time walkthrough is on the public wiki:
+
+- `https://github.com/svelderrainruiz/vi-history-suite/wiki/Fork-Codespace-Quickstart`
+
+That first-time walkthrough is the canonical step-by-step path for a brand new
+fork and a brand new Codespace. This README keeps only the short summary.
+
 ## Public Development Path
 
 This repo is expected to work in a Docker-capable devcontainer or Codespace.
