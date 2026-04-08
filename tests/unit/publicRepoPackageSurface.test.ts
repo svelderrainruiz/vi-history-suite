@@ -145,7 +145,9 @@ describe('public repo package surface', () => {
     expect(readText('CHANGELOG.md')).toContain('Retained exact-version releases now include `v0.2.0`, `v1.0.0`, `v1.0.1`,');
     expect(readText('CHANGELOG.md')).toContain('`v1.0.2`, `v1.0.3`, `v1.0.4`, `v1.0.5`, `v1.0.6`, `v1.1.0`, and `v1.2.0`.');
     expect(readText('CHANGELOG.md')).toContain('## [1.2.1] - 2026-04-07');
-    expect(readText('CHANGELOG.md')).toContain('VS Code Marketplace publication surface');
+    expect(readText('CHANGELOG.md')).toContain(
+      'Marketplace publication surface for `svelderrainruiz.vi-history-suite`'
+    );
     expect(readText('CHANGELOG.md')).toContain('homepage now points Marketplace users to the');
     expect(readText('CHANGELOG.md')).toContain('## [1.2.0] - 2026-04-07');
     expect(readText('CHANGELOG.md')).toContain('`v1.2.0` is now the exact public release line on `main`');
