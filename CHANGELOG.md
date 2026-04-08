@@ -3,16 +3,43 @@
 This changelog is the governed version-line summary for `vi-history-suite`.
 
 Retained exact-version releases now include `v0.2.0`, `v1.0.0`, `v1.0.1`,
-`v1.0.2`, `v1.0.3`, `v1.0.4`, `v1.0.5`, `v1.0.6`, and `v1.1.0`.
+`v1.0.2`, `v1.0.3`, `v1.0.4`, `v1.0.5`, `v1.0.6`, `v1.1.0`, and `v1.2.0`.
 
 Burned exact-version releases now include `v1.0.2`.
+
+## [1.2.1] - 2026-04-07
+
+### Changed
+
+- `v1.2.1` is now the active exact release candidate line on `develop`, while
+  the current exact released line on `main` remains `v1.2.0`
+- exact release closeout is now governed through a retained VS Code
+  Marketplace publication surface for `svelderrainruiz.vi-history-suite`
+  instead of relying on operator memory after the GitHub release and GitLab
+  tag are already green
+- the release control plane now records the governed publisher id, Marketplace
+  item id, publication URL, publication mode, and exact published version in a
+  dedicated Marketplace publication ledger
+- exact SemVer closeout now remains incomplete until the matching VSIX version
+  is verified on the VS Code Marketplace, and the release procedure now
+  records both the pinned `vsce` path and the manual portal-upload fallback
+- the packaged extension homepage now points Marketplace users to the
+  maintained public wiki home surface instead of the repo root, so the next
+  exact release does not route installed users into branch-specific source
+  guidance first
+- the root README, public source README, public install page, and public wiki
+  home/install pages now lead with the installed-extension local workflow and
+  keep repo/fork/Codespaces evaluation as an explicit secondary lane
 
 ## [1.2.0] - 2026-04-07
 
 ### Changed
 
-- `v1.1.0` remains the exact public release line on `main`, while `develop`
-  now carries the active `1.2.0` candidate line for the next public release
+- `v1.2.0` is now the exact public release line on `main`, while `develop`
+  remains the public evaluation branch and still carries `1.2.0` until the
+  next exact release candidate opens
+- the `release/1.2.0` promotion lane is now closed, and no newer exact public
+  release candidate is active yet
 - the `1.2.0` line opens one governed public Codespaces/bootstrap capability
   for public `github.com` and `gitlab.com` HTTPS repos, with explicit branch
   honor, remote default-branch resolution when the branch is omitted, and a
@@ -20,9 +47,12 @@ Burned exact-version releases now include `v1.0.2`.
 - `npm run design:gate` now begins with a governed branch-baseline assertion so
   future candidate work fails closed when `develop` has not yet been realigned
   to the exact released `main` line
-- the exact `v1.2.0` tag is intentionally blocked until the public wiki
-  procedures for this new bootstrap path are reviewed and accepted on the
-  candidate line
+- Sergio's brand-new-fork and brand-new-Codespace acceptance rerun has now
+  passed on `Examples/Logging with Helper-VIs.vi`, and moved-VI compare pairs
+  now resolve the historical repo-relative path per revision instead of
+  failing closed with `left-blob-read-failed`
+- bundled compare-flow docs now retire stale `Diff prev` and retained-pair
+  wording in favor of the checkbox-selected pair review path
 
 ## [1.1.0] - 2026-04-07
 
