@@ -130,7 +130,7 @@
     "test:integration:linux": "node scripts/runLinuxIntegrationHost.js",
     "public:host:bootstrap-linux": "node scripts/bootstrapLinuxVsCodeHost.js install",
     "public:repo:clone": "node scripts/preparePublicRepoClone.js",
-    "test:design-contract": "npm exec -- vitest run tests/unit/bootstrapLinuxVsCodeHost.test.ts tests/unit/preparePublicRepoCloneScript.test.ts tests/unit/preparePublicTestFixtureScript.test.ts tests/unit/publicRepoPackageSurface.test.ts tests/unit/publicDevcontainerSurface.test.ts tests/unit/publicFacadeLinuxSmoke.test.ts tests/unit/runLinuxIntegrationHost.test.ts tests/unit/linuxContainerRuntimeExecutionSurface.test.ts",
+    "test:design-contract": "npm exec -- vitest run tests/unit/bootstrapLinuxVsCodeHost.test.ts tests/unit/comparisonReportPreflight.test.ts tests/unit/comparisonReportRuntimeExecution.test.ts tests/unit/preparePublicRepoCloneScript.test.ts tests/unit/preparePublicTestFixtureScript.test.ts tests/unit/publicRepoPackageSurface.test.ts tests/unit/publicDevcontainerSurface.test.ts tests/unit/publicFacadeLinuxSmoke.test.ts tests/unit/runLinuxIntegrationHost.test.ts tests/unit/linuxContainerRuntimeExecutionSurface.test.ts",
     "test": "npm run test:design-contract",
     "public:smoke:linux": "npm run compile && node scripts/runPublicFacadeLinuxSmoke.js",
     "public:fixture:icon-editor": "node scripts/preparePublicTestFixture.js",
