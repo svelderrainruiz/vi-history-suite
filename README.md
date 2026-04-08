@@ -25,12 +25,15 @@ Installed-user start pages:
 
 Local installed-user workflow:
 
-1. open a trusted Git repo that contains an eligible LabVIEW VI
-2. run `VI History`
-3. select one commit checkbox
-4. select a second distinct commit checkbox
-5. wait for first-use image acquisition if needed
-6. review the generated comparison report
+1. install or start Docker Desktop or Docker, then confirm `docker info`
+   succeeds in the same session that will run VS Code
+2. open a trusted Git repo that contains an eligible LabVIEW VI
+3. run `VI History`
+4. select one commit checkbox
+5. select a second distinct commit checkbox
+6. if the governed image is missing but Docker is ready, wait for first-use
+   image acquisition
+7. review the generated comparison report
 
 You do not need to fork this repo or choose a branch to use the installed
 extension locally.
@@ -39,6 +42,8 @@ It is intentionally bounded:
 
 - Docker-only compare execution
 - x64 container surfaces only
+- Docker CLI plus a running Docker daemon are prerequisites for the first
+  compare
 - repo-agnostic two-commit checkbox-selected compare flow
 - devcontainer/Codespaces-capable development path
 - no host-LabVIEW runtime competition in the installed-extension workflow
@@ -60,8 +65,50 @@ The compare surface is Docker-only:
   engine.
 - Linux hosts use the governed Linux image.
 - Missing governed images are pulled on first use with visible progress.
-- If Docker is unavailable or the selected image cannot be acquired, the
-  extension fails closed instead of probing host LabVIEW.
+- If Docker is not installed yet, not running yet, or the selected image
+  cannot be acquired, the extension fails closed instead of probing host
+  LabVIEW.
+
+## Branch Use
+
+- Branches matter only when you are evaluating or contributing to the source
+  repo. Marketplace and installed-extension users do not need this branch
+  model to use the product locally.
+- If you are here to evaluate the next public candidate, use `develop`. Stay
+  on `main` only if you want the latest exact released source.
+- `main` is the public default branch and tracks the latest exact released
+  source line.
+- `develop` is the public evaluation branch for the next governed candidate
+  line.
+- If you only want the latest released source or release-facing docs, stay on
+  `main`; if you are following the first-time Codespaces or devcontainer
+  evaluation flow, explicitly choose `develop`.
+- Exact release numbers and retained version facts are listed later in
+  `Current Version Line`.
+
+## Fastest First Fork-Owner Run
+
+If this is your first time using the public fork path, use this order:
+
+1. Fork the repo and clear `Copy the main branch only` so your fork keeps
+   `develop`. Your fork can still keep `main` as its default branch.
+2. Create a Codespace from `develop` with `Codespace repository configuration`
+   -> `New with options` and choose a `16-core` machine. Treat `16-core` as
+   the supported first-time machine. If GitHub does not offer `16-core` on
+   your account, choose the largest machine available and treat that as
+   best-effort instead of equivalent support.
+3. Wait for the browser message
+   `Setting up remote connection: Building codespace` to finish.
+4. Run `npm run public:fixture:icon-editor`.
+5. Press `F5`, open `/workspaces/labview-icon-editor`, then right-click
+   `resource/plugins/lv_icon.vi` and choose `VI History`.
+
+The full first-time walkthrough is on the public wiki:
+
+- `https://github.com/svelderrainruiz/vi-history-suite/wiki/Fork-Codespace-Quickstart`
+
+That first-time walkthrough is the canonical step-by-step path for a brand new
+fork and a brand new Codespace. This README keeps only the short summary.
 
 ## Branch Use
 
@@ -262,11 +309,12 @@ npm run package -- --out /tmp/vi-history-suite-public-preview.vsix
 
 ## Current Version Line
 
-- retained exact-version releases: `v0.2.0`, `v1.0.0`, `v1.0.1`, `v1.0.2`, `v1.0.3`, `v1.0.4`, `v1.0.5`, `v1.0.6`, `v1.1.0`, `v1.2.0`
+- retained exact-version releases: `v0.2.0`, `v1.0.0`, `v1.0.1`, `v1.0.2`, `v1.0.3`, `v1.0.4`, `v1.0.5`, `v1.0.6`, `v1.1.0`, `v1.2.0`, `v1.2.1`, `v1.2.2`
 - burned exact release line: `v1.0.2`
-- current exact released line: `v1.2.0`
-- current published package line on `main`: `1.2.0`
-- current develop package line on `develop`: `1.2.1`
-- active exact release candidate line on `develop`: `v1.2.1`
+- current exact released line: `v1.2.2`
+- current published package line on `main`: `1.2.2`
+- current develop package line on `develop`: `1.2.2`
+- active exact release candidate line on `develop`: `v1.2.2`
+- no newer `release/*` branch is active yet
 - public GitHub default branch: `main`
 - public Codespaces evaluation branch: `develop`
