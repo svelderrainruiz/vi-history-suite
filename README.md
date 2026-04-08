@@ -237,6 +237,7 @@ npm run package -- --out /tmp/vi-history-suite-public-preview.vsix
 - current published package line on `main`: `1.1.0`
 - current develop package line on `develop`: `1.2.0`
 - active exact release candidate line on `develop`: `v1.2.0`
-- no `release/1.2.0` branch is active yet
+- active release-candidate branch: `release/1.2.0`
+- active SemVer opening decision: `minor`
 - public GitHub default branch: `main`
 - public Codespaces evaluation branch: `develop`

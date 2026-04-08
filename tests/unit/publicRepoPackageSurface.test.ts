@@ -97,7 +97,8 @@ describe('public repo package surface', () => {
     expect(readme).toContain('current published package line on `main`: `1.1.0`');
     expect(readme).toContain('current develop package line on `develop`: `1.2.0`');
     expect(readme).toContain('active exact release candidate line on `develop`: `v1.2.0`');
-    expect(readme).toContain('no `release/1.2.0` branch is active yet');
+    expect(readme).toContain('active release-candidate branch: `release/1.2.0`');
+    expect(readme).toContain('active SemVer opening decision: `minor`');
     expect(readme).toContain('public GitHub default branch: `main`');
     expect(readme).toContain('public Codespaces evaluation branch: `develop`');
     expect(readme).toContain('Refresh-Codespace-Repositories');
@@ -147,5 +148,7 @@ describe('public repo package surface', () => {
     expect(readText('CHANGELOG.md')).toContain('`v1.0.2`, `v1.0.3`, `v1.0.4`, `v1.0.5`, `v1.0.6`, and `v1.1.0`.');
     expect(readText('CHANGELOG.md')).toContain('## [1.2.0] - 2026-04-07');
     expect(readText('CHANGELOG.md')).toContain('`v1.1.0` remains the exact public release line on `main`');
+    expect(readText('CHANGELOG.md')).toContain('`release/1.2.0` is the');
+    expect(readText('CHANGELOG.md')).toContain("Sergio's brand-new-fork and brand-new-Codespace acceptance rerun has now");
   });
 });
