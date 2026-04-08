@@ -3,16 +3,35 @@
 This changelog is the governed version-line summary for `vi-history-suite`.
 
 Retained exact-version releases now include `v0.2.0`, `v1.0.0`, `v1.0.1`,
-`v1.0.2`, `v1.0.3`, `v1.0.4`, `v1.0.5`, `v1.0.6`, `v1.1.0`, and `v1.2.0`.
+`v1.0.2`, `v1.0.3`, `v1.0.4`, `v1.0.5`, `v1.0.6`, `v1.1.0`, `v1.2.0`, and
+`v1.2.1`.
 
 Burned exact-version releases now include `v1.0.2`.
+
+## [1.2.2] - 2026-04-07
+
+### Changed
+
+- `v1.2.1` remains the exact public release line on `main`, while `develop`
+  now carries `1.2.2` as the next exact candidate line
+- exact release closeout now remains incomplete until the exact released
+  `main` line has been back-merged into `develop` through the protected path
+  and the resulting `develop` pipeline is green, so future sessions do not
+  wait for Sergio to elicit that follow-through explicitly
+- the sustainment control plane now treats missing or not-yet-running Docker
+  as an expected first-run installed-user boundary instead of assuming image
+  acquisition is always the first runtime step on a fresh machine
+- installed-user entry docs and runtime-doctor next actions now tell first-use
+  users to install or start Docker, confirm `docker info` works, and then
+  retry the checkbox-selected compare flow without implying host-LabVIEW
+  fallback
 
 ## [1.2.1] - 2026-04-07
 
 ### Changed
 
-- `v1.2.1` is now the active exact release candidate line on `develop`, while
-  the current exact released line on `main` remains `v1.2.0`
+- `v1.2.1` is now the exact public release line on `main`, while `develop`
+  remains aligned to `1.2.1` until the next exact release candidate opens
 - exact release closeout is now governed through a retained VS Code
   Marketplace publication surface for `svelderrainruiz.vi-history-suite`
   instead of relying on operator memory after the GitHub release and GitLab
@@ -30,6 +49,10 @@ Burned exact-version releases now include `v1.0.2`.
 - the root README, public source README, public install page, and public wiki
   home/install pages now lead with the installed-extension local workflow and
   keep repo/fork/Codespaces evaluation as an explicit secondary lane
+- the exact public GitHub release `v1.2.1` now publishes merged public `main`
+  commit `2547344`, and the VS Code Marketplace item
+  `svelderrainruiz.vi-history-suite` now verifies `1.2.1` through the
+  official gallery extension query after pinned `vsce` publication
 
 ## [1.2.0] - 2026-04-07
 
