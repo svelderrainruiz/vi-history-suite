@@ -13,6 +13,10 @@ function readJson<T>(relativePath: string): T {
   return JSON.parse(readText(relativePath)) as T;
 }
 
+function countOccurrences(text: string, needle: string): number {
+  return text.split(needle).length - 1;
+}
+
 describe('public repo package surface', () => {
   it('keeps the public repo on the Docker-only public product contract', () => {
     const manifest = readJson<{
@@ -70,6 +74,8 @@ describe('public repo package surface', () => {
     expect(readme).toContain('You do not need to fork this repo or choose a branch to use the installed');
     expect(readme).toContain('extension locally.');
     expect(readme).toContain('Fastest First Fork-Owner Run');
+    expect(countOccurrences(readme, '## Branch Use')).toBe(1);
+    expect(countOccurrences(readme, '## Fastest First Fork-Owner Run')).toBe(1);
     expect(readme).toContain('Copy the main branch only');
     expect(readme).toContain('Codespace repository configuration');
     expect(readme).toContain('16-core');
