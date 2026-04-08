@@ -3,8 +3,8 @@
 This changelog is the governed version-line summary for `vi-history-suite`.
 
 Retained exact-version releases now include `v0.2.0`, `v1.0.0`, `v1.0.1`,
-`v1.0.2`, `v1.0.3`, `v1.0.4`, `v1.0.5`, `v1.0.6`, `v1.1.0`, `v1.2.0`, and
-`v1.2.1`.
+`v1.0.2`, `v1.0.3`, `v1.0.4`, `v1.0.5`, `v1.0.6`, `v1.1.0`, `v1.2.0`,
+`v1.2.1`, and `v1.2.2`.
 
 Burned exact-version releases now include `v1.0.2`.
 
@@ -12,8 +12,8 @@ Burned exact-version releases now include `v1.0.2`.
 
 ### Changed
 
-- `v1.2.1` remains the exact public release line on `main`, while `develop`
-  now carries `1.2.2` as the next exact candidate line
+- `v1.2.2` is now the exact public release line on `main`, while `develop`
+  still carries `1.2.2` until the next exact candidate line opens
 - exact release closeout now remains incomplete until the exact released
   `main` line has been back-merged into `develop` through the protected path
   and the resulting `develop` pipeline is green, so future sessions do not

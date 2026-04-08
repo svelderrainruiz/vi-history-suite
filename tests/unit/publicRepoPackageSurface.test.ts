@@ -99,7 +99,7 @@ describe('public repo package surface', () => {
     expect(readme).toContain('public GitHub default branch: `main`');
     expect(readme).toContain('public Codespaces evaluation branch: `develop`');
     expect(readme).toContain(
-      'retained exact-version releases: `v0.2.0`, `v1.0.0`, `v1.0.1`, `v1.0.2`, `v1.0.3`, `v1.0.4`, `v1.0.5`, `v1.0.6`, `v1.1.0`, `v1.2.0`, `v1.2.1`'
+      'retained exact-version releases: `v0.2.0`, `v1.0.0`, `v1.0.1`, `v1.0.2`, `v1.0.3`, `v1.0.4`, `v1.0.5`, `v1.0.6`, `v1.1.0`, `v1.2.0`, `v1.2.1`, `v1.2.2`'
     );
     expect(readme).toContain('Refresh-Codespace-Repositories');
     expect(readme).not.toContain('Manual-Actor-Framework-Clone');
@@ -148,7 +148,7 @@ describe('public repo package surface', () => {
     expect(previewWorkflow).toContain('npm run package -- --out artifacts/vi-history-suite-public-preview.vsix');
     const changelog = readText('CHANGELOG.md');
     expect(changelog).toContain('Retained exact-version releases now include `v0.2.0`, `v1.0.0`, `v1.0.1`,');
-    expect(changelog).toContain('`v1.2.1`.');
+    expect(changelog).toContain('`v1.2.2`.');
     expect(changelog).toContain('## [1.2.2] - 2026-04-07');
     expect(changelog).toContain('## [1.2.1] - 2026-04-07');
     expect(changelog).toContain('install or start Docker');
@@ -157,6 +157,7 @@ describe('public repo package surface', () => {
       'Marketplace publication surface for `svelderrainruiz.vi-history-suite`'
     );
     expect(changelog).toContain('homepage now points Marketplace users to the');
+    expect(changelog).toContain('`v1.2.2` is now the exact public release line on `main`');
     expect(changelog).toContain('## [1.2.0] - 2026-04-07');
     expect(changelog).toContain('`v1.2.0` is now the exact public release line on `main`');
     expect(changelog).toContain('the `release/1.2.0` promotion lane is now closed');
