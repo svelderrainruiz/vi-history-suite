@@ -1,6 +1,9 @@
 import * as assert from 'node:assert/strict';
+import { execFile as execFileCallback } from 'node:child_process';
 import * as fs from 'node:fs/promises';
+import * as os from 'node:os';
 import * as path from 'node:path';
+import { promisify } from 'node:util';
 import * as vscode from 'vscode';
 
 import type { ViHistorySuiteApi } from '../../../src/extension';
@@ -23,12 +26,30 @@ interface DashboardRecord {
   }>;
 }
 
+interface PreparedLocalRuntimeSettingsCliSummary {
+  outcome: 'prepared-local-runtime-settings-cli' | 'missing-global-storage-uri';
+  defaultSettingsFilePath?: string;
+  javascriptLauncherPath?: string;
+  windowsLauncherPath?: string;
+  posixLauncherPath?: string;
+  rootDirectoryPath?: string;
+  supportedSettingsTargets?: readonly string[];
+  untrustedWorkspacePosture?: string;
+}
+
+interface PreparedLocalRuntimeSettingsCliExecutionOptions {
+  env?: NodeJS.ProcessEnv;
+}
+
+const execFile = promisify(execFileCallback);
+
 export async function runIntegrationSuite(): Promise<void> {
   const metadata = await loadMetadata();
   const api = await loadExtensionApi();
 
   await api.refreshEligibility();
   await testEligibleVersusIneligibleFlow(api, metadata);
+  await testPrepareLocalRuntimeSettingsCli();
   await testPanelOpenFlow(api, metadata);
 }
 
@@ -137,8 +158,14 @@ async function testPanelOpenFlow(
   assert.match(panel.renderedHtml, /Reviewer guidance:/);
   assert.match(panel.renderedHtml, /Confidence and scope:/);
   assert.match(panel.renderedHtml, /Local Git history, tracked-file status, and content-detected VI signature checks\./);
-  assert.match(panel.renderedHtml, /Direct local evidence for chronology, path provenance, retained hashes, and retained compare pairing\./);
-  assert.match(panel.renderedHtml, /checkbox-selected compare pairing/);
+  assert.match(
+    panel.renderedHtml,
+    /Direct local evidence for chronology, path provenance, retained hashes, and explicit selected\/base compare preflight facts\./
+  );
+  assert.match(
+    panel.renderedHtml,
+    /pairwise compare actions use retained LabVIEW comparison-report evidence and installed tooling instead of plain text diff\./
+  );
   assert.match(panel.renderedHtml, /Needs external comparison tooling:/);
   assert.match(panel.renderedHtml, /Binary semantic differences, visual or cosmetic change detection, and LabVIEW comparison-report output\./);
   assert.match(panel.renderedHtml, /Adjacent:<\/strong> <code>[0-9a-f]{8}<\/code> <strong>vs prior:<\/strong> <code>[0-9a-f]{8}<\/code>/);
@@ -146,7 +173,7 @@ async function testPanelOpenFlow(
   assert.match(panel.renderedHtml, /Update eligible fixture/);
   assert.match(panel.renderedHtml, /Add initial integration fixtures/);
   assert.match(panel.renderedHtml, /Add third eligible fixture revision/);
-  assert.match(panel.renderedHtml, /Select any two retained revisions/);
+  assert.match(panel.renderedHtml, /select exactly two retained revisions, then review the compare preflight section before choosing/);
   assert.match(panel.renderedHtml, /Open docs/);
   assert.doesNotMatch(panel.renderedHtml, /Open dashboard/);
   assert.doesNotMatch(panel.renderedHtml, /Create decision record/);
@@ -412,6 +439,258 @@ async function testPanelOpenFlow(
   assert.equal(refreshedDashboardAction.outcome, 'opened-review-dashboard');
   assert.equal(api.getOpenDashboardPanelCount(), 2);
   assert.equal(api.getPanelActionCount(), 10);
+}
+
+async function testPrepareLocalRuntimeSettingsCli(): Promise<void> {
+  const result = (await vscode.commands.executeCommand(
+    'labviewViHistory.prepareLocalRuntimeSettingsCli'
+  )) as PreparedLocalRuntimeSettingsCliSummary;
+
+  assert.ok(result);
+  assert.equal(result.outcome, 'prepared-local-runtime-settings-cli');
+  assert.ok(result.rootDirectoryPath);
+  assert.ok(result.javascriptLauncherPath);
+  assert.ok(result.windowsLauncherPath);
+  assert.ok(result.posixLauncherPath);
+  assert.ok(result.defaultSettingsFilePath);
+  assert.deepEqual(result.supportedSettingsTargets, [
+    'default-user-settings',
+    'explicit-settings-file'
+  ]);
+  assert.equal(result.untrustedWorkspacePosture, 'prepare-command-admitted-compare-blocked');
+
+  await fs.access(result.javascriptLauncherPath!);
+  await fs.access(result.windowsLauncherPath!);
+  await fs.access(result.posixLauncherPath!);
+
+  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'vihs-runtime-settings-cli-'));
+  try {
+    const settingsFilePath = path.join(tempRoot, 'settings.json');
+    await fs.writeFile(
+      settingsFilePath,
+      `${JSON.stringify({ 'editor.tabSize': 2 }, null, 2)}\n`,
+      'utf8'
+    );
+
+    const hostRun = await runPreparedLocalRuntimeSettingsCli(result, [
+      '--provider',
+      'host',
+      '--labview-version',
+      '2026',
+      '--labview-bitness',
+      'x64',
+      '--settings-file',
+      settingsFilePath
+    ]);
+    if (process.platform === 'win32') {
+      assert.equal(hostRun.launcherPath, result.windowsLauncherPath);
+    } else {
+      assert.equal(hostRun.launcherPath, result.posixLauncherPath);
+    }
+    assert.match(hostRun.stdout, /viHistorySuite\.runtimeProvider=host/);
+    assert.match(hostRun.stdout, /viHistorySuite\.labviewVersion=2026/);
+    assert.match(hostRun.stdout, /viHistorySuite\.labviewBitness=x64/);
+    assert.deepEqual(JSON.parse(await fs.readFile(settingsFilePath, 'utf8')), {
+      'editor.tabSize': 2,
+      'viHistorySuite.runtimeProvider': 'host',
+      'viHistorySuite.labviewVersion': '2026',
+      'viHistorySuite.labviewBitness': 'x64'
+    });
+
+    const dockerRun = await runPreparedLocalRuntimeSettingsCli(result, [
+      '--provider',
+      'docker',
+      '--labview-version',
+      '2026',
+      '--labview-bitness',
+      'x64',
+      '--settings-file',
+      settingsFilePath
+    ]);
+    if (process.platform === 'win32') {
+      assert.equal(dockerRun.launcherPath, result.windowsLauncherPath);
+    } else {
+      assert.equal(dockerRun.launcherPath, result.posixLauncherPath);
+    }
+    assert.match(dockerRun.stdout, /viHistorySuite\.runtimeProvider=docker/);
+    assert.deepEqual(JSON.parse(await fs.readFile(settingsFilePath, 'utf8')), {
+      'editor.tabSize': 2,
+      'viHistorySuite.runtimeProvider': 'docker',
+      'viHistorySuite.labviewVersion': '2026',
+      'viHistorySuite.labviewBitness': 'x64'
+    });
+
+    if (process.platform === 'win32') {
+      const dockerValidationRun = await runPreparedLocalRuntimeSettingsCli(result, [
+        '--validate',
+        '--settings-file',
+        settingsFilePath
+      ]);
+      assert.equal(dockerValidationRun.launcherPath, result.windowsLauncherPath);
+      assert.match(
+        dockerValidationRun.stdout,
+        new RegExp(settingsFilePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+      );
+      assert.match(dockerValidationRun.stdout, /viHistorySuite\.runtimeProvider=docker/);
+      assert.match(dockerValidationRun.stdout, /viHistorySuite\.labviewVersion=2026/);
+      assert.match(dockerValidationRun.stdout, /viHistorySuite\.labviewBitness=x64/);
+      assert.match(dockerValidationRun.stdout, /runtimeValidationOutcome=ready/);
+      assert.match(dockerValidationRun.stdout, /runtimeProvider=windows-container/);
+      assert.match(dockerValidationRun.stdout, /runtimeEngine=labview-cli/);
+      assert.match(dockerValidationRun.stdout, /runtimeBlockedReason=<none>/);
+    }
+
+    const invalidSettingsFilePath = path.join(tempRoot, 'invalid-settings.json');
+    await fs.writeFile(
+      invalidSettingsFilePath,
+      JSON.stringify(
+        {
+          'viHistorySuite.runtimeProvider': 'mystery',
+          'viHistorySuite.labviewVersion': '2026',
+          'viHistorySuite.labviewBitness': 'x64'
+        },
+        null,
+        2
+      ) + '\n',
+      'utf8'
+    );
+    const validationRun = await runPreparedLocalRuntimeSettingsCli(result, [
+      '--validate',
+      '--settings-file',
+      invalidSettingsFilePath
+    ]);
+    if (process.platform === 'win32') {
+      assert.equal(validationRun.launcherPath, result.windowsLauncherPath);
+    } else {
+      assert.equal(validationRun.launcherPath, result.posixLauncherPath);
+    }
+    assert.match(
+      validationRun.stdout,
+      new RegExp(invalidSettingsFilePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    );
+    assert.match(validationRun.stdout, /viHistorySuite\.runtimeProvider=mystery/);
+    assert.match(validationRun.stdout, /viHistorySuite\.labviewVersion=2026/);
+    assert.match(validationRun.stdout, /viHistorySuite\.labviewBitness=x64/);
+    assert.match(validationRun.stdout, /runtimeValidationOutcome=blocked/);
+    assert.match(validationRun.stdout, /runtimeProvider=unavailable/);
+    assert.match(validationRun.stdout, /runtimeEngine=<none>/);
+    assert.match(validationRun.stdout, /runtimeBlockedReason=installed-provider-invalid/);
+
+    if (process.platform === 'win32') {
+      const activeAppDataRoot = process.env.APPDATA;
+      assert.ok(activeAppDataRoot, 'Windows integration host must expose APPDATA.');
+      const defaultSettingsFilePath = path.join(activeAppDataRoot, 'Code', 'User', 'settings.json');
+      assert.equal(result.defaultSettingsFilePath, defaultSettingsFilePath);
+      const initialRuntimeSettings = readViHistorySuiteRuntimeSettings();
+      const firstProvider = initialRuntimeSettings.runtimeProvider === 'host' ? 'docker' : 'host';
+      const secondProvider = firstProvider === 'host' ? 'docker' : 'host';
+      const defaultTargetRun = await runPreparedLocalRuntimeSettingsCli(
+        result,
+        ['--provider', firstProvider, '--labview-version', '2026', '--labview-bitness', 'x64']
+      );
+      assert.equal(defaultTargetRun.launcherPath, result.windowsLauncherPath);
+      assert.match(
+        defaultTargetRun.stdout,
+        new RegExp(defaultSettingsFilePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+      );
+      assert.match(
+        defaultTargetRun.stdout,
+        new RegExp(`viHistorySuite\\.runtimeProvider=${firstProvider}`)
+      );
+      assertRuntimeSettingsFileContains(
+        JSON.parse(await fs.readFile(defaultSettingsFilePath, 'utf8')) as Record<string, unknown>,
+        {
+          runtimeProvider: firstProvider,
+          labviewVersion: '2026',
+          labviewBitness: 'x64'
+        }
+      );
+
+      const activeDockerRun = await runPreparedLocalRuntimeSettingsCli(result, [
+        '--provider',
+        secondProvider,
+        '--labview-version',
+        '2026',
+        '--labview-bitness',
+        'x64'
+      ]);
+      assert.equal(activeDockerRun.launcherPath, result.windowsLauncherPath);
+      assert.match(
+        activeDockerRun.stdout,
+        new RegExp(defaultSettingsFilePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+      );
+      assert.match(
+        activeDockerRun.stdout,
+        new RegExp(`viHistorySuite\\.runtimeProvider=${secondProvider}`)
+      );
+      assertRuntimeSettingsFileContains(
+        JSON.parse(await fs.readFile(defaultSettingsFilePath, 'utf8')) as Record<string, unknown>,
+        {
+          runtimeProvider: secondProvider,
+          labviewVersion: '2026',
+          labviewBitness: 'x64'
+        }
+      );
+    }
+  } finally {
+    await fs.rm(tempRoot, { recursive: true, force: true });
+  }
+}
+
+async function runPreparedLocalRuntimeSettingsCli(
+  result: PreparedLocalRuntimeSettingsCliSummary,
+  args: string[],
+  options: PreparedLocalRuntimeSettingsCliExecutionOptions = {}
+): Promise<{ stdout: string; stderr: string; launcherPath: string }> {
+  if (process.platform === 'win32') {
+    const execution = await execFile(
+      'cmd.exe',
+      ['/d', '/s', '/c', result.windowsLauncherPath!, ...args],
+      {
+        encoding: 'utf8',
+        env: options.env
+      }
+    );
+    return {
+      ...execution,
+      launcherPath: result.windowsLauncherPath!
+    };
+  }
+
+  const execution = await execFile(result.posixLauncherPath!, args, {
+    encoding: 'utf8',
+    env: options.env
+  });
+  return {
+    ...execution,
+    launcherPath: result.posixLauncherPath!
+  };
+}
+
+function readViHistorySuiteRuntimeSettings(): {
+  runtimeProvider: string | undefined;
+  labviewVersion: string | undefined;
+  labviewBitness: string | undefined;
+} {
+  const configuration = vscode.workspace.getConfiguration('viHistorySuite');
+  return {
+    runtimeProvider: configuration.get<string>('runtimeProvider'),
+    labviewVersion: configuration.get<string>('labviewVersion'),
+    labviewBitness: configuration.get<string>('labviewBitness')
+  };
+}
+
+function assertRuntimeSettingsFileContains(
+  settings: Record<string, unknown>,
+  expected: {
+    runtimeProvider: string;
+    labviewVersion: string;
+    labviewBitness: string;
+  }
+): void {
+  assert.equal(settings['viHistorySuite.runtimeProvider'], expected.runtimeProvider);
+  assert.equal(settings['viHistorySuite.labviewVersion'], expected.labviewVersion);
+  assert.equal(settings['viHistorySuite.labviewBitness'], expected.labviewBitness);
 }
 
 async function waitFor(
