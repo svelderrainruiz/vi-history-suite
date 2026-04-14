@@ -89,14 +89,15 @@ describe('public devcontainer surface', () => {
     ).toBe(true);
     expect(readme).toContain('public GitHub facade is expected to support evaluation inside Codespaces or');
     expect(readme).toContain('a local devcontainer');
-    expect(
-      readme.includes('exact released `main` line and Marketplace `1.2.2` install route remain') ||
-        readme.includes('exact released `main` / Marketplace `1.2.2`: Docker-only and x64-only')
-    ).toBe(true);
+    expect(readme).toContain(
+      'the exact released `main` line and Marketplace `1.2.2` install route remain'
+    );
+    expect(readme).toContain('Docker-only');
     expect(readme).toContain('A Linux-hosted development session uses the governed Linux container image.');
     expect(readme).toContain('npm run public:host:bootstrap-linux');
     expect(readme).toContain('npm run public:fixture:icon-editor');
     expect(readme).toContain('repo-sibling `labview-icon-editor`');
-    expect(readme).toContain('maintained public candidate on `develop` opens host-default Windows');
+    expect(readme).toContain('The exact released installed extension path on `main` does not require host');
+    expect(readme).toContain('LabVIEW.');
   });
 });
