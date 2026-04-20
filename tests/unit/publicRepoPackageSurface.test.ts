@@ -80,7 +80,7 @@ describe('public repo package surface', () => {
     expect(readme).toContain('Report A Problem Or Request Support');
     expect(readme).toContain('LabVIEW version support request');
     expect(readme).toContain('Need Source Evaluation Or Contribution?');
-    expect(readme).toContain('You do not need to fork this repo or choose a branch to use the installed');
+    expect(readme).toContain('You do not need to fork this repo or choose a branch to use the');
     expect(readme).toContain('extension locally.');
     expect(readme).toContain('[INSTALL.md](./INSTALL.md)');
     expect(readme).toContain('[CONTRIBUTING.md](./CONTRIBUTING.md)');
