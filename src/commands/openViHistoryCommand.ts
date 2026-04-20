@@ -118,7 +118,15 @@ export function createOpenViHistoryCommand(
       return;
     }
 
-    const loadedModel = await historyService.load(targetUri);
+    let loadedModel: Awaited<ReturnType<ViHistoryService['load']>>;
+    try {
+      loadedModel = await historyService.load(targetUri);
+    } catch (error) {
+      void vscode.window.showErrorMessage(
+        buildHistoryLoadFailureMessage(targetUri.fsPath, error)
+      );
+      return;
+    }
     if (!loadedModel.eligible) {
       void vscode.window.showInformationMessage(
         'The selected file is not currently eligible for VI History.'
@@ -1436,7 +1444,7 @@ async function resolveHistoryPanelComparePreflightState(
   const labviewVersion = settings.labviewVersion ?? 'Unset';
   const labviewBitness = settings.bitness ?? 'Unset';
   const cliHint =
-    'Provider is read-only here. Use the generated settings CLI to update provider, LabVIEW version, or LabVIEW bitness when correction is required. If you just used the generated settings CLI while VS Code was already open, reload or restart the window before trusting compare preflight.';
+    'Provider is read-only here. Use the generated settings CLI to update provider, LabVIEW version, or LabVIEW bitness when correction is required. Review compare preflight again after the CLI update. If this already-running VS Code session still shows stale provider or runtime facts, reload or restart the window and review compare preflight again.';
 
   if (settings.invalidRequestedProvider) {
     return {
@@ -1513,7 +1521,7 @@ async function resolveHistoryPanelComparePreflightState(
       ),
       cliHint,
       warningMessage:
-        'Compare preflight is blocked. Docker requires viHistorySuite.labviewBitness=x64 or viHistorySuite.runtimeProvider=host before Compare can run. If you just used the generated settings CLI while VS Code was already open, reload or restart the window. Then review compare preflight before choosing Compare.'
+        'Compare preflight is blocked. Docker requires viHistorySuite.labviewBitness=x64 or viHistorySuite.runtimeProvider=host before Compare can run. Then review compare preflight before choosing Compare. If this already-running VS Code session still shows stale provider or runtime facts after the CLI update, reload or restart the window and review compare preflight again.'
     };
   }
 
@@ -1552,11 +1560,11 @@ function deriveComparisonRuntimeNextAction(
 }
 
 function buildComparePreflightSettingsAction(settingsAction: string): string {
-  return `Next action: ${settingsAction}. If you just used the generated settings CLI while VS Code was already open, reload or restart the window. Then review compare preflight before choosing Compare.`;
+  return `Next action: ${settingsAction}. Then review compare preflight before choosing Compare. If this already-running VS Code session still shows stale provider or runtime facts after the CLI update, reload or restart the window and review compare preflight again.`;
 }
 
 function buildComparePreflightWarningMessage(settingsAction: string): string {
-  return `Compare preflight is blocked. ${settingsAction}. If you just used the generated settings CLI while VS Code was already open, reload or restart the window. Then review compare preflight before choosing Compare.`;
+  return `Compare preflight is blocked. ${settingsAction}. Then review compare preflight before choosing Compare. If this already-running VS Code session still shows stale provider or runtime facts after the CLI update, reload or restart the window and review compare preflight again.`;
 }
 
 function buildRuntimeBackedBlockedComparePreflightState(options: {
@@ -1594,7 +1602,7 @@ function buildRuntimeBackedBlockedComparePreflightState(options: {
     warningSegments.push(`Blocked reason: ${options.runtimeSelection.blockedReason}.`);
   }
   warningSegments.push(
-    'If you just used the generated settings CLI while VS Code was already open, reload or restart the window before trusting compare preflight.'
+    'If this already-running VS Code session still shows stale provider or runtime facts after the CLI update, reload or restart the window and review compare preflight again.'
   );
   warningSegments.push(nextAction);
 
@@ -1778,4 +1786,43 @@ function mapLegacyExecutionModeToProviderRequest(
   }
 
   return executionMode;
+}
+
+function buildHistoryLoadFailureMessage(
+  targetFsPath: string,
+  error: unknown
+): string {
+  if (isInstalledProgramFilesLvIconPath(targetFsPath)) {
+    return 'The selected installed copy of lv_icon.vi is not the governed review surface. Open resource/plugins/lv_icon.vi from a Git-backed ni/labview-icon-editor clone instead; the Program Files copy has no commit history for VI Comparison Report generation.';
+  }
+
+  if (isGitRepositoryResolutionFailure(error)) {
+    return 'VI History could not load the selected file because it is not inside a tracked Git repository. Open a local Git-backed LabVIEW VI with commit history instead.';
+  }
+
+  return 'VI History could not load the selected file.';
+}
+
+function isInstalledProgramFilesLvIconPath(targetFsPath: string): boolean {
+  const normalizedPath = targetFsPath.replaceAll('/', '\\');
+  const lowerPath = normalizedPath.toLowerCase();
+
+  return (
+    path.win32.basename(normalizedPath).toLowerCase() === 'lv_icon.vi' &&
+    lowerPath.includes('\\program files') &&
+    lowerPath.includes('\\national instruments\\')
+  );
+}
+
+function isGitRepositoryResolutionFailure(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  const message = error.message.toLowerCase();
+  return (
+    message.includes('not a git repository') ||
+    message.includes('rev-parse') ||
+    message.includes('--show-toplevel')
+  );
 }

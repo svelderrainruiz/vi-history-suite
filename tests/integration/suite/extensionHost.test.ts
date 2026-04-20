@@ -32,16 +32,69 @@ interface PreparedLocalRuntimeSettingsCliSummary {
   javascriptLauncherPath?: string;
   windowsLauncherPath?: string;
   posixLauncherPath?: string;
+  windowsTerminalEntrypointPath?: string;
+  posixTerminalEntrypointPath?: string;
+  currentPlatformLauncherPath?: string;
+  currentPlatformTerminalEntrypointPath?: string;
+  terminalCommandName?: string;
+  pathPrependValue?: string;
   rootDirectoryPath?: string;
+  nextCommand?: string;
+  exampleCommand?: string;
   supportedSettingsTargets?: readonly string[];
   untrustedWorkspacePosture?: string;
 }
 
 interface PreparedLocalRuntimeSettingsCliExecutionOptions {
   env?: NodeJS.ProcessEnv;
+  cwd?: string;
+}
+
+interface RuntimeSettingsLiveSessionProbeSummary {
+  outcome: 'probed-runtime-settings-live-session';
+  settingsFilePath?: string;
+  persistedProvider?: string;
+  persistedLabviewVersion?: string;
+  persistedLabviewBitness?: string;
+  baselinePersistedProvider?: string;
+  baselinePersistedLabviewVersion?: string;
+  baselinePersistedLabviewBitness?: string;
+  liveProvider?: string;
+  liveLabviewVersion?: string;
+  liveLabviewBitness?: string;
+  providerDrift: boolean;
+  versionDrift: boolean;
+  bitnessDrift: boolean;
+  driftDetected: boolean;
+  liveUptakeObservation: 'in-session-updated' | 'reload-required';
+  mutationProviderTarget?: string;
+  safeRestoreApplied: boolean;
+  safeRestoreVerified: boolean;
+  runtimeValidationOutcome?: 'ready' | 'blocked';
+  runtimeProvider?: string;
+  runtimeEngine?: string;
+  runtimeBlockedReason?: string;
+  packetRunId: string;
+  packetJsonPath: string;
+  packetMarkdownPath: string;
+  latestPacketJsonPath: string;
+  latestPacketMarkdownPath: string;
+  historyTotalRuns: number;
+  historyReloadRequiredCount: number;
+  historyInSessionUpdatedCount: number;
+  historyUnknownObservationCount: number;
+  historyStance:
+    | 'live-uptake-not-proven'
+    | 'candidate-live-uptake-observed'
+    | 'insufficient-evidence';
+  historyProofStatus: 'not-fully-proven' | 're-evaluation-required';
 }
 
 const execFile = promisify(execFileCallback);
+const WINDOWS_X64_LABVIEW_EXE_PATH =
+  'C:\\Program Files\\National Instruments\\LabVIEW 2026\\LabVIEW.exe';
+const WINDOWS_X86_LABVIEW_CLI_PATH =
+  'C:\\Program Files (x86)\\National Instruments\\Shared\\LabVIEW CLI\\LabVIEWCLI.exe';
 
 export async function runIntegrationSuite(): Promise<void> {
   const metadata = await loadMetadata();
@@ -49,7 +102,9 @@ export async function runIntegrationSuite(): Promise<void> {
 
   await api.refreshEligibility();
   await testEligibleVersusIneligibleFlow(api, metadata);
+  await testAdmittedLocalRuntimeSettingsTerminalEntrypoint(api);
   await testPrepareLocalRuntimeSettingsCli();
+  await testProbeRuntimeSettingsLiveSession();
   await testPanelOpenFlow(api, metadata);
 }
 
@@ -452,7 +507,15 @@ async function testPrepareLocalRuntimeSettingsCli(): Promise<void> {
   assert.ok(result.javascriptLauncherPath);
   assert.ok(result.windowsLauncherPath);
   assert.ok(result.posixLauncherPath);
+  assert.ok(result.windowsTerminalEntrypointPath);
+  assert.ok(result.posixTerminalEntrypointPath);
+  assert.ok(result.currentPlatformLauncherPath);
+  assert.ok(result.currentPlatformTerminalEntrypointPath);
   assert.ok(result.defaultSettingsFilePath);
+  assert.ok(result.nextCommand);
+  assert.ok(result.exampleCommand);
+  assert.equal(result.terminalCommandName, 'vihs');
+  assert.ok(result.pathPrependValue);
   assert.deepEqual(result.supportedSettingsTargets, [
     'default-user-settings',
     'explicit-settings-file'
@@ -462,10 +525,32 @@ async function testPrepareLocalRuntimeSettingsCli(): Promise<void> {
   await fs.access(result.javascriptLauncherPath!);
   await fs.access(result.windowsLauncherPath!);
   await fs.access(result.posixLauncherPath!);
+  await fs.access(result.windowsTerminalEntrypointPath!);
+  await fs.access(result.posixTerminalEntrypointPath!);
+  assert.equal(result.exampleCommand, result.nextCommand);
+  assert.match(
+    result.nextCommand!,
+    /^vihs --provider host --labview-version 2026 --labview-bitness x64$/
+  );
+  if (process.platform === 'win32') {
+    assert.equal(result.currentPlatformLauncherPath, result.windowsLauncherPath);
+    assert.equal(
+      result.currentPlatformTerminalEntrypointPath,
+      result.windowsTerminalEntrypointPath
+    );
+  } else {
+    assert.equal(result.currentPlatformLauncherPath, result.posixLauncherPath);
+    assert.equal(
+      result.currentPlatformTerminalEntrypointPath,
+      result.posixTerminalEntrypointPath
+    );
+  }
 
   const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'vihs-runtime-settings-cli-'));
   try {
     const settingsFilePath = path.join(tempRoot, 'settings.json');
+    const arbitraryWorkingDirectory = path.join(tempRoot, 'arbitrary-repo-shell');
+    await fs.mkdir(arbitraryWorkingDirectory, { recursive: true });
     await fs.writeFile(
       settingsFilePath,
       `${JSON.stringify({ 'editor.tabSize': 2 }, null, 2)}\n`,
@@ -481,12 +566,19 @@ async function testPrepareLocalRuntimeSettingsCli(): Promise<void> {
       'x64',
       '--settings-file',
       settingsFilePath
-    ]);
+    ], {
+      cwd: arbitraryWorkingDirectory
+    });
     if (process.platform === 'win32') {
       assert.equal(hostRun.launcherPath, result.windowsLauncherPath);
     } else {
       assert.equal(hostRun.launcherPath, result.posixLauncherPath);
     }
+    assert.match(hostRun.stdout, /settingsTarget=explicit-settings-file/);
+    assert.match(
+      hostRun.stdout,
+      new RegExp(`settingsFilePath=${settingsFilePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`)
+    );
     assert.match(hostRun.stdout, /viHistorySuite\.runtimeProvider=host/);
     assert.match(hostRun.stdout, /viHistorySuite\.labviewVersion=2026/);
     assert.match(hostRun.stdout, /viHistorySuite\.labviewBitness=x64/);
@@ -496,6 +588,31 @@ async function testPrepareLocalRuntimeSettingsCli(): Promise<void> {
       'viHistorySuite.labviewVersion': '2026',
       'viHistorySuite.labviewBitness': 'x64'
     });
+
+    if (
+      process.platform === 'win32' &&
+      (await pathExists(WINDOWS_X64_LABVIEW_EXE_PATH)) &&
+      (await pathExists(WINDOWS_X86_LABVIEW_CLI_PATH))
+    ) {
+      const hostValidationRun = await runPreparedLocalRuntimeSettingsCli(result, [
+        '--validate',
+        '--settings-file',
+        settingsFilePath
+      ]);
+      assert.equal(hostValidationRun.launcherPath, result.windowsLauncherPath);
+      assert.match(
+        hostValidationRun.stdout,
+        new RegExp(settingsFilePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+      );
+      assert.match(hostValidationRun.stdout, /settingsTarget=explicit-settings-file/);
+      assert.match(hostValidationRun.stdout, /viHistorySuite\.runtimeProvider=host/);
+      assert.match(hostValidationRun.stdout, /viHistorySuite\.labviewVersion=2026/);
+      assert.match(hostValidationRun.stdout, /viHistorySuite\.labviewBitness=x64/);
+      assert.match(hostValidationRun.stdout, /runtimeValidationOutcome=ready/);
+      assert.match(hostValidationRun.stdout, /runtimeProvider=host-native/);
+      assert.match(hostValidationRun.stdout, /runtimeEngine=labview-cli/);
+      assert.match(hostValidationRun.stdout, /runtimeBlockedReason=<none>/);
+    }
 
     const dockerRun = await runPreparedLocalRuntimeSettingsCli(result, [
       '--provider',
@@ -513,6 +630,7 @@ async function testPrepareLocalRuntimeSettingsCli(): Promise<void> {
       assert.equal(dockerRun.launcherPath, result.posixLauncherPath);
     }
     assert.match(dockerRun.stdout, /viHistorySuite\.runtimeProvider=docker/);
+    assert.match(dockerRun.stdout, /settingsTarget=explicit-settings-file/);
     assert.deepEqual(JSON.parse(await fs.readFile(settingsFilePath, 'utf8')), {
       'editor.tabSize': 2,
       'viHistorySuite.runtimeProvider': 'docker',
@@ -531,6 +649,7 @@ async function testPrepareLocalRuntimeSettingsCli(): Promise<void> {
         dockerValidationRun.stdout,
         new RegExp(settingsFilePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
       );
+      assert.match(dockerValidationRun.stdout, /settingsTarget=explicit-settings-file/);
       assert.match(dockerValidationRun.stdout, /viHistorySuite\.runtimeProvider=docker/);
       assert.match(dockerValidationRun.stdout, /viHistorySuite\.labviewVersion=2026/);
       assert.match(dockerValidationRun.stdout, /viHistorySuite\.labviewBitness=x64/);
@@ -568,6 +687,7 @@ async function testPrepareLocalRuntimeSettingsCli(): Promise<void> {
       validationRun.stdout,
       new RegExp(invalidSettingsFilePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
     );
+    assert.match(validationRun.stdout, /settingsTarget=explicit-settings-file/);
     assert.match(validationRun.stdout, /viHistorySuite\.runtimeProvider=mystery/);
     assert.match(validationRun.stdout, /viHistorySuite\.labviewVersion=2026/);
     assert.match(validationRun.stdout, /viHistorySuite\.labviewBitness=x64/);
@@ -593,6 +713,7 @@ async function testPrepareLocalRuntimeSettingsCli(): Promise<void> {
         defaultTargetRun.stdout,
         new RegExp(defaultSettingsFilePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
       );
+      assert.match(defaultTargetRun.stdout, /settingsTarget=default-user-settings/);
       assert.match(
         defaultTargetRun.stdout,
         new RegExp(`viHistorySuite\\.runtimeProvider=${firstProvider}`)
@@ -619,6 +740,7 @@ async function testPrepareLocalRuntimeSettingsCli(): Promise<void> {
         activeDockerRun.stdout,
         new RegExp(defaultSettingsFilePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
       );
+      assert.match(activeDockerRun.stdout, /settingsTarget=default-user-settings/);
       assert.match(
         activeDockerRun.stdout,
         new RegExp(`viHistorySuite\\.runtimeProvider=${secondProvider}`)
@@ -637,6 +759,211 @@ async function testPrepareLocalRuntimeSettingsCli(): Promise<void> {
   }
 }
 
+async function testAdmittedLocalRuntimeSettingsTerminalEntrypoint(
+  api: ViHistorySuiteApi
+): Promise<void> {
+  const admitted = api.getLocalRuntimeSettingsTerminalEntrypoint();
+  assert.ok(admitted, 'extension activation should admit the bare vihs terminal entrypoint');
+  assert.equal(admitted.terminalCommandName, 'vihs');
+  assert.ok(admitted.pathPrependValue);
+  assert.ok(admitted.currentPlatformTerminalEntrypointPath);
+
+  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'vihs-terminal-entrypoint-'));
+  try {
+    const settingsFilePath = path.join(tempRoot, 'settings.json');
+    const arbitraryWorkingDirectory = path.join(tempRoot, 'arbitrary-repo-shell');
+    await fs.mkdir(arbitraryWorkingDirectory, { recursive: true });
+    await fs.writeFile(
+      settingsFilePath,
+      `${JSON.stringify({ 'editor.tabSize': 2 }, null, 2)}\n`,
+      'utf8'
+    );
+
+    const discoveryRun = await runAdmittedLocalRuntimeSettingsCli(admitted, [], {
+      cwd: arbitraryWorkingDirectory
+    });
+    assert.match(discoveryRun.stdout, /vihs --provider host --labview-version 2026 --labview-bitness x64/);
+    assert.match(discoveryRun.stdout, /vihs --validate/);
+
+    const hostRun = await runAdmittedLocalRuntimeSettingsCli(
+      admitted,
+      [
+        '--provider',
+        'host',
+        '--labview-version',
+        '2026',
+        '--labview-bitness',
+        'x64',
+        '--settings-file',
+        settingsFilePath
+      ],
+      {
+        cwd: arbitraryWorkingDirectory
+      }
+    );
+    assert.equal(hostRun.launcherPath, 'vihs');
+    assert.match(hostRun.stdout, /settingsTarget=explicit-settings-file/);
+    assert.match(hostRun.stdout, /viHistorySuite\.runtimeProvider=host/);
+    assert.deepEqual(JSON.parse(await fs.readFile(settingsFilePath, 'utf8')), {
+      'editor.tabSize': 2,
+      'viHistorySuite.runtimeProvider': 'host',
+      'viHistorySuite.labviewVersion': '2026',
+      'viHistorySuite.labviewBitness': 'x64'
+    });
+  } finally {
+    await fs.rm(tempRoot, { recursive: true, force: true });
+  }
+}
+
+async function pathExists(candidatePath: string): Promise<boolean> {
+  try {
+    await fs.access(candidatePath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function testProbeRuntimeSettingsLiveSession(): Promise<void> {
+  const prepared = (await vscode.commands.executeCommand(
+    'labviewViHistory.prepareLocalRuntimeSettingsCli'
+  )) as PreparedLocalRuntimeSettingsCliSummary;
+  assert.ok(prepared.defaultSettingsFilePath);
+
+  const settingsFilePath = prepared.defaultSettingsFilePath!;
+  const initialRuntimeSettings = readViHistorySuiteRuntimeSettings();
+  const firstBaselineProvider =
+    initialRuntimeSettings.runtimeProvider === 'docker' ? 'docker' : 'host';
+  const secondBaselineProvider = firstBaselineProvider === 'docker' ? 'host' : 'docker';
+
+  const firstSummary = await runAndAssertRuntimeSettingsLiveSessionProbe(
+    prepared,
+    settingsFilePath,
+    firstBaselineProvider
+  );
+  const secondSummary = await runAndAssertRuntimeSettingsLiveSessionProbe(
+    prepared,
+    settingsFilePath,
+    secondBaselineProvider
+  );
+
+  assert.equal(firstSummary.historyTotalRuns, 1);
+  assert.equal(secondSummary.historyTotalRuns, 2);
+  assert.equal(secondSummary.historyReloadRequiredCount, 0);
+  assert.equal(secondSummary.historyUnknownObservationCount, 0);
+  assert.equal(secondSummary.historyInSessionUpdatedCount, 2);
+  assert.equal(secondSummary.historyStance, 'candidate-live-uptake-observed');
+  assert.equal(secondSummary.historyProofStatus, 're-evaluation-required');
+  await maybeWriteRuntimeSettingsLiveSessionProofOutput(secondSummary);
+}
+
+async function runAndAssertRuntimeSettingsLiveSessionProbe(
+  prepared: PreparedLocalRuntimeSettingsCliSummary,
+  settingsFilePath: string,
+  baselineProvider: 'host' | 'docker'
+): Promise<RuntimeSettingsLiveSessionProbeSummary> {
+  const seededBaseline = await runPreparedLocalRuntimeSettingsCli(prepared, [
+    '--provider',
+    baselineProvider,
+    '--labview-version',
+    '2026',
+    '--labview-bitness',
+    'x64'
+  ]);
+  if (process.platform === 'win32') {
+    assert.equal(seededBaseline.launcherPath, prepared.windowsLauncherPath);
+  } else {
+    assert.equal(seededBaseline.launcherPath, prepared.posixLauncherPath);
+  }
+  assert.match(
+    seededBaseline.stdout,
+    new RegExp(settingsFilePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+  );
+  assert.match(
+    seededBaseline.stdout,
+    new RegExp(`viHistorySuite\\.runtimeProvider=${baselineProvider}`)
+  );
+  assert.match(seededBaseline.stdout, /viHistorySuite\.labviewVersion=2026/);
+  assert.match(seededBaseline.stdout, /viHistorySuite\.labviewBitness=x64/);
+
+  let baselineSettingsText: string | undefined;
+  try {
+    baselineSettingsText = await fs.readFile(settingsFilePath, 'utf8');
+  } catch (error) {
+    if (!(error && typeof error === 'object' && 'code' in error && (error as NodeJS.ErrnoException).code === 'ENOENT')) {
+      throw error;
+    }
+  }
+
+  const summary = (await vscode.commands.executeCommand(
+    'labviewViHistory.probeRuntimeSettingsLiveSession'
+  )) as RuntimeSettingsLiveSessionProbeSummary;
+
+  assert.ok(summary);
+  assert.equal(summary.outcome, 'probed-runtime-settings-live-session');
+  assert.equal(typeof summary.providerDrift, 'boolean');
+  assert.equal(typeof summary.versionDrift, 'boolean');
+  assert.equal(typeof summary.bitnessDrift, 'boolean');
+  assert.equal(typeof summary.driftDetected, 'boolean');
+  assert.ok(
+    summary.liveUptakeObservation === 'in-session-updated' ||
+      summary.liveUptakeObservation === 'reload-required'
+  );
+  assert.equal(summary.safeRestoreApplied, true);
+  assert.equal(summary.safeRestoreVerified, true);
+  assert.ok(summary.mutationProviderTarget === 'host' || summary.mutationProviderTarget === 'docker');
+  assert.ok(summary.baselinePersistedProvider === 'host' || summary.baselinePersistedProvider === 'docker');
+  assert.equal(summary.baselinePersistedProvider, baselineProvider);
+  assert.equal(summary.persistedProvider, summary.mutationProviderTarget);
+  assert.notEqual(summary.baselinePersistedProvider, summary.persistedProvider);
+  assert.equal(
+    summary.liveUptakeObservation,
+    summary.driftDetected ? 'reload-required' : 'in-session-updated'
+  );
+  assert.ok(summary.packetRunId);
+  assert.ok(summary.packetJsonPath);
+  assert.ok(summary.packetMarkdownPath);
+  assert.ok(summary.latestPacketJsonPath);
+  assert.ok(summary.latestPacketMarkdownPath);
+  assert.ok(summary.historyTotalRuns >= 1);
+  assert.ok(summary.historyReloadRequiredCount >= 0);
+  assert.ok(summary.historyInSessionUpdatedCount >= 0);
+  assert.ok(summary.historyUnknownObservationCount >= 0);
+  assert.ok(
+    summary.historyStance === 'live-uptake-not-proven' ||
+      summary.historyStance === 'candidate-live-uptake-observed' ||
+      summary.historyStance === 'insufficient-evidence'
+  );
+  assert.ok(
+    summary.historyTotalRuns >=
+      summary.historyReloadRequiredCount +
+        summary.historyInSessionUpdatedCount +
+        summary.historyUnknownObservationCount
+  );
+  const expectedHistoryStance =
+    summary.historyReloadRequiredCount > 0
+      ? 'live-uptake-not-proven'
+      : summary.historyInSessionUpdatedCount > 0 && summary.historyUnknownObservationCount === 0
+        ? 'candidate-live-uptake-observed'
+        : 'insufficient-evidence';
+  assert.equal(summary.historyStance, expectedHistoryStance);
+  await fs.access(summary.packetJsonPath);
+  await fs.access(summary.packetMarkdownPath);
+  await fs.access(summary.latestPacketJsonPath);
+  await fs.access(summary.latestPacketMarkdownPath);
+
+  let restoredSettingsText: string | undefined;
+  try {
+    restoredSettingsText = await fs.readFile(settingsFilePath, 'utf8');
+  } catch (error) {
+    if (!(error && typeof error === 'object' && 'code' in error && (error as NodeJS.ErrnoException).code === 'ENOENT')) {
+      throw error;
+    }
+  }
+  assert.equal(restoredSettingsText, baselineSettingsText);
+  return summary;
+}
+
 async function runPreparedLocalRuntimeSettingsCli(
   result: PreparedLocalRuntimeSettingsCliSummary,
   args: string[],
@@ -648,7 +975,8 @@ async function runPreparedLocalRuntimeSettingsCli(
       ['/d', '/s', '/c', result.windowsLauncherPath!, ...args],
       {
         encoding: 'utf8',
-        env: options.env
+        env: options.env,
+        cwd: options.cwd
       }
     );
     return {
@@ -659,12 +987,72 @@ async function runPreparedLocalRuntimeSettingsCli(
 
   const execution = await execFile(result.posixLauncherPath!, args, {
     encoding: 'utf8',
-    env: options.env
+    env: options.env,
+    cwd: options.cwd
   });
   return {
     ...execution,
     launcherPath: result.posixLauncherPath!
   };
+}
+
+async function runAdmittedLocalRuntimeSettingsCli(
+  result: {
+    pathPrependValue?: string;
+  },
+  args: string[],
+  options: PreparedLocalRuntimeSettingsCliExecutionOptions = {}
+): Promise<{ stdout: string; stderr: string; launcherPath: string }> {
+  const env = {
+    ...process.env,
+    ...options.env,
+    PATH: `${result.pathPrependValue ?? ''}${options.env?.PATH ?? process.env.PATH ?? ''}`
+  };
+
+  if (process.platform === 'win32') {
+    const execution = await execFile('cmd.exe', ['/d', '/s', '/c', 'vihs', ...args], {
+      encoding: 'utf8',
+      env,
+      cwd: options.cwd
+    });
+    return {
+      ...execution,
+      launcherPath: 'vihs'
+    };
+  }
+
+  const commandLine = ['vihs', ...args.map(quotePosixShellArg)].join(' ');
+  const execution = await execFile('sh', ['-lc', commandLine], {
+    encoding: 'utf8',
+    env,
+    cwd: options.cwd
+  });
+  return {
+    ...execution,
+    launcherPath: 'vihs'
+  };
+}
+
+async function maybeWriteRuntimeSettingsLiveSessionProofOutput(
+  summary: RuntimeSettingsLiveSessionProbeSummary
+): Promise<void> {
+  const outputDirectory = (
+    process.env.VI_HISTORY_SUITE_RUNTIME_SETTINGS_LIVE_SESSION_PROOF_OUTPUT_DIR ?? ''
+  ).trim();
+  if (!outputDirectory) {
+    return;
+  }
+
+  const packetRoot = path.dirname(summary.latestPacketJsonPath);
+  const retainedPacketRoot = path.join(outputDirectory, 'packet-root');
+  await fs.rm(outputDirectory, { recursive: true, force: true });
+  await fs.mkdir(outputDirectory, { recursive: true });
+  await fs.cp(packetRoot, retainedPacketRoot, { recursive: true });
+  await fs.writeFile(
+    path.join(outputDirectory, 'probe-command-summary.json'),
+    `${JSON.stringify(summary, null, 2)}\n`,
+    'utf8'
+  );
 }
 
 function readViHistorySuiteRuntimeSettings(): {
@@ -691,6 +1079,10 @@ function assertRuntimeSettingsFileContains(
   assert.equal(settings['viHistorySuite.runtimeProvider'], expected.runtimeProvider);
   assert.equal(settings['viHistorySuite.labviewVersion'], expected.labviewVersion);
   assert.equal(settings['viHistorySuite.labviewBitness'], expected.labviewBitness);
+}
+
+function quotePosixShellArg(value: string): string {
+  return `'${value.replace(/'/g, `'\"'\"'`)}'`;
 }
 
 async function waitFor(

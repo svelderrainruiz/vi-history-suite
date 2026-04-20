@@ -233,6 +233,22 @@ function deriveRuntimeDoctorNextAction(options: {
   }
 
   if (options.runtimeExecution.state === 'failed') {
+    if (options.runtimeExecution.diagnosticReason === 'labview-cli-vi-password-protected') {
+      return 'Next action: choose a revision pair whose selected/base VI is not password protected, or remove password protection before rerunning comparison report generation.';
+    }
+
+    if (
+      options.runtimeSelection.platform === 'win32' &&
+      options.runtimeSelection.provider === 'host-native' &&
+      options.runtimeExecution.failureReason === 'command-timed-out' &&
+      (options.runtimeExecution.diagnosticReason ===
+        'labview-cli-timeout-no-labview-at-banner-snapshot' ||
+        options.runtimeExecution.diagnosticReason ===
+          'labview-cli-timeout-no-labview-through-exit')
+    ) {
+      return 'Next action: review the retained runtime process observations and confirm the selected LabVIEW 2026 host bundle, then rerun comparison report generation or switch to a Docker-backed compare path if the host-native CreateComparisonReport seam remains blocked.';
+    }
+
     return 'Next action: use the retained runtime notes, stdout/stderr artifacts, and diagnostic log to correct the runtime environment, then rerun comparison report generation.';
   }
 
@@ -244,7 +260,7 @@ function deriveRuntimeDoctorNextAction(options: {
 }
 
 function buildRuntimeSettingsReloadAction(settingsAction: string, finalAction: string): string {
-  return `Next action: ${settingsAction}. If you just used the generated settings CLI while VS Code was already open, reload or restart the window. Then ${finalAction}.`;
+  return `Next action: ${settingsAction}. Then ${finalAction}. If this already-running VS Code session still shows stale provider or runtime facts after the CLI update, reload or restart the window and try again.`;
 }
 
 function deriveRuntimeDoctorSettingsFreshnessNote(options: {
@@ -265,7 +281,7 @@ function deriveRuntimeDoctorSettingsFreshnessNote(options: {
     return undefined;
   }
 
-  return 'Settings freshness: if you just used the generated settings CLI while VS Code was already open, reload or restart the window before trusting this runtime result.';
+  return 'Settings freshness: if this already-running VS Code session still shows stale provider or runtime facts after the generated settings CLI update, reload or restart the window and retry.';
 }
 
 function deriveRequestedProviderIntent(selection: {
