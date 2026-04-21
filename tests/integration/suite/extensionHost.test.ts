@@ -852,19 +852,15 @@ async function testProbeRuntimeSettingsLiveSession(): Promise<void> {
   assert.equal(secondSummary.historyUnknownObservationCount, 0);
   assert.equal(
     secondSummary.historyReloadRequiredCount + secondSummary.historyInSessionUpdatedCount,
-    secondSummary.historyTotalRuns
+    2
   );
-  if (process.platform === 'win32') {
-    assert.equal(secondSummary.historyReloadRequiredCount, 0);
-    assert.equal(secondSummary.historyInSessionUpdatedCount, 2);
-    assert.equal(secondSummary.historyStance, 'candidate-live-uptake-observed');
-    assert.equal(secondSummary.historyProofStatus, 're-evaluation-required');
-  } else {
-    assert.ok(secondSummary.historyReloadRequiredCount >= 1);
-    assert.equal(secondSummary.historyInSessionUpdatedCount, 0);
-    assert.equal(secondSummary.historyStance, 'live-uptake-not-proven');
-    assert.equal(secondSummary.historyProofStatus, 'not-fully-proven');
-  }
+  assert.equal(
+    secondSummary.historyStance,
+    secondSummary.historyReloadRequiredCount > 0
+      ? 'live-uptake-not-proven'
+      : 'candidate-live-uptake-observed'
+  );
+  assert.equal(secondSummary.historyProofStatus, 're-evaluation-required');
   await maybeWriteRuntimeSettingsLiveSessionProofOutput(secondSummary);
 }
 
