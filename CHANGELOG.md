@@ -3,17 +3,33 @@
 This changelog is the governed version-line summary for `vi-history-suite`.
 
 Retained exact-version releases now include `v0.2.0`, `v1.0.0`, `v1.0.1`,
-`v1.0.2`, `v1.0.3`, `v1.0.4`, `v1.0.5`, `v1.0.6`, `v1.1.0`, `v1.2.0`,
-`v1.2.1`, and `v1.2.2`.
+`v1.0.2`, `v1.0.3`, `v1.0.4`, `v1.0.5`, `v1.0.6`, `v1.1.0`, `v1.2.0`, and
+`v1.2.1`.
 
 Burned exact-version releases now include `v1.0.2`.
+
+## [1.3.0] - 2026-04-14
+
+### Changed
+
+- `v1.2.2` remains the exact public release line on `main`, while `develop`
+  now carries `1.3.0` as the next exact candidate line
+- the `1.3.0` opening decision is now governed as a `minor` line because the
+  active branch adds a new installed-user capability and supported workflow:
+  host-default Windows local `LabVIEWCLI` with bounded expert Docker instead
+  of only hardening the released Docker-only path
+- the public candidate package now distinguishes the published exact `v1.2.2`
+  baseline from the unreleased `v1.3.0` candidate line, keeping the next
+  public/wiki publication and expert-agent review gates explicit instead of
+  continuing to treat exact `1.2.2` publication closeout as the active
+  candidate state
 
 ## [1.2.2] - 2026-04-07
 
 ### Changed
 
-- `v1.2.2` is now the exact public release line on `main`, while `develop`
-  still carries `1.2.2` until the next exact candidate line opens
+- `v1.2.1` remains the exact public release line on `main`, while `develop`
+  now carries `1.2.2` as the next exact candidate line
 - exact release closeout now remains incomplete until the exact released
   `main` line has been back-merged into `develop` through the protected path
   and the resulting `develop` pipeline is green, so future sessions do not
