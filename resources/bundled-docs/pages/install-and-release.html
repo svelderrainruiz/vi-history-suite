@@ -13,7 +13,7 @@
 <li>Windows defaults to local <code>LabVIEWCLI</code> when the persisted provider is absent</li>
 <li>Docker remains a bounded expert provider selected through the published install/bootstrap surface or later <code>vihs</code> updates</li>
 <li>run the published PowerShell bootstrap once, then use <code>vihs</code> or <code>vihs --validate</code> as the admitted follow-up commands</li>
-<li>if VS Code was already open when the generated settings CLI changed settings, reload or restart before trusting compare preflight</li>
+<li>if VS Code was already open when the bootstrap or later <code>vihs</code> update changed settings, reload or restart the window only if stale facts remain</li>
 <li>run <code>vihs --validate</code> before the first compare on a fresh machine</li>
 <li>if Docker is selected, confirm <code>docker info</code> works in the same session that runs VS Code</li>
 </ul>

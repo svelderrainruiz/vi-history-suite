@@ -8,7 +8,7 @@
 <li>at least two commits modify that VI</li>
 <li>for the exact released <code>main</code> path: Docker is installed and running on the current host, and <code>docker info</code> succeeds in the same session that launched VS Code</li>
 <li>for the maintained public <code>develop</code> candidate: the published Windows PowerShell bootstrap or a later <code>vihs</code> run persists the provider, LabVIEW version, and LabVIEW bitness bundle</li>
-<li>if VS Code was already open when the generated settings CLI changed the provider bundle, the window is reloaded or restarted before compare preflight is trusted</li>
+<li>if VS Code was already open when the bootstrap or later <code>vihs</code> update changed settings, reload or restart the window only if stale facts remain</li>
 </ul>
 <h2>Execution Policy</h2>
 <p>Comparison generation follows the current provider-explicit installed contract.</p>

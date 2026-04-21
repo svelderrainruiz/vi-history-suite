@@ -31,8 +31,8 @@ Please include:
 - whether the target file was an eligible tracked LabVIEW VI
 - the persisted provider, LabVIEW version, and LabVIEW bitness bundle
 - whether you ran `vihs --validate`
-- whether VS Code was already open when the generated settings CLI last wrote
-  settings
+- whether VS Code was already open when the bootstrap or a later `vihs` run
+  last wrote settings
 - whether the issue happened on first-use image pull, on a warm image, or on a
   host-default Windows local `LabVIEWCLI` path
 - Docker engine and host combination
