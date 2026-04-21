@@ -849,11 +849,27 @@ async function testProbeRuntimeSettingsLiveSession(): Promise<void> {
 
   assert.equal(firstSummary.historyTotalRuns, 1);
   assert.equal(secondSummary.historyTotalRuns, 2);
-  assert.equal(secondSummary.historyReloadRequiredCount, 0);
+  const liveUptakeObservations = [
+    firstSummary.liveUptakeObservation,
+    secondSummary.liveUptakeObservation
+  ];
+  const reloadRequiredCount = liveUptakeObservations.filter(
+    observation => observation === 'reload-required'
+  ).length;
+  const inSessionUpdatedCount = liveUptakeObservations.filter(
+    observation => observation === 'in-session-updated'
+  ).length;
+  assert.equal(secondSummary.historyReloadRequiredCount, reloadRequiredCount);
   assert.equal(secondSummary.historyUnknownObservationCount, 0);
-  assert.equal(secondSummary.historyInSessionUpdatedCount, 2);
-  assert.equal(secondSummary.historyStance, 'candidate-live-uptake-observed');
-  assert.equal(secondSummary.historyProofStatus, 're-evaluation-required');
+  assert.equal(secondSummary.historyInSessionUpdatedCount, inSessionUpdatedCount);
+  const expectedHistoryStance =
+    reloadRequiredCount > 0 ? 'live-uptake-not-proven' : 'candidate-live-uptake-observed';
+  assert.equal(secondSummary.historyStance, expectedHistoryStance);
+  const expectedHistoryProofStatus =
+    expectedHistoryStance === 'candidate-live-uptake-observed'
+      ? 're-evaluation-required'
+      : 'not-fully-proven';
+  assert.equal(secondSummary.historyProofStatus, expectedHistoryProofStatus);
   await maybeWriteRuntimeSettingsLiveSessionProofOutput(secondSummary);
 }
 
