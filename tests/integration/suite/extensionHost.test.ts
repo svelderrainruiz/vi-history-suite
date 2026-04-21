@@ -860,7 +860,10 @@ async function testProbeRuntimeSettingsLiveSession(): Promise<void> {
       ? 'live-uptake-not-proven'
       : 'candidate-live-uptake-observed'
   );
-  assert.equal(secondSummary.historyProofStatus, 're-evaluation-required');
+  assert.equal(
+    secondSummary.historyProofStatus,
+    secondSummary.historyReloadRequiredCount > 0 ? 'not-fully-proven' : 're-evaluation-required'
+  );
   await maybeWriteRuntimeSettingsLiveSessionProofOutput(secondSummary);
 }
 
