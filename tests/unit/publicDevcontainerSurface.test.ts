@@ -84,6 +84,7 @@ describe('public devcontainer surface', () => {
     expect(extensions.recommendations).not.toEqual(expect.arrayContaining(['vitest.explorer']));
 
     expect(readme).toContain('## Evaluate From Source');
+    expect(readme).toContain('## Contribute');
     expect(readme).toContain('[INSTALL.md](./INSTALL.md)');
     expect(readme).toContain('[CONTRIBUTING.md](./CONTRIBUTING.md)');
     expect(install).toContain('Use this lane only when you want to inspect the source repo');

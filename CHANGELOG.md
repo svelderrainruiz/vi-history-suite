@@ -3,10 +3,65 @@
 This changelog is the governed version-line summary for `vi-history-suite`.
 
 Retained exact-version releases now include `v0.2.0`, `v1.0.0`, `v1.0.1`,
-`v1.0.2`, `v1.0.3`, `v1.0.4`, `v1.0.5`, `v1.0.6`, `v1.1.0`, `v1.2.0`, and
-`v1.2.1`.
+`v1.0.2`, `v1.0.3`, `v1.0.4`, `v1.0.5`, `v1.0.6`, `v1.1.0`, `v1.2.0`,
+`v1.2.1`, `v1.2.2`, `v1.3.0`, `v1.3.1`, `v1.3.2`, `v1.3.3`, and `v1.3.4`.
 
 Burned exact-version releases now include `v1.0.2`.
+
+## [1.3.6] - 2026-04-22
+
+### Changed
+
+- exact authority `v1.3.5` on `main` remains immutable while the separate
+  public GitHub exact release still serves `v1.3.1` and VS Code Marketplace
+  still serves `1.3.0`, so `release/1.3.6` now opens from merged-green
+  `develop` for the next governed public-exact retry
+- the fail-closed public exact pre-tag proof remains retained directly on
+  `develop` while `release/1.3.6` carries the next exact-retry line
+
+## [1.3.5] - 2026-04-21
+
+### Changed
+
+- exact authority `v1.3.4` on `main` remains immutable while the public GitHub
+  exact release still serves `v1.3.1` and VS Code Marketplace still serves
+  `1.3.0`, so `v1.3.5` reopens the exact line narrowly from `main`
+- the authority-side public-source validation surfaces now relax the remaining
+  stale public facade changelog expectation before the next public GitHub exact-release retry
+
+## [1.3.4] - 2026-04-21
+
+### Changed
+
+- exact authority `v1.3.3` on `main` remains immutable while the public GitHub
+  exact release still serves `v1.3.1` and VS Code Marketplace still serves
+  `1.3.0`, so `v1.3.4` reopens the exact line narrowly from `main`
+- the authority-side public-source validation surfaces now fix the last stale
+  public facade changelog expectation before the next public GitHub exact-release retry
+
+## [1.3.3] - 2026-04-21
+
+### Changed
+
+- exact authority `v1.3.2` on `main` remains immutable while the public GitHub
+  exact release still serves `v1.3.1` and VS Code Marketplace still serves
+  `1.3.0`, so `v1.3.3` reopens the exact line narrowly from `main`
+- the authority-side public-source validation surfaces now align with the
+  promoted public facade by expecting the current README source-evaluation
+  headings and the reopened `1.3.3` package/changelog line before the next
+  public GitHub exact-release retry
+
+## [1.3.2] - 2026-04-21
+
+### Changed
+
+- exact public GitHub `v1.3.1` remains immutable while VS Code Marketplace
+  still serves `1.3.0`, so `v1.3.2` opens as a governed hotfix line from
+  exact `main` instead of mutating the already-published `v1.3.1` GitHub
+  asset
+- the packaged extension surface now carries the first governed Marketplace
+  icon path at `resources/marketplace/vi-history-suite-icon.png` through the
+  extension manifest instead of relying on listing-only operator memory
 
 ## [1.3.1] - 2026-04-20
 
