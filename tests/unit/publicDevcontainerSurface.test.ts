@@ -83,7 +83,6 @@ describe('public devcontainer surface', () => {
     );
     expect(extensions.recommendations).not.toEqual(expect.arrayContaining(['vitest.explorer']));
 
-    expect(readme).toContain('## Install The Extension');
     expect(readme).toContain('## Evaluate From Source');
     expect(readme).toContain('## Contribute');
     expect(readme).toContain('[INSTALL.md](./INSTALL.md)');
@@ -92,6 +91,6 @@ describe('public devcontainer surface', () => {
     expect(install).toContain('npm run public:host:bootstrap-linux');
     expect(install).toContain('npm run public:fixture:icon-editor');
     expect(install).toContain('npm run public:repo:clone');
-    expect(install).toContain('review another public Git repository with');
+    expect(install).toContain('If you prefer a non-interactive public-repo clone command, use:');
   });
 });
