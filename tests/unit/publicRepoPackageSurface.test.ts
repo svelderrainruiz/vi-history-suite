@@ -32,9 +32,9 @@ describe('public repo package surface', () => {
     const bundledComparisonReview = readText(
       'resources/bundled-docs/pages/comparison-reports-and-dashboard-review.html'
     );
-    const previewWorkflow = readText('.github/workflows/public-facade-package-preview.yml');
+    const previewWorkflow = readText('.github/workflows/public-source-package-preview.yml');
 
-    expect(manifest.version).toBe('1.3.1');
+    expect(manifest.version).toBe('1.3.9');
     expect(manifest.files).toEqual([
       'out/**',
       'node_modules/jsonc-parser/**',
@@ -44,7 +44,10 @@ describe('public repo package surface', () => {
       'LICENSE'
     ]);
     expect(manifest.scripts?.['public:smoke:linux']).toBe(
-      'npm run compile && node scripts/runPublicFacadeLinuxSmoke.js'
+      'npm run compile && node scripts/runPublicLinuxInstalledUserSmoke.js'
+    );
+    expect(manifest.scripts?.['public:contract:windows-installed-user']).toBe(
+      'node scripts/runPublicWindowsInstalledUserContract.js'
     );
     expect(manifest.scripts?.['public:host:bootstrap-linux']).toBe(
       'node scripts/bootstrapLinuxVsCodeHost.js install'
@@ -56,7 +59,7 @@ describe('public repo package surface', () => {
       'node scripts/preparePublicTestFixture.js'
     );
     expect(manifest.scripts?.['test:design-contract']).toBe(
-      'npm exec -- vitest run tests/unit/bootstrapLinuxVsCodeHost.test.ts tests/unit/comparisonReportPreflight.test.ts tests/unit/comparisonReportRuntimeExecution.test.ts tests/unit/preparePublicRepoCloneScript.test.ts tests/unit/preparePublicTestFixtureScript.test.ts tests/unit/publicRepoPackageSurface.test.ts tests/unit/publicDevcontainerSurface.test.ts tests/unit/publicFacadeLinuxSmoke.test.ts tests/unit/runLinuxIntegrationHost.test.ts tests/unit/linuxContainerRuntimeExecutionSurface.test.ts'
+      'npm exec -- vitest run tests/unit/bootstrapLinuxVsCodeHost.test.ts tests/unit/comparisonReportPreflight.test.ts tests/unit/comparisonReportRuntimeExecution.test.ts tests/unit/preparePublicRepoCloneScript.test.ts tests/unit/preparePublicTestFixtureScript.test.ts tests/unit/publicRepoPackageSurface.test.ts tests/unit/publicDevcontainerSurface.test.ts tests/unit/publicLinuxInstalledUserSmoke.test.ts tests/unit/publicWindowsInstalledUserContract.test.ts tests/unit/runLinuxIntegrationHost.test.ts tests/unit/linuxContainerRuntimeExecutionSurface.test.ts'
     );
     expect(manifest.scripts?.['package']).toBe(
       'npm run compile && npm run package:audit && node scripts/runPinnedVsce.js package'
@@ -137,7 +140,7 @@ describe('public repo package surface', () => {
     expect(bundledComparisonReview).toContain('<h2>Checkbox-Selected Pair Review</h2>');
     expect(bundledComparisonReview).not.toContain('<code>Diff prev</code>');
     expect(bundledComparisonReview).not.toContain('<h2>Retained Pair Review</h2>');
-    expect(previewWorkflow).toContain('name: Public Facade Package Preview');
+    expect(previewWorkflow).toContain('name: Public Source Package Preview');
     expect(previewWorkflow).toContain('  push:');
     expect(previewWorkflow).toContain("      - 'release/**'");
     expect(previewWorkflow).toContain("      - 'hotfix/**'");
@@ -151,12 +154,16 @@ describe('public repo package surface', () => {
     expect(previewWorkflow).toContain('mkdir -p artifacts');
     expect(previewWorkflow).toContain('npm run package -- --out artifacts/vi-history-suite-public-preview.vsix');
     const changelog = readText('CHANGELOG.md');
-    expect(changelog).toContain('Retained exact-version releases now include `v0.2.0`, `v1.0.0`, `v1.0.1`,');
-    expect(changelog).toContain('`v1.2.1`.');
-    expect(changelog).toContain('## [1.3.1] - 2026-04-20');
-    expect(changelog).toContain('`v1.3.0` remains the exact public release line on `main`');
-    expect(changelog).toContain('fresh governed Windows proof receipt dated');
-    expect(changelog).toContain('`v1.3.1` remains a pre-release candidate line');
-    expect(changelog).toContain('## [1.3.0] - 2026-04-14');
+    const normalizedChangelog = changelog.replace(/\s+/g, ' ');
+    expect(normalizedChangelog).toContain(
+      'Retained exact-version releases now include `v0.2.0`, `v1.0.0`, `v1.0.1`,'
+    );
+    expect(normalizedChangelog).toContain('`v1.3.6`, `v1.3.7`, and `v1.3.8`.');
+    expect(normalizedChangelog).toContain('## [1.3.9] - 2026-04-23');
+    expect(normalizedChangelog).toContain('## [1.3.8] - 2026-04-23');
+    expect(normalizedChangelog).toContain('public GitHub release `312768592` published immutable');
+    expect(normalizedChangelog).toContain('asset-first GitHub publication path');
+    expect(normalizedChangelog).toContain('## [1.3.2] - 2026-04-21');
+    expect(normalizedChangelog).toContain('## [1.3.0] - 2026-04-14');
   });
 });

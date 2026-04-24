@@ -3,10 +3,102 @@
 This changelog is the governed version-line summary for `vi-history-suite`.
 
 Retained exact-version releases now include `v0.2.0`, `v1.0.0`, `v1.0.1`,
-`v1.0.2`, `v1.0.3`, `v1.0.4`, `v1.0.5`, `v1.0.6`, `v1.1.0`, `v1.2.0`, and
-`v1.2.1`.
+`v1.0.2`, `v1.0.3`, `v1.0.4`, `v1.0.5`, `v1.0.6`, `v1.1.0`, `v1.2.0`,
+`v1.2.1`, `v1.2.2`, `v1.3.0`, `v1.3.1`, `v1.3.2`, `v1.3.3`, `v1.3.4`,
+`v1.3.5`, `v1.3.6`, `v1.3.7`, and `v1.3.8`.
 
 Burned exact-version releases now include `v1.0.2`.
+
+## [1.3.9] - 2026-04-23
+
+### Changed
+
+- exact authority `v1.3.8` is retained as blocked historical incident
+  evidence after public GitHub release `312768592` published immutable with
+  zero assets
+- `release/1.3.9` opens from the retained `v1.3.8` authority line through the
+  asset-first GitHub publication path so the installed `vihs` Windows launcher
+  fix can close across GitLab, public GitHub, and VS Code Marketplace
+
+## [1.3.8] - 2026-04-23
+
+### Fixed
+
+- `release/1.3.8` opened from the closed `v1.3.7` public GitHub and VS Code
+  Marketplace baseline to promote the installed `vihs` Windows launcher fix
+  for users who do not have global `node` on `PATH`
+- generated Windows launchers now prefer `VI_HISTORY_SUITE_NODE_EXE`, then
+  standard VS Code `Code.exe` with `ELECTRON_RUN_AS_NODE=1`, before falling
+  back to ambient `node.exe`
+
+## [1.3.7] - 2026-04-22
+
+### Changed
+
+- exact authority `v1.3.6` on `main` remains immutable while public GitHub
+  `main` plus tag already publish `v1.3.6`, but the repo-owned in-place
+  GitHub release publish attempt against draft `312363117` now proves an
+  external immutable-release boundary (`422 tag_name was used by an immutable
+  release`), so `release/1.3.7` opens from merged-green `develop` as the next
+  governed exact line
+- the repo-owned exact-release publish/verify controller remains retained on
+  `develop` so the next exact line can close through one governed GitHub
+  release act instead of another draft-only partial transaction
+
+## [1.3.6] - 2026-04-22
+
+### Changed
+
+- exact authority `v1.3.5` on `main` remains immutable while the separate
+  public GitHub exact release still serves `v1.3.1` and VS Code Marketplace
+  still serves `1.3.0`, so `release/1.3.6` now opens from merged-green
+  `develop` for the next governed public-exact retry
+- the fail-closed public exact pre-tag proof remains retained directly on
+  `develop` while `release/1.3.6` carries the next exact-retry line
+
+## [1.3.5] - 2026-04-21
+
+### Changed
+
+- exact authority `v1.3.4` on `main` remains immutable while the public GitHub
+  exact release still serves `v1.3.1` and VS Code Marketplace still serves
+  `1.3.0`, so `v1.3.5` reopens the exact line narrowly from `main`
+- the authority-side public-source validation surfaces now relax the remaining
+  stale public facade changelog expectation before the next public GitHub exact-release retry
+
+## [1.3.4] - 2026-04-21
+
+### Changed
+
+- exact authority `v1.3.3` on `main` remains immutable while the public GitHub
+  exact release still serves `v1.3.1` and VS Code Marketplace still serves
+  `1.3.0`, so `v1.3.4` reopens the exact line narrowly from `main`
+- the authority-side public-source validation surfaces now fix the last stale
+  public facade changelog expectation before the next public GitHub exact-release retry
+
+## [1.3.3] - 2026-04-21
+
+### Changed
+
+- exact authority `v1.3.2` on `main` remains immutable while the public GitHub
+  exact release still serves `v1.3.1` and VS Code Marketplace still serves
+  `1.3.0`, so `v1.3.3` reopens the exact line narrowly from `main`
+- the authority-side public-source validation surfaces now align with the
+  promoted public facade by expecting the current README source-evaluation
+  headings and the reopened `1.3.3` package/changelog line before the next
+  public GitHub exact-release retry
+
+## [1.3.2] - 2026-04-21
+
+### Changed
+
+- exact public GitHub `v1.3.1` remains immutable while VS Code Marketplace
+  still serves `1.3.0`, so `v1.3.2` opens as a governed hotfix line from
+  exact `main` instead of mutating the already-published `v1.3.1` GitHub
+  asset
+- the packaged extension surface now carries the first governed Marketplace
+  icon path at `resources/marketplace/vi-history-suite-icon.png` through the
+  extension manifest instead of relying on listing-only operator memory
 
 ## [1.3.1] - 2026-04-20
 
