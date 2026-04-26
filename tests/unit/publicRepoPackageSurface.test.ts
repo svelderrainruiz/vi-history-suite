@@ -14,7 +14,7 @@ function readJson<T>(relativePath: string): T {
 }
 
 describe('public repo package surface', () => {
-  it('keeps the public repo on the exact-release main baseline while opening the host-default develop candidate', () => {
+  it('keeps the public facade contract aligned with the governed preview package line', () => {
     const manifest = readJson<{
       scripts?: Record<string, string>;
       version?: string;
@@ -25,16 +25,20 @@ describe('public repo package surface', () => {
     const support = readText('SUPPORT.md');
     const contributing = readText('CONTRIBUTING.md');
     const bugReport = readText('.github/ISSUE_TEMPLATE/bug-report.yml');
+    const communityValidation = readText(
+      '.github/ISSUE_TEMPLATE/community-validation-windows-labview.yml'
+    );
     const labviewVersionRequest = readText('.github/ISSUE_TEMPLATE/labview-version-support.yml');
     const featureRequest = readText('.github/ISSUE_TEMPLATE/feature-request.yml');
     const issueConfig = readText('.github/ISSUE_TEMPLATE/config.yml');
+    const labels = readText('.github/labels.yml');
     const bundledUserWorkflow = readText('resources/bundled-docs/pages/user-workflow.html');
     const bundledComparisonReview = readText(
       'resources/bundled-docs/pages/comparison-reports-and-dashboard-review.html'
     );
     const previewWorkflow = readText('.github/workflows/public-source-package-preview.yml');
 
-    expect(manifest.version).toBe('1.3.9');
+    expect(manifest.version).toBe('1.3.10');
     expect(manifest.files).toEqual([
       'out/**',
       'node_modules/jsonc-parser/**',
@@ -73,6 +77,7 @@ describe('public repo package surface', () => {
 
     expect(readme).toContain('## Install The Extension');
     expect(readme).toContain('code --install-extension svelderrainruiz.vi-history-suite');
+    expect(readme).toContain('The packaged Marketplace listing is intentionally installed-user first');
     expect(readme).toContain('VI History: Prepare Local Runtime Settings CLI');
     expect(readme).toContain('## Compare A VI');
     expect(readme).toContain('## Supported Today');
@@ -81,7 +86,10 @@ describe('public repo package surface', () => {
     expect(readme).toContain('Choose `Compare`');
     expect(readme).toContain('LabVIEW years `2020` through `2026`');
     expect(readme).toContain('`docker/windows` is supported for `2026` `x64` only');
+    expect(readme).toContain('Proof Status And Community Validation');
+    expect(readme).toContain('svelderrainruiz.vi-history-suite@prerelease');
     expect(readme).toContain('Report A Problem Or Request Support');
+    expect(readme).toContain('[Marketplace Community Validation Report]');
     expect(readme).toContain('[LabVIEW Version Support Request]');
     expect(readme).toContain('## Evaluate From Source');
     expect(readme).toContain('## Contribute');
@@ -89,6 +97,10 @@ describe('public repo package surface', () => {
     expect(readme).toContain('[CONTRIBUTING.md](./CONTRIBUTING.md)');
     expect(readme).not.toContain('Need Source Evaluation Or Contribution?');
     expect(readme).not.toContain('latest exact released source');
+    expect(readme).not.toContain('Install And Use');
+    expect(readme).not.toContain('exact released Marketplace line');
+    expect(readme).not.toContain('maintained `develop` candidate line');
+    expect(readme).not.toContain('install-vihs-extension.ps1');
     expect(readme).not.toContain('Authority And Release Control');
     expect(install).toContain('## Install The Extension');
     expect(install).toContain('## First-Time Setup');
@@ -118,16 +130,28 @@ describe('public repo package surface', () => {
     expect(support).toContain('or from a VSIX');
     expect(support).toContain('vihs --validate');
     expect(support).toContain('Windows defaults to local `LabVIEWCLI`');
+    expect(support).toContain('Community Validation Triage');
+    expect(support).toContain('Linux/Docker success does not prove');
     expect(bugReport).toContain('install, settings, validation, or compare problem');
     expect(bugReport).toContain('`code --install-extension svelderrainruiz.vi-history-suite`');
-    expect(bugReport).toContain('Exact released Marketplace line (`1.3.0`)');
+    expect(bugReport).toContain('svelderrainruiz.vi-history-suite@prerelease');
+    expect(bugReport).toContain('Exact released Marketplace line (`1.3.9`)');
+    expect(bugReport).toContain('Marketplace community-validation pre-release (`1.3.10`)');
     expect(bugReport).toContain('What command or surface failed?');
     expect(bugReport).toContain('`vihs --validate` output');
+    expect(communityValidation).toContain('Marketplace community validation report');
+    expect(communityValidation).toContain('Selectable does not mean maintainer-proven');
+    expect(communityValidation).toContain('Proof-status acknowledgement');
     expect(labviewVersionRequest).toContain('LabVIEW version support request');
     expect(labviewVersionRequest).toContain('Requested LabVIEW year');
+    expect(labviewVersionRequest).toContain('proof-deferred');
     expect(featureRequest).toContain('install, configuration, validation, or compare improvement');
     expect(featureRequest).toContain('Which surface should improve?');
+    expect(labels).toContain('name: community-validation');
+    expect(labels).toContain('name: proof:reported');
+    expect(labels).toContain('name: proof:deferred');
     expect(issueConfig).toContain('Install and release guide');
+    expect(issueConfig).toContain('Marketplace community validation');
     expect(issueConfig).toContain('User workflow');
     expect(contributing).toContain('source-available and intentionally restrictive');
     expect(contributing).toContain('npm run public:host:bootstrap-linux');
@@ -158,7 +182,9 @@ describe('public repo package surface', () => {
     expect(normalizedChangelog).toContain(
       'Retained exact-version releases now include `v0.2.0`, `v1.0.0`, `v1.0.1`,'
     );
-    expect(normalizedChangelog).toContain('`v1.3.6`, `v1.3.7`, and `v1.3.8`.');
+    expect(normalizedChangelog).toContain('`v1.3.6`, `v1.3.7`, `v1.3.8`, and `v1.3.9`.');
+    expect(normalizedChangelog).toContain('## [1.3.10] - 2026-04-25');
+    expect(normalizedChangelog).toContain('Marketplace community-validation preview package line');
     expect(normalizedChangelog).toContain('## [1.3.9] - 2026-04-23');
     expect(normalizedChangelog).toContain('## [1.3.8] - 2026-04-23');
     expect(normalizedChangelog).toContain('public GitHub release `312768592` published immutable');

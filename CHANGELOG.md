@@ -5,9 +5,20 @@ This changelog is the governed version-line summary for `vi-history-suite`.
 Retained exact-version releases now include `v0.2.0`, `v1.0.0`, `v1.0.1`,
 `v1.0.2`, `v1.0.3`, `v1.0.4`, `v1.0.5`, `v1.0.6`, `v1.1.0`, `v1.2.0`,
 `v1.2.1`, `v1.2.2`, `v1.3.0`, `v1.3.1`, `v1.3.2`, `v1.3.3`, `v1.3.4`,
-`v1.3.5`, `v1.3.6`, `v1.3.7`, and `v1.3.8`.
+`v1.3.5`, `v1.3.6`, `v1.3.7`, `v1.3.8`, and `v1.3.9`.
 
 Burned exact-version releases now include `v1.0.2`.
+
+## [1.3.10] - 2026-04-25
+
+### Added
+
+- Marketplace community-validation preview package line for publishing a VS
+  Code Marketplace pre-release while Windows installed-user proof remains
+  explicitly deferred.
+- Proof-status disclosure for selectable Windows/LabVIEW provider, year, and
+  bitness settings through `vihs --validate` and the requirements traceability
+  matrix.
 
 ## [1.3.9] - 2026-04-23
 
