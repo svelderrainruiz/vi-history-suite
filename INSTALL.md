@@ -45,9 +45,11 @@ before expecting Compare to run.
 
 - Windows defaults to local `LabVIEWCLI`
 - host Windows LabVIEW years `2020` through `2026` are selectable when they are installed locally
-- `docker/windows` is supported for `2026` `x64` only
-- Docker years before `2026` are unsupported
-- `docker/linux` for `2026` and `host/linux` are not currently implemented
+- `docker/windows` and `docker/linux` are governed today for `2026` `x64`
+  only, but other selectable Docker years and bitnesses are accepted for
+  validation reporting and may return a stable not-yet-implemented code
+- `host/linux` is selectable for validation reporting and is expected to return
+  a stable unsupported or missing-runtime code until implemented
 - blocked or unsupported paths fail closed with explicit next-step guidance
 
 ## Source Evaluation And Codespaces
