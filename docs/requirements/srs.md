@@ -4748,6 +4748,15 @@ Missing numeric IDs are intentional.
     a GitHub App can create) works with a plain token that has `statuses: write`,
     matching the PAT-based token model; a status failure is best-effort and
     never blocks the textual review.
+  - VHS-REQ-661.13: The review detects and calls out the VIs that appear changed
+    in Git but whose completed comparison found no substantive difference — a
+    file re-saved/recompiled with different bytes but an identical front panel
+    and block diagram. The signal is a completed comparison whose semantic model
+    reports an overview-level difference yet zero itemized detail items
+    (`detailItemCount === 0`); such VIs are labeled distinctly in the summary
+    table and named in a callout, and their empty per-VI detail block is
+    suppressed, so a reviewer can discount Git false-positives at a glance.
+    Attribute-only changes render as detail items and are therefore not flagged.
 - Agent Work Scope:
   - Change the workflow YAML and its static contract test together. Keep the
     workflow thin CI plumbing around the already-shipped
@@ -4762,12 +4771,14 @@ Missing numeric IDs are intentional.
   - `src/semantic/viSemanticPrReview.ts`
   - `src/semantic/stickyPrComment.ts`
   - `src/semantic/viSemanticReviewMarkdown.ts`
+  - `src/semantic/viSemanticNoChangeDetection.ts`
   - `src/semantic/viComparisonReportImages.ts`
   - `src/semantic/viReviewCommitStatus.ts`
 - Verification References:
   - `tests/unit/viSemanticPrReviewWorkflow.test.ts`
   - `tests/unit/viSemanticReviewOnPrTemplate.test.ts`
   - `tests/unit/viSemanticReviewMarkdown.test.ts`
+  - `tests/unit/viSemanticNoChangeDetection.test.ts`
   - `tests/unit/viComparisonReportImages.test.ts`
   - `tests/unit/viReviewCommitStatus.test.ts`
   - `tests/unit/viSemanticPrReview.test.ts`

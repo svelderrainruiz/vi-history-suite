@@ -30,12 +30,14 @@ function makeModel(overrides: Partial<ViSemanticComparisonModel> = {}): ViSemant
     changedSurfaces: ['block-diagram'],
     attributes: { included: [], excluded: [] },
     overviewSections: [],
-    detailSections: [],
+    detailSections: [
+      { surface: 'block-diagram', heading: 'Block Diagram objects', items: ['Wire rerouted'], itemCount: 1 }
+    ],
     totals: {
       changedSurfaceCount: 1,
       overviewImageCount: 0,
-      detailSectionCount: 0,
-      detailItemCount: 0,
+      detailSectionCount: 1,
+      detailItemCount: 1,
       includedAttributeCount: 0,
       excludedAttributeCount: 0
     },
@@ -214,6 +216,45 @@ describe('renderViSemanticPrReviewMarkdown', () => {
     expect(markdown).toContain('#### src/A.vi');
     expect(markdown).toContain('The block diagram differs.');
     expect(markdown).not.toContain('#### src/B.vi');
+  });
+
+  it('calls out VIs that appear changed in Git but have no substantive difference (VHS-REQ-661.13)', async () => {
+    const noSubstantive = makeModel({
+      vi: { title: 'B.vi' },
+      hasDifferences: true,
+      changedSurfaces: ['front-panel', 'block-diagram'],
+      detailSections: [],
+      totals: {
+        changedSurfaceCount: 2,
+        overviewImageCount: 2,
+        detailSectionCount: 0,
+        detailItemCount: 0,
+        includedAttributeCount: 0,
+        excludedAttributeCount: 0
+      },
+      narrative: 'The front panel and block diagram differ.'
+    });
+    const review = await buildViSemanticPrReview(
+      { repositoryRoot: '/repo', baseHash: 'a', selectedHash: 'b' },
+      {
+        listChangedPaths: async () => ['src/A.vi', 'src/B.vi'],
+        compareVi: async (input) =>
+          input.relativePath === 'src/A.vi'
+            ? completed(makeModel({ vi: { title: 'A.vi' } }))
+            : completed(noSubstantive)
+      }
+    );
+
+    const markdown = renderViSemanticPrReviewMarkdown(review);
+    // The false-positive VI is labeled distinctly and named in the callout,
+    // and its noisy "differs" detail block is suppressed.
+    expect(markdown).toContain('| src/B.vi | No substantive changes | — |');
+    expect(markdown).toContain('1 VI changed in Git but with no substantive difference');
+    expect(markdown).toContain('> - `src/B.vi`');
+    expect(markdown).not.toContain('#### src/B.vi');
+    // A real change is unaffected.
+    expect(markdown).toContain('| src/A.vi | Changed | block diagram |');
+    expect(markdown).toContain('#### src/A.vi');
   });
 
   it('embeds a collapsed visual-diff gallery for a changed VI when images are supplied (VHS-REQ-661.11)', async () => {

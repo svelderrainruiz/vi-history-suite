@@ -1,6 +1,10 @@
 import type { ViChangeSurface, ViSemanticComparisonModel } from './viSemanticModel';
 import type { ViSemanticHistory } from './viSemanticHistory';
 import type { ViSemanticPrReview } from './viSemanticPrReview';
+import {
+  detectNoSubstantiveChangeVis,
+  viHasNoSubstantiveChanges
+} from './viSemanticNoChangeDetection';
 
 /**
  * Pure renderers that turn the semantic comparison / history / PR-review models
@@ -138,9 +142,17 @@ export function renderViSemanticPrReviewMarkdown(
   lines.push('| VI | Result | Changed surfaces |', '| --- | --- | --- |');
   for (const entry of review.entries) {
     if (entry.status === 'completed') {
-      const result = entry.hasDifferences ? 'Changed' : 'No differences';
+      // A completed comparison with zero itemized differences is a Git
+      // false-positive: the file changed on disk but LabVIEW found no
+      // substantive difference. Call it out distinctly from a real change.
+      const noSubstantive = viHasNoSubstantiveChanges(entry.model);
+      const result = !entry.hasDifferences
+        ? 'No differences'
+        : noSubstantive
+          ? 'No substantive changes'
+          : 'Changed';
       const surfaces =
-        entry.hasDifferences && entry.model.changedSurfaces.length > 0
+        entry.hasDifferences && !noSubstantive && entry.model.changedSurfaces.length > 0
           ? surfaceList(entry.model.changedSurfaces)
           : '—';
       lines.push(`| ${escapeCell(entry.relativePath)} | ${result} | ${escapeCell(surfaces)} |`);
@@ -154,8 +166,22 @@ export function renderViSemanticPrReviewMarkdown(
   }
   lines.push('');
 
+  // Call out the Git false-positives (VHS-REQ-661): VIs that appear changed but
+  // whose comparison found no substantive difference, so a reviewer can discount
+  // them at a glance instead of opening each one.
+  const noSubstantiveChangeVis = detectNoSubstantiveChangeVis(review);
+  if (noSubstantiveChangeVis.length > 0) {
+    const count = noSubstantiveChangeVis.length;
+    lines.push(
+      `> **${count} VI${count === 1 ? '' : 's'} changed in Git but with no substantive difference** ` +
+        '(re-saved/recompiled without a front-panel or block-diagram change):',
+      ...noSubstantiveChangeVis.map((vi) => `> - \`${escapeCell(vi.relativePath)}\``),
+      ''
+    );
+  }
+
   for (const entry of review.entries) {
-    if (entry.status === 'completed' && entry.hasDifferences) {
+    if (entry.status === 'completed' && entry.hasDifferences && !viHasNoSubstantiveChanges(entry.model)) {
       lines.push(`#### ${escapeCell(entry.relativePath)}`, '', renderViSemanticComparisonMarkdown(entry.model), '');
       const images = options.imagesByVi?.get(entry.relativePath) ?? [];
       if (images.length > 0) {
