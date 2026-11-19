@@ -10,7 +10,7 @@
   "testPlan": { "path": "testing/test-plan.md" },
   "names": { "requirements/syrs.md": "System-Requirements-Specification" },
   "words": { "vhs": "VHS", "req": "REQ", "syrs": "SyRS" },
-  "assetDirs": ["images", "media"],
+  "assetDirs": ["images"],
   "sections": [
     ["information-for-users", "Information for users"],
     ["architecture", "Architecture"],
