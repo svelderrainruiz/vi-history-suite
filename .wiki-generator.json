@@ -1,0 +1,38 @@
+{
+  "schema": "rsr/wiki-generator-config@1",
+  "repoUrl": "https://github.com/svelderrainruiz/vi-history-suite",
+  "branch": "develop",
+  "wikiTitle": "vi-history-suite Wiki",
+  "docs": "docs",
+  "srs": { "path": "requirements/srs.md", "style": "blocks" },
+  "rtm": { "path": "requirements/rtm.csv", "idColumn": "ReqID", "columns": ["Status", "Area"] },
+  "architecture": { "overview": "architecture/overview.md", "adrDir": "architecture/adr", "adrIndex": "architecture/adr/README.md" },
+  "testPlan": { "path": "testing/test-plan.md" },
+  "names": { "requirements/syrs.md": "System-Requirements-Specification" },
+  "words": { "vhs": "VHS", "req": "REQ", "syrs": "SyRS" },
+  "assetDirs": ["images", "media"],
+  "sections": [
+    ["information-for-users", "Information for users"],
+    ["architecture", "Architecture"],
+    ["cm", "Process and assurance"],
+    ["testing", "Testing"],
+    ["requirements", "Requirements"]
+  ],
+  "scopes": {
+    "software": {
+      "directory": "software-requirements",
+      "idPrefix": "VHS-REQ",
+      "sections": [
+        { "name": "Status", "from": "block:Status" },
+        { "name": "Parent", "from": "block:Parent" },
+        { "name": "Area", "from": "block:Area" },
+        { "name": "Statement", "from": "block:Statement" },
+        { "name": "Acceptance Criteria", "from": "block:Acceptance Criteria" },
+        { "name": "Agent Work Scope", "from": "block:Agent Work Scope" },
+        { "name": "Implementation References", "from": "block:Implementation References" },
+        { "name": "Verification References", "from": "block:Verification References" },
+        { "name": "Change Guidance", "from": "block:Change Guidance" }
+      ]
+    }
+  }
+}
