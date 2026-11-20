@@ -1,0 +1,123 @@
+# Publishes the generated wiki to the repository wiki.
+#
+# docs/ is the single source of truth: the shared repo-standards-review generator
+# (.repo-standards-review/wiki_generate.py, configured by .wiki-generator.json) regenerates the whole wiki from it, with
+# canonical test pages built from the vitest evidence at this commit (the same steps as the wiki-canonical-evidence job
+# in ci.yml). scripts/check_wiki_canonical.py runs first, so any failure stops the job before the wiki is checked out and
+# nothing is published. Tests that need a VS Code extension host are not run here: their pages say "not run".
+#
+# Fail closed: the upstream publishes its own wiki; a fork publishes its own wiki only when its owner sets the
+# repository variable WIKI_PUBLISH_ENABLED to 'true'. The job pushes only to <repository>.wiki with GITHUB_TOKEN and
+# uses no secrets. See docs/information-for-users/fork-and-wiki-guide.md.
+name: wiki-publish
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'docs/**'
+      - '.wiki-generator.json'
+      - 'scripts/check_wiki_canonical.py'
+      - '.repo-standards-review/**'
+      - '.github/workflows/wiki-publish.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wiki-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Wiki / generate, publish, verify
+    if: (github.repository == 'svelderrainruiz/vi-history-suite' || vars.WIKI_PUBLISH_ENABLED == 'true') && github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write # push the generated pages to the wiki repository
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Prepare lvkit + icon-editor corpus (VHS-REQ-712)
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv tool install 'lvkit==0.5.0'
+          uv tool list
+          uv tool dir --bin >> "$GITHUB_PATH"
+          corpus="$RUNNER_TEMP/lvkit-corpus"
+          rm -rf "$corpus"
+          git init -q "$corpus"
+          git -C "$corpus" remote add origin https://github.com/ni/labview-icon-editor
+          git -C "$corpus" fetch --depth 1 origin 537683398d8c5cb73533603b5c06b6eef62a6ac8
+          git -C "$corpus" fetch --depth 1 origin fc09736ae5e38c2016de081a9c8686256c9f2f9c
+          echo "VIHS_LVKIT_CORPUS_DIR=$corpus" >> "$GITHUB_ENV"
+
+      - name: Run the unit tests as a JSON report
+        run: npx vitest run --reporter=json --outputFile=vitest-report.json
+
+      - name: Write the execution evidence
+        run: python3 .repo-standards-review/observations.py evidence --format jest-json --report vitest-report.json --platform linux-x64 --root . --output wiki-evidence.json
+
+      - name: Validate the canonical wiki
+        run: python3 scripts/check_wiki_canonical.py
+
+      - name: Build the wiki
+        env:
+          EVIDENCE: wiki-evidence.json
+        run: |
+          set -euo pipefail
+          build() {
+            git -C "$1" init -q -b main 2>/dev/null || true
+            python3 .repo-standards-review/wiki_generate.py --member-root . --out "$1" > /dev/null
+            python3 .repo-standards-review/observations.py stimulus --wiki "$1" --evidence "$EVIDENCE" --member vi-history-suite --artifact-section 'Evidence Files' --step 'npm ci' --command 'npx vitest run {files}'
+            python3 .repo-standards-review/observations.py generate --wiki "$1" --evidence "$EVIDENCE"
+          }
+          mkdir "$RUNNER_TEMP/wiki-build"
+          build "$RUNNER_TEMP/wiki-build"
+
+      - name: Check out the wiki
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ github.repository }}.wiki
+          path: .wiki
+
+      - name: Publish the wiki
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          rsync -a --delete --exclude='.git' "$RUNNER_TEMP/wiki-build/" .wiki/
+          cd .wiki
+          git add -A
+          if git diff --cached --quiet; then
+            echo "wiki is already current"
+            exit 0
+          fi
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+            commit --quiet -m "Generate from docs/ at ${SOURCE_SHA}"
+          git push --quiet origin HEAD
+
+      - name: Verify the published wiki (drift check)
+        env:
+          WIKI_URL: https://github.com/${{ github.repository }}.wiki.git
+        run: |
+          git clone --quiet "$WIKI_URL" "$RUNNER_TEMP/wiki-verify"
+          diff -r --exclude='.git' "$RUNNER_TEMP/wiki-build" "$RUNNER_TEMP/wiki-verify"
