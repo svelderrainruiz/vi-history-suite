@@ -733,3 +733,4 @@ VHS-REQ-715,Software,Active,srs.md#vhs-req-715-full-perfmon-metadata-capture-and
 VHS-REQ-716,Software,Active,srs.md#vhs-req-716-lvkit-vi-scan-store-and-generated-code-retrieval-tool,,,docs/requirements/srs.md
 VHS-REQ-717,Software,Active,srs.md#vhs-req-717-preview-time-vi-scan-trigger,,,docs/requirements/srs.md
 VHS-REQ-719,Software,Active,srs.md#vhs-req-719-local-branch-flow-enforcement-and-explicit-prototype-promotion,,,docs/requirements/srs.md
+VHS-REQ-720,Software,Active,srs.md#vhs-req-720-fork-wiki-submissions-are-verified-as-data,,,docs/requirements/srs.md

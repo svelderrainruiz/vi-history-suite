@@ -8928,3 +8928,39 @@ Missing numeric IDs are intentional.
     year or bitness enters the grid, extend `MATRIX_YEARS`/`MATRIX_BITNESSES` and
     the ledger tracks together, and keep ledger recording gated on genuine
     real-runtime evidence.
+
+### VHS-REQ-720: Fork Wiki Submissions Are Verified As Data
+
+- Status: Active
+- Parent: VHS-SYS-REQ-011
+- Area: Repository Governance
+- Statement: The toolset shall verify a fork's wiki-submission issue against this
+  repository's own test definitions, treating fork content strictly as data, and
+  label the issue `wiki-attested` or `wiki-not-attested`, with a partner
+  allow-list, held in an Actions secret outside the repository, that authorizes
+  nobody while it is unset or empty.
+- Acceptance Criteria:
+  - The gate job is the only job that reads the allow-list secret; it authorizes
+    the fork owner (listed) and the issue author (the owner or a public
+    organisation member) and every failure gives one undifferentiated outcome.
+  - `scripts/wiki_submission.py` parses the body strictly under the limits of
+    `scripts/wiki-submission.schema.json`, fetches evidence bytes at the pinned
+    fork commit, enforces size caps, recomputes sha256 and compares test ids,
+    results, commit and platform with `.wiki-generator.json` `testPlan.canonical`
+    and the evidence kit; it never checks out or runs fork code.
+  - The report job takes only fixed-vocabulary outputs, runs even when the gate
+    or verify job fails, and never keeps an attestation after a failed verification.
+- Agent Work Scope:
+  - Change the ingest workflow, verifier, schema and their fixtures together when
+    changing the submission contract.
+- Implementation References:
+  - `.github/workflows/wiki-submission-ingest.yml`
+  - `scripts/wiki_submission.py`
+  - `scripts/wiki-submission.schema.json`
+  - `docs/architecture/adr/ADR-0036-verify-fork-wiki-submissions-as-data.md`
+- Verification References:
+  - `tests/unit/wikiSubmissionIngest.test.ts`
+  - `tests/python/wiki_submission_test.py`
+- Change Guidance:
+  - Keep fork content as data and the secret in the gate job only; do not add a
+    `pull_request_target` trigger.
