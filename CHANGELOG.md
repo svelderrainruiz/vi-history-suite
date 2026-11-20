@@ -6,6 +6,13 @@ This changelog records user-facing release history for `vi-history-suite`.
 
 ### Added
 
+- Link the requirements that cite a specific test file to canonical wiki test pages (svelderrainruiz/vi-history-suite#20,
+  VITechnologies/projectbuddy#318): 22 per-case plus 115 file-level canonical, 4 stub. A file-level page says
+  `evidence granularity: file` and names the test files that passed at the commit and cite the requirement; the generic
+  `requirementsDocs.test.ts` and `packageManifest.test.ts` are never evidence, so VHS-REQ-004, 084, 599 and 607 stay stubs
+  with reason codes in `docs/testing/wiki-stub-reasons.json`. `scripts/generate_wiki_test_plan.py` generates the rows and
+  the SRS `Evidence Files` blocks, and `scripts/check_wiki_canonical.py` now fails when a test page is within 2 KB of the
+  16,384-byte page budget or when the counts differ.
 - Move the RSR consumer kit and governance pin to v0.14.0 (VITechnologies/projectbuddy#408) and configure canonical wiki test
   pages: `.wiki-generator.json` adds a test scope, `TestID` links from the test plan, and the evidence file; the
   `Wiki Canonical Test Pages` CI job turns `vitest run --reporter=json` into evidence and checks that the wiki

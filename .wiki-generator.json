@@ -12,7 +12,7 @@
     "idColumn": "Test Evidence",
     "canonical": {
       "evidence": ["wiki-evidence.json"],
-      "artifactSection": "Verification References",
+      "artifactSection": "Evidence Files",
       "testFiles": ["\\.test\\.ts$"],
       "notRunReason": "it needs a VS Code extension host, which the evidence does not run"
     }
@@ -40,6 +40,7 @@
         { "name": "Agent Work Scope", "from": "block:Agent Work Scope" },
         { "name": "Implementation References", "from": "block:Implementation References" },
         { "name": "Verification References", "from": "block:Verification References" },
+        { "name": "Evidence Files", "from": "block:Evidence Files" },
         { "name": "Change Guidance", "from": "block:Change Guidance" },
         { "name": "TestID", "from": "plan:tests" }
       ]

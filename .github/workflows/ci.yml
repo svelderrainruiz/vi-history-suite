@@ -412,6 +412,9 @@ jobs:
       - name: Write the execution evidence
         run: python3 .repo-standards-review/observations.py evidence --format jest-json --report vitest-report.json --platform linux-x64 --root . --output wiki-evidence.json
 
+      - name: Check the page-margin check rejects tight pages
+        run: python3 scripts/check_wiki_canonical.py --self-test
+
       - name: Check the canonical test pages
         run: python3 scripts/check_wiki_canonical.py
 

@@ -40,6 +40,9 @@ Missing numeric IDs are intentional.
 - Verification References:
   - `tests/unit/viMagic.test.ts`
   - `tests/unit/viMagicWrapper.test.ts`
+- Evidence Files:
+  - `tests/unit/viMagic.test.ts`
+  - `tests/unit/viMagicWrapper.test.ts`
 - Change Guidance:
   - Do not replace content detection with extension-only detection.
 
@@ -63,6 +66,8 @@ Missing numeric IDs are intentional.
 - Verification References:
   - `tests/unit/viMagic.test.ts`
   - `tests/unit/packageManifest.test.ts`
+- Evidence Files:
+  - `tests/unit/viMagic.test.ts`
 - Change Guidance:
   - Keep strict mode opt-in unless a separate requirement changes the default.
 
@@ -84,6 +89,8 @@ Missing numeric IDs are intentional.
 - Verification References:
   - `tests/unit/viFile.test.ts`
   - `tests/unit/viMagicWrapper.test.ts`
+- Evidence Files:
+  - `tests/unit/viFile.test.ts`
 - Change Guidance:
   - Keep indexing I/O bounded for large repositories.
 
@@ -103,6 +110,8 @@ Missing numeric IDs are intentional.
 - Implementation References:
   - `src/domain/viMagic.ts`
 - Verification References:
+  - `tests/unit/viMagicWrapper.test.ts`
+- Evidence Files:
   - `tests/unit/viMagicWrapper.test.ts`
 - Change Guidance:
   - Preserve remote and virtual workspace compatibility.
@@ -134,6 +143,11 @@ Missing numeric IDs are intentional.
   - `tests/unit/viHistoryModel.test.ts`
   - `tests/unit/viHistoryService.test.ts`
   - `tests/unit/gitCli.test.ts`
+- Evidence Files:
+  - `tests/unit/openViHistoryCommand.test.ts`
+  - `tests/unit/viHistoryModel.test.ts`
+  - `tests/unit/viHistoryService.test.ts`
+  - `tests/unit/gitCli.test.ts`
 - Change Guidance:
   - Keep eligibility stricter than menu visibility hints.
 
@@ -154,6 +168,8 @@ Missing numeric IDs are intentional.
 - Implementation References:
   - `src/git/gitCli.ts`
 - Verification References:
+  - `tests/unit/gitCli.test.ts`
+- Evidence Files:
   - `tests/unit/gitCli.test.ts`
 - Change Guidance:
   - Do not switch to newline parsing for Git path lists, and do not treat this
@@ -181,6 +197,9 @@ Missing numeric IDs are intentional.
   - `tests/unit/gitCli.test.ts`
   - `tests/unit/viHistoryService.test.ts`
   - `tests/unit/viHistoryModel.test.ts`
+- Evidence Files:
+  - `tests/unit/gitCli.test.ts`
+  - `tests/unit/viHistoryModel.test.ts`
 - Change Guidance:
   - Keep minimum eligibility reads scoped to the requested file rather than
     introducing repository-wide VI scans.
@@ -205,6 +224,8 @@ Missing numeric IDs are intentional.
 - Verification References:
   - `tests/unit/viHistoryService.test.ts`
   - `tests/unit/gitApi.test.ts`
+- Evidence Files:
+  - `tests/unit/viHistoryService.test.ts`
 - Change Guidance:
   - Keep Git API and CLI fallback behavior aligned.
 
@@ -232,6 +253,9 @@ Missing numeric IDs are intentional.
   - `tests/unit/packageManifest.test.ts`
   - `tests/unit/extensionActivationLazySideEffects.test.ts`
   - `tests/integration/suite/extensionHost.test.ts`
+- Evidence Files:
+  - `tests/unit/openViHistoryCommand.test.ts`
+  - `tests/unit/extensionActivationLazySideEffects.test.ts`
 - Change Guidance:
   - Trust checks are safety boundaries, not convenience prompts.
 
@@ -258,6 +282,8 @@ Missing numeric IDs are intentional.
 - Verification References:
   - `tests/unit/openViHistoryCommand.test.ts`
   - `tests/unit/packageManifest.test.ts`
+- Evidence Files:
+  - `tests/unit/openViHistoryCommand.test.ts`
 - Change Guidance:
   - Keep command-time validation conservative even when manifest menu hints stay
     intentionally broad.
@@ -283,6 +309,8 @@ Missing numeric IDs are intentional.
   - `tests/unit/packageManifest.test.ts`
   - `tests/unit/extensionActivationLazySideEffects.test.ts`
   - `tests/integration/suite/extensionHost.test.ts`
+- Evidence Files:
+  - `tests/unit/extensionActivationLazySideEffects.test.ts`
 - Change Guidance:
   - Treat command IDs as public extension API.
 
@@ -303,6 +331,8 @@ Missing numeric IDs are intentional.
   - `package.json`
 - Verification References:
   - `tests/unit/packageManifest.test.ts`
+- Evidence Files:
+  - None: reason code generic-evidence-only, see docs/testing/wiki-stub-reasons.json.
 - Change Guidance:
   - Runtime eligibility must remain stricter than these visible menu hints.
 
@@ -327,6 +357,8 @@ Missing numeric IDs are intentional.
 - Verification References:
   - `tests/unit/packageManifest.test.ts`
   - `tests/unit/extensionActivationLazySideEffects.test.ts`
+- Evidence Files:
+  - `tests/unit/extensionActivationLazySideEffects.test.ts`
 - Change Guidance:
   - Do not add broad activation events (such as `*` or unfiltered language or
     view events) without a requirement update.
@@ -350,6 +382,8 @@ Missing numeric IDs are intentional.
   - `package.json`
 - Verification References:
   - `tests/unit/packageManifest.test.ts`
+- Evidence Files:
+  - None: reason code generic-evidence-only, see docs/testing/wiki-stub-reasons.json.
 - Change Guidance:
   - Keep manifest capability claims aligned with runtime behavior.
 
@@ -380,6 +414,9 @@ Missing numeric IDs are intentional.
 - Verification References:
   - `tests/unit/openViHistoryCommand.test.ts`
   - `tests/integration/suite/extensionHost.test.ts`
+  - `tests/unit/viHistoryService.test.ts`
+- Evidence Files:
+  - `tests/unit/openViHistoryCommand.test.ts`
   - `tests/unit/viHistoryService.test.ts`
 - Change Guidance:
   - Keep user-facing stops explicit instead of silent.
@@ -428,6 +465,10 @@ Missing numeric IDs are intentional.
   - `tests/unit/historyPanelRendering.test.ts`
   - `tests/unit/runtimeReportPanel.test.ts`
   - `tests/integration/suite/extensionHost.test.ts`
+- Evidence Files:
+  - `tests/unit/viHistoryModel.test.ts`
+  - `tests/unit/historyPanelRendering.test.ts`
+  - `tests/unit/runtimeReportPanel.test.ts`
 - Change Guidance:
   - Do not replace factual Git content with inferred summaries. Keep the panel
     focused on the commit table and the explicit Compare action; route additional
@@ -461,6 +502,10 @@ Missing numeric IDs are intentional.
   - `tests/unit/historyPanelTracker.test.ts`
   - `tests/unit/packageManifest.test.ts`
   - `tests/integration/suite/extensionHost.test.ts`
+- Evidence Files:
+  - `tests/unit/historyReviewPacket.test.ts`
+  - `tests/unit/openViHistoryCommand.test.ts`
+  - `tests/unit/historyPanelTracker.test.ts`
 - Change Guidance:
   - Keep copied review packets grounded in the same model the panel renders.
 
@@ -491,6 +536,8 @@ Missing numeric IDs are intentional.
 - Verification References:
   - `tests/unit/historyReviewPacket.test.ts`
   - `tests/integration/suite/extensionHost.test.ts`
+- Evidence Files:
+  - `tests/unit/historyReviewPacket.test.ts`
 - Change Guidance:
   - Keep binary semantic claims out of Git-only packet text.
 
@@ -526,6 +573,9 @@ Missing numeric IDs are intentional.
   - `tests/unit/gitCli.test.ts`
   - `tests/unit/historyPanelRendering.test.ts`
   - `tests/integration/suite/extensionHost.test.ts`
+- Evidence Files:
+  - `tests/unit/gitCli.test.ts`
+  - `tests/unit/historyPanelRendering.test.ts`
 - Change Guidance:
   - Keep panel content factual; render Git commit text without inferred
     summaries.
@@ -569,6 +619,11 @@ Missing numeric IDs are intentional.
   - `tests/unit/comparisonReportPreflight.test.ts`
   - `tests/unit/comparisonReportAction.test.ts`
   - `tests/integration/suite/extensionHost.test.ts`
+- Evidence Files:
+  - `tests/unit/explicitComparePairWorkflow.test.ts`
+  - `tests/unit/openViHistoryCommand.test.ts`
+  - `tests/unit/comparisonReportPreflight.test.ts`
+  - `tests/unit/comparisonReportAction.test.ts`
 - Change Guidance:
   - Keep pair selection explicit and reviewable.
 
@@ -590,6 +645,8 @@ Missing numeric IDs are intentional.
 - Implementation References:
   - `src/reporting/comparisonReportPreflight.ts`
 - Verification References:
+  - `tests/unit/comparisonReportPreflight.test.ts`
+- Evidence Files:
   - `tests/unit/comparisonReportPreflight.test.ts`
 - Change Guidance:
   - Preserve revision-specific comparison, not current-file comparison.
@@ -613,6 +670,8 @@ Missing numeric IDs are intentional.
   - `src/reporting/comparisonReportPreflight.ts`
   - `src/domain/viMagicCore.ts`
 - Verification References:
+  - `tests/unit/comparisonReportPreflight.test.ts`
+- Evidence Files:
   - `tests/unit/comparisonReportPreflight.test.ts`
 - Change Guidance:
   - Do not invoke external comparison tooling before content checks pass.
@@ -677,6 +736,9 @@ Missing numeric IDs are intentional.
   - `tests/unit/comparisonReportRuntimeExecution.test.ts`
   - `tests/unit/comparisonReportPacket.test.ts`
   - `manual:dependency-harness-newest-tree-staging`
+- Evidence Files:
+  - `tests/unit/comparisonReportRuntimeExecution.test.ts`
+  - `tests/unit/comparisonReportPacket.test.ts`
 - Change Guidance:
   - Provide true per-revision dependency fidelity: load each VI against its own
     revision's in-repo dependencies (the base VI is no longer loaded against the
@@ -718,6 +780,9 @@ Missing numeric IDs are intentional.
   - `src/reporting/comparisonReportPreflight.ts`
   - `src/reporting/comparisonReportPacket.ts`
 - Verification References:
+  - `tests/unit/comparisonReportPreflight.test.ts`
+  - `tests/unit/comparisonReportPacket.test.ts`
+- Evidence Files:
   - `tests/unit/comparisonReportPreflight.test.ts`
   - `tests/unit/comparisonReportPacket.test.ts`
 - Change Guidance:
@@ -770,6 +835,9 @@ Missing numeric IDs are intentional.
   - `tests/unit/packageManifest.test.ts`
   - `tests/unit/comparisonReportExport.test.ts`
   - `tests/unit/comparisonReportAction.test.ts`
+- Evidence Files:
+  - `tests/unit/comparisonReportExport.test.ts`
+  - `tests/unit/comparisonReportAction.test.ts`
 - Change Guidance:
   - Keep the export limited to retained comparison evidence placed in an
     accessible location; the exported copy may embed retained revision context
@@ -805,6 +873,9 @@ Missing numeric IDs are intentional.
   - `src/reporting/comparisonReportPlan.ts`
   - `src/reporting/comparisonReportAction.ts`
 - Verification References:
+  - `tests/unit/comparisonReportExecutionPlan.test.ts`
+  - `tests/unit/comparisonReportAction.test.ts`
+- Evidence Files:
   - `tests/unit/comparisonReportExecutionPlan.test.ts`
   - `tests/unit/comparisonReportAction.test.ts`
 - Change Guidance:
@@ -856,6 +927,10 @@ Missing numeric IDs are intentional.
   - `src/reporting/comparisonReportAction.ts`
   - `src/reporting/comparisonReportExport.ts`
 - Verification References:
+  - `tests/unit/comparisonReportPacket.test.ts`
+  - `tests/unit/comparisonReportAction.test.ts`
+  - `tests/unit/comparisonReportExport.test.ts`
+- Evidence Files:
   - `tests/unit/comparisonReportPacket.test.ts`
   - `tests/unit/comparisonReportAction.test.ts`
   - `tests/unit/comparisonReportExport.test.ts`
@@ -914,6 +989,11 @@ Missing numeric IDs are intentional.
   - `tests/unit/runtimeReportPanel.test.ts`
   - `tests/unit/openRuntimeReportPanelCommand.test.ts`
   - `tests/unit/comparisonReportOptionSelection.test.ts`
+- Evidence Files:
+  - `tests/unit/comparisonReportExecutionPlan.test.ts`
+  - `tests/unit/runtimeReportPanel.test.ts`
+  - `tests/unit/comparisonReportOptionSelection.test.ts`
+  - 2 further cited test file(s) are omitted by the page-margin cap, see docs/testing/wiki-stub-reasons.json.
 - Change Guidance:
   - Keep the difference-suppression flag names aligned with the LabVIEWCLI
     CreateComparisonReport operation help; do not expose flags the CLI operation
@@ -953,6 +1033,8 @@ Missing numeric IDs are intentional.
 - Verification References:
   - `tests/unit/containerImageCatalog.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/containerImageCatalog.test.ts`
 - Change Guidance:
   - Keep the tag grammar and namespace pin strict; widening either is a security
     decision (untrusted registry input), not a cosmetic change.
@@ -988,6 +1070,9 @@ Missing numeric IDs are intentional.
   - `tests/unit/containerImageCatalog.test.ts`
   - `tests/unit/pickContainerImageVersionCommand.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/containerImageCatalog.test.ts`
+  - `tests/unit/pickContainerImageVersionCommand.test.ts`
 - Change Guidance:
   - Keep the request anonymous, read-only, and bounded; never add credentials or
     unbounded retries, and keep registry unavailability non-fatal.
@@ -1030,6 +1115,9 @@ Missing numeric IDs are intentional.
   - `tests/unit/containerImageCatalog.test.ts`
   - `tests/unit/pickContainerImageVersionCommand.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/containerImageCatalog.test.ts`
+  - `tests/unit/pickContainerImageVersionCommand.test.ts`
 - Change Guidance:
   - Treat the local list as authoritative for the offline/already-pulled case;
     merging with registry results must not drop a locally present version.
@@ -1086,6 +1174,9 @@ Missing numeric IDs are intentional.
   - `tests/unit/openRuntimeReportPanelCommand.test.ts`
   - `tests/unit/packageManifest.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/openRuntimeReportPanelCommand.test.ts`
+  - 1 further cited test file(s) are omitted by the page-margin cap, see docs/testing/wiki-stub-reasons.json.
 - Change Guidance:
   - Keep the default resolution backward-compatible: an unset setting must
     preserve the prior pinned image for the current release.
@@ -1168,6 +1259,12 @@ Missing numeric IDs are intentional.
   - `tests/unit/openViHistoryCommand.test.ts`
   - `tests/unit/pickContainerImageVersionCommand.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/comparisonRuntimeLocator.test.ts`
+  - `tests/unit/comparisonRuntimeDoctor.test.ts`
+  - `tests/unit/comparisonReportAction.test.ts`
+  - `tests/unit/openViHistoryCommand.test.ts`
+  - `tests/unit/pickContainerImageVersionCommand.test.ts`
 - Change Guidance:
   - Preserve the fail-closed runtime contract (VHS-SYS-REQ-007): a
     requested-but-missing runtime is always a classified block, never a silent
@@ -1218,6 +1315,9 @@ Missing numeric IDs are intentional.
   - `tests/unit/extensionActivationLazySideEffects.test.ts`
   - `tests/unit/packageManifest.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/openRuntimeReportPanelCommand.test.ts`
+  - `tests/unit/extensionActivationLazySideEffects.test.ts`
 - Change Guidance:
   - Keep the container image selection co-located with the docker provider choice
     and discovery best-effort and bounded; never let an unavailable discovery or a
@@ -1300,6 +1400,12 @@ Missing numeric IDs are intentional.
   - `tests/unit/worktreeSnapshotIndex.test.ts`
   - `tests/unit/comparisonReportArchive.test.ts`
   - `tests/unit/multiReportDashboard.test.ts`
+- Evidence Files:
+  - `tests/unit/viHistoryModel.test.ts`
+  - `tests/unit/worktreeSnapshotIndex.test.ts`
+  - `tests/unit/comparisonReportArchive.test.ts`
+  - `tests/unit/multiReportDashboard.test.ts`
+  - 5 further cited test file(s) are omitted by the page-margin cap, see docs/testing/wiki-stub-reasons.json.
 - Change Guidance:
   - Keep the working-tree side read-only (never write to the user's working
     directory). Working-tree comparisons are retained only when a
@@ -1338,6 +1444,9 @@ Missing numeric IDs are intentional.
   - `tests/unit/comparisonReportAction.test.ts`
   - `tests/unit/extensionActivationLazySideEffects.test.ts`
   - `tests/unit/packageManifest.test.ts`
+- Evidence Files:
+  - `tests/unit/comparisonReportAction.test.ts`
+  - `tests/unit/extensionActivationLazySideEffects.test.ts`
 - Change Guidance:
   - The re-entry action must reuse `labviewViHistory.open` rather than
     duplicating prerequisite gating, and must not run comparison execution.
@@ -1413,6 +1522,9 @@ Missing numeric IDs are intentional.
   - `tests/unit/comparisonReportAction.test.ts`
   - `tests/unit/openViHistoryCommand.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/comparisonReportAction.test.ts`
+  - `tests/unit/openViHistoryCommand.test.ts`
 - Change Guidance:
   - Scope strictly to the daemon-down case; never suppress diagnostics for
     image-acquisition, connection (`-350000`), bitness, or VI-Server failures.
@@ -1478,6 +1590,9 @@ Missing numeric IDs are intentional.
   - `tests/unit/comparisonReportAction.test.ts`
   - `tests/unit/openViHistoryCommand.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/comparisonReportAction.test.ts`
+  - `tests/unit/openViHistoryCommand.test.ts`
 - Change Guidance:
   - Scope strictly to the not-installed case; never suppress diagnostics for
     image-acquisition, connection (`-350000`), bitness, or VI-Server failures.
@@ -1519,6 +1634,12 @@ Missing numeric IDs are intentional.
   - `tests/unit/comparisonReportRuntimeExecution.test.ts`
   - `tests/unit/comparisonReportAction.test.ts`
   - `manual:runtime-discovery-missing-tool-check`
+- Evidence Files:
+  - `tests/unit/comparisonRuntimeLocator.test.ts`
+  - `tests/unit/comparisonRuntimeDoctor.test.ts`
+  - `tests/unit/comparisonReportPacket.test.ts`
+  - `tests/unit/comparisonReportRuntimeExecution.test.ts`
+  - `tests/unit/comparisonReportAction.test.ts`
 - Change Guidance:
   - Keep runtime diagnostics factual and provider-specific.
 
@@ -1541,6 +1662,8 @@ Missing numeric IDs are intentional.
   - `src/reporting/comparisonReportRuntimeExecution.ts`
   - `src/reporting/comparisonReportPlan.ts`
 - Verification References:
+  - `tests/unit/comparisonReportRuntimeExecution.test.ts`
+- Evidence Files:
   - `tests/unit/comparisonReportRuntimeExecution.test.ts`
 - Change Guidance:
   - Keep external tool invocations decoupled from Git blob access.
@@ -1585,6 +1708,15 @@ Missing numeric IDs are intentional.
   - `src/reporting/diagnostics/diagnosticsRecorder.ts`
   - `src/reporting/runtime/labviewCliIni.ts`
 - Verification References:
+  - `tests/unit/comparisonReportRuntimeExecution.test.ts`
+  - `tests/unit/comparisonReportPacket.test.ts`
+  - `tests/unit/comparisonReportAction.test.ts`
+  - `tests/unit/comparisonRuntimeDoctor.test.ts`
+  - `tests/unit/diagnosticsRecorder.test.ts`
+  - `tests/unit/labviewCliIni.test.ts`
+  - `tests/unit/windowsContainerLabviewCliScript.test.ts`
+  - `tests/unit/linuxContainerLabviewCliScript.test.ts`
+- Evidence Files:
   - `tests/unit/comparisonReportRuntimeExecution.test.ts`
   - `tests/unit/comparisonReportPacket.test.ts`
   - `tests/unit/comparisonReportAction.test.ts`
@@ -1705,6 +1837,9 @@ Missing numeric IDs are intentional.
 - Verification References:
   - `tests/unit/comparisonReportExecutionPlan.test.ts`
   - `tests/unit/comparisonReportRuntimeExecution.test.ts`
+- Evidence Files:
+  - `tests/unit/comparisonReportExecutionPlan.test.ts`
+  - `tests/unit/comparisonReportRuntimeExecution.test.ts`
 - Change Guidance:
   - Keep the headless decision inside the plan so runtime evidence reflects
     the actual args used. Linux host-native runs are unconditionally headless
@@ -1746,6 +1881,8 @@ Missing numeric IDs are intentional.
   - `tests/unit/publicDevcontainerSurface.test.ts`
   - `tests/unit/publicDocSourceLinks.test.ts`
   - `manual:devcontainer-extension-host`
+- Evidence Files:
+  - `tests/unit/publicDevcontainerSurface.test.ts`
 - Change Guidance:
   - Keep the devcontainer path focused on source evaluation, not release
     authority.
@@ -1802,6 +1939,9 @@ Missing numeric IDs are intentional.
   - `tests/unit/docsLinkCheckScript.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
   - `manual:github-actions-build-test-package`
+- Evidence Files:
+  - `tests/unit/branchGovernanceWorkflow.test.ts`
+  - `tests/unit/docsLinkCheckScript.test.ts`
 - Change Guidance:
   - Keep branch governance inside the required hosted CI job so the public
     merge gate stays simple and visible.
@@ -1853,6 +1993,10 @@ Missing numeric IDs are intentional.
   - `tests/unit/integrationHostRuntime.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
   - `manual:trusted-windows-labview-runner-dispatch`
+- Evidence Files:
+  - `tests/unit/windowsLabviewMaintainerWorkflow.test.ts`
+  - `tests/unit/checkMaintainerRunnerPrerequisites.test.ts`
+  - `tests/unit/integrationHostRuntime.test.ts`
 - Change Guidance:
   - Do not run self-hosted validation on arbitrary pull request code.
 
@@ -1898,6 +2042,9 @@ Missing numeric IDs are intentional.
   - `tests/unit/checkMaintainerRunnerPrerequisites.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
   - `manual:trusted-linux-labview-runner-dispatch`
+- Evidence Files:
+  - `tests/unit/linuxLabviewMaintainerWorkflow.test.ts`
+  - `tests/unit/checkMaintainerRunnerPrerequisites.test.ts`
 - Change Guidance:
   - Do not run self-hosted validation on arbitrary pull request code.
 
@@ -1929,6 +2076,8 @@ Missing numeric IDs are intentional.
 - Verification References:
   - `tests/unit/packageManifest.test.ts`
   - `manual:vagrant-validate-when-installed`
+- Evidence Files:
+  - None: reason code generic-evidence-only, see docs/testing/wiki-stub-reasons.json.
 - Change Guidance:
   - Keep Vagrant useful for humans and free of any hosted-CI hypervisor
     dependency; the release gate it feeds (VHS-REQ-666) is enforced by reading a
@@ -1968,6 +2117,8 @@ Missing numeric IDs are intentional.
   - `tests/unit/publicDocSourceLinks.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
   - `external:vscode-marketplace-svelderrainruiz.vi-history-suite`
+- Evidence Files:
+  - `tests/unit/publicDocSourceLinks.test.ts`
 - Change Guidance:
   - Do not change Marketplace identity as part of normal source migration work.
 
@@ -2112,6 +2263,16 @@ Missing numeric IDs are intentional.
   - `tests/unit/outputContractLib.test.ts`
   - `tests/unit/recordRuntimeValidationScript.test.ts`
   - `manual:requirements-quality-check-system-scope`
+- Evidence Files:
+  - `tests/unit/requirementsCsvColumns.test.ts`
+  - `tests/unit/requirementsIntegrity.test.ts`
+  - `tests/unit/requirementVerificationLinkage.test.ts`
+  - `tests/unit/requirementCriteriaInventory.test.ts`
+  - `tests/unit/requirementsManifestExport.test.ts`
+  - `tests/unit/schemaEnvelopeLib.test.ts`
+  - `tests/unit/outputContractLib.test.ts`
+  - `tests/unit/recordRuntimeValidationScript.test.ts`
+  - 4 further cited test file(s) are omitted by the page-margin cap, see docs/testing/wiki-stub-reasons.json.
 - Change Guidance:
   - Do not silently remove requirement IDs; retire or supersede them through the
     index.
@@ -2151,6 +2312,9 @@ Missing numeric IDs are intentional.
   - `tests/unit/securityMaintenanceWorkflows.test.ts`
   - `tests/unit/packageRuntimeSurfaceAudit.test.ts`
   - `manual:dependabot-pr-checks`
+- Evidence Files:
+  - `tests/unit/securityMaintenanceWorkflows.test.ts`
+  - `tests/unit/packageRuntimeSurfaceAudit.test.ts`
 - Change Guidance:
   - Keep major dependency updates independently reviewable unless a future
     requirement intentionally changes the dependency-maintenance policy.
@@ -2186,6 +2350,8 @@ Missing numeric IDs are intentional.
   - `.github/ISSUE_TEMPLATE/first_time_onboarding_feedback.yml`
 - Verification References:
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - None: reason code generic-evidence-only, see docs/testing/wiki-stub-reasons.json.
 - Change Guidance:
   - Keep field intake narrowly focused on routing evidence; do not add release
     governance, admin setup, or secret collection.
@@ -2220,6 +2386,8 @@ Missing numeric IDs are intentional.
   - `tests/unit/packageTestVsixWorkflow.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
   - `manual:diagnostic-test-vsix-dispatch`
+- Evidence Files:
+  - `tests/unit/packageTestVsixWorkflow.test.ts`
 - Change Guidance:
   - Keep this as diagnostic reporter support only; do not convert GitHub
     Releases into the normal install channel or add Marketplace credentials to
@@ -2295,6 +2463,10 @@ Missing numeric IDs are intentional.
   - `tests/unit/requirementsDocs.test.ts`
   - `manual:marketplace-release-environment-setup`
   - `manual:marketplace-release-tag-dispatch`
+- Evidence Files:
+  - `tests/unit/branchGovernanceWorkflow.test.ts`
+  - `tests/unit/marketplaceReleaseWorkflow.test.ts`
+  - `tests/unit/marketplaceListingVerification.test.ts`
 - Change Guidance:
   - Do not publish from branch refs; tag the merged `main` commit and publish
     from that exact tag only.
@@ -2329,6 +2501,16 @@ Missing numeric IDs are intentional.
   - `src/dashboard/dashboardLatestRun.ts`
   - `src/dashboard/retainedDashboardEvidence.ts`
 - Verification References:
+  - `tests/unit/dashboardEtaAccuracy.test.ts`
+  - `tests/unit/niComparisonReportParser.test.ts`
+  - `tests/unit/comparisonReportArchive.test.ts`
+  - `tests/unit/dashboardLatestRun.test.ts`
+  - `tests/unit/multiReportDashboard.test.ts`
+  - `tests/unit/multiReportDashboardAction.test.ts`
+  - `tests/unit/retainedDashboardEvidence.test.ts`
+  - `tests/unit/reviewDecisionRecord.test.ts`
+  - `tests/unit/reviewScenarioSupportPolicy.test.ts`
+- Evidence Files:
   - `tests/unit/dashboardEtaAccuracy.test.ts`
   - `tests/unit/niComparisonReportParser.test.ts`
   - `tests/unit/comparisonReportArchive.test.ts`
@@ -2382,6 +2564,10 @@ Missing numeric IDs are intentional.
   - `tests/unit/extensionActivationLazySideEffects.test.ts`
   - `tests/integration/suite/extensionHost.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/bundledDocumentation.test.ts`
+  - `tests/unit/bundledDocumentationAction.test.ts`
+  - `tests/unit/extensionActivationLazySideEffects.test.ts`
 - Change Guidance:
   - Keep this requirement scoped to installed bundled documentation behavior and
     packaged assets, not external website or wiki governance.
@@ -2428,6 +2614,9 @@ Missing numeric IDs are intentional.
   - `tests/unit/extensionActivationLazySideEffects.test.ts`
   - `tests/integration/suite/extensionHost.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/localRuntimeSettingsCli.test.ts`
+  - `tests/unit/extensionActivationLazySideEffects.test.ts`
 - Change Guidance:
   - Keep this requirement focused on installed CLI preparation, activation
     auto-materialization, and launcher self-healing; do not change runtime
@@ -2488,6 +2677,11 @@ Missing numeric IDs are intentional.
   - `tests/unit/requirementsDocs.test.ts`
   - `tests/unit/traceabilityAuditScript.test.ts`
   - `tests/unit/mutationWorkflow.test.ts`
+- Evidence Files:
+  - `tests/unit/coverageMapScript.test.ts`
+  - `tests/unit/closeoutEvidenceScript.test.ts`
+  - `tests/unit/traceabilityAuditScript.test.ts`
+  - `tests/unit/mutationWorkflow.test.ts`
 - Change Guidance:
   - Keep this requirement focused on coverage intelligence and risk
     prioritization; do not use it to hide dev-only sources or reduce coverage
@@ -2521,6 +2715,9 @@ Missing numeric IDs are intentional.
 - Verification References:
   - `tests/unit/vscodeTestHarness.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+  - `tests/unit/traceabilityAuditScript.test.ts`
+- Evidence Files:
+  - `tests/unit/vscodeTestHarness.test.ts`
   - `tests/unit/traceabilityAuditScript.test.ts`
 - Change Guidance:
   - Keep this requirement focused on reusable test architecture. Do not change
@@ -2617,6 +2814,15 @@ Missing numeric IDs are intentional.
   - `tests/unit/traceabilityAuditScript.test.ts`
   - `tests/unit/customizationGovernanceAuditScript.test.ts`
   - `manual:definition-of-done-release-readiness-review`
+- Evidence Files:
+  - `tests/unit/definitionOfDoneGate.test.ts`
+  - `tests/unit/closeoutEvidenceScript.test.ts`
+  - `tests/unit/assuranceStateScript.test.ts`
+  - `tests/unit/multiStandardsAuditScript.test.ts`
+  - `tests/unit/marketplaceReleaseWorkflow.test.ts`
+  - `tests/unit/releaseReadinessScript.test.ts`
+  - `tests/unit/traceabilityAuditScript.test.ts`
+  - `tests/unit/customizationGovernanceAuditScript.test.ts`
 - Change Guidance:
   - Keep this requirement as the operating contract for Done and keep hosted
     `DoD Gate / dod` enforcement inside the required public CI workflow.
@@ -2665,6 +2871,10 @@ Missing numeric IDs are intentional.
   - `tests/unit/runtimeSettingsSeed.test.ts`
   - `tests/unit/extensionActivationLazySideEffects.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/runtimeAutoDetect.test.ts`
+  - `tests/unit/runtimeSettingsSeed.test.ts`
+  - `tests/unit/extensionActivationLazySideEffects.test.ts`
 - Change Guidance:
   - Keep detection filesystem-only at activation time; richer registry,
     daemon-reachability, or process probes belong to
@@ -2729,6 +2939,11 @@ Missing numeric IDs are intentional.
   - `tests/unit/runtimeAvailabilityWatcher.test.ts`
   - `tests/unit/extensionActivationLazySideEffects.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/runtimeAvailabilityNotice.test.ts`
+  - `tests/unit/runtimeCommands.test.ts`
+  - `tests/unit/runtimeAvailabilityWatcher.test.ts`
+  - `tests/unit/extensionActivationLazySideEffects.test.ts`
 - Change Guidance:
   - Keep first-run gating, throttling, and copy in this requirement; runtime
     detection itself stays under VHS-REQ-616.
@@ -2785,6 +3000,10 @@ Missing numeric IDs are intentional.
   - `tests/unit/gitPrerequisiteNotice.test.ts`
   - `tests/unit/extensionActivationLazySideEffects.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/gitPrerequisiteDetect.test.ts`
+  - `tests/unit/gitPrerequisiteNotice.test.ts`
+  - `tests/unit/extensionActivationLazySideEffects.test.ts`
 - Change Guidance:
   - Keep Git detection synchronous in spirit (one probe, cached) and never
     re-probe inside the `labviewViHistory.open` hot path. Richer health
@@ -2914,6 +3133,16 @@ Missing numeric IDs are intentional.
   - `tests/unit/pickRuntimeProviderCommand.test.ts`
   - `tests/unit/runtimeCommands.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/runtimeAvailabilityNotice.test.ts`
+  - `tests/unit/runtimeAvailabilityWatcher.test.ts`
+  - `tests/unit/runtimeReportPanel.test.ts`
+  - `tests/unit/openRuntimeReportPanelCommand.test.ts`
+  - `tests/unit/comparisonReportAction.test.ts`
+  - `tests/unit/dockerDaemonPlatform.test.ts`
+  - `tests/unit/containerImageCatalog.test.ts`
+  - `tests/unit/pickRuntimeProviderCommand.test.ts`
+  - `tests/unit/runtimeCommands.test.ts`
 - Change Guidance:
   - Treat the persisted selection as the authoritative source of truth
     when satisfiable; do not introduce a `mismatch` UI state or repeated
@@ -3002,6 +3231,12 @@ Missing numeric IDs are intentional.
   - `tests/unit/comparisonReportAction.test.ts`
   - `tests/unit/openViHistoryCommand.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/comparisonReportRuntimeExecution.test.ts`
+  - `tests/unit/comparisonRuntimeLocator.test.ts`
+  - `tests/unit/comparisonRuntimeDoctor.test.ts`
+  - `tests/unit/comparisonReportAction.test.ts`
+  - `tests/unit/openViHistoryCommand.test.ts`
 - Change Guidance:
   - When extending the locator with new fact fields, propagate
     `hostObservedLabviewBitness` and `hostObservedLabviewExecutablePath`
@@ -3090,6 +3325,12 @@ Missing numeric IDs are intentional.
   - `tests/unit/runWindowsRuntimeMatrixScript.test.ts`
   - `manual:windows-runtime-matrix-version-conflict-dispatch`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/comparisonRuntimeLocator.test.ts`
+  - `tests/unit/comparisonRuntimeDoctor.test.ts`
+  - `tests/unit/comparisonReportAction.test.ts`
+  - `tests/unit/openViHistoryCommand.test.ts`
+  - `tests/unit/runWindowsRuntimeMatrixScript.test.ts`
 - Change Guidance:
   - Keep year inference best-effort and never block on an unknown running year.
     Thread `hostObservedLabviewVersion` through any new `locate()` return site
@@ -3173,6 +3414,11 @@ Missing numeric IDs are intentional.
   - `tests/unit/openViHistoryCommand.test.ts`
   - `tests/unit/comparisonRuntimeDoctor.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/comparisonReportRuntimeExecution.test.ts`
+  - `tests/unit/comparisonReportAction.test.ts`
+  - `tests/unit/openViHistoryCommand.test.ts`
+  - `tests/unit/comparisonRuntimeDoctor.test.ts`
 - Change Guidance:
   - Keep the classifier keyed on the stable LabVIEW stderr text rather than the
     propagated exit code (1125), so the reason survives CLI exit-code changes and
@@ -3237,6 +3483,9 @@ Missing numeric IDs are intentional.
   - `tests/unit/comparisonRuntimeLocator.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
   - `manual:windows-container-image-cold-pull-progress`
+- Evidence Files:
+  - `tests/unit/dockerImagePullProgress.test.ts`
+  - `tests/unit/comparisonRuntimeLocator.test.ts`
 - Change Guidance:
   - Keep the Engine API call read-only, anonymous, and bounded, and keep the CLI
     fallback so an unreachable or older daemon never blocks acquisition. Keep the
@@ -3291,6 +3540,9 @@ Missing numeric IDs are intentional.
   - `tests/unit/dockerImagePullProgress.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
   - `manual:windows-container-image-cold-pull-progress`
+- Evidence Files:
+  - `tests/unit/dockerImageDownloadSize.test.ts`
+  - `tests/unit/dockerImagePullProgress.test.ts`
 - Change Guidance:
   - Keep the manifest resolution anonymous, bounded, and pinned to the Docker Hub
     hosts; any new registry support must keep the outbound host set fixed and
@@ -3343,6 +3595,9 @@ Missing numeric IDs are intentional.
   - `tests/unit/comparisonRuntimeLocator.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
   - `manual:windows-container-image-cold-pull-progress`
+- Evidence Files:
+  - `tests/unit/dockerImagePullProgress.test.ts`
+  - `tests/unit/comparisonRuntimeLocator.test.ts`
 - Change Guidance:
   - Keep the phase figures monotonic and capped below 100% so the toast never
     shows a premature or frozen 100%, and keep extraction advancing on
@@ -3432,6 +3687,11 @@ Missing numeric IDs are intentional.
   - `tests/unit/pickRuntimeProviderCommand.test.ts`
   - `tests/unit/openRuntimeReportPanelCommand.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/containerImageCatalog.test.ts`
+  - `tests/unit/runtimeSettingsSeed.test.ts`
+  - `tests/unit/pickRuntimeProviderCommand.test.ts`
+  - 5 further cited test file(s) are omitted by the page-margin cap, see docs/testing/wiki-stub-reasons.json.
 - Change Guidance:
   - Keep the headless mechanism tied to the image year (`-Headless` for 2026 Q1+,
     `EnableCICDFeaturesForLabVIEW=TRUE` for 2025 Q3 and earlier) per NI's
@@ -3492,6 +3752,9 @@ Missing numeric IDs are intentional.
   - `tests/unit/extensionActivationLazySideEffects.test.ts`
   - `tests/unit/runtimeAvailabilityNotice.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/extensionActivationLazySideEffects.test.ts`
+  - `tests/unit/runtimeAvailabilityNotice.test.ts`
 - Change Guidance:
   - Keep the gate keyed on the LabVIEW CLI prerequisite and the cached
     detection; richer compare-time runtime diagnostics belong to
@@ -3553,6 +3816,8 @@ Missing numeric IDs are intentional.
 - Verification References:
   - `tests/unit/runtimeAvailabilityNotice.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/runtimeAvailabilityNotice.test.ts`
 - Change Guidance:
   - Keep the dedicated LabVIEW CLI download URL free of volatile tracking
     tokens (for example `srsltid`). The status-bar "runtime available"
@@ -3631,6 +3896,9 @@ Missing numeric IDs are intentional.
   - `tests/unit/runWindowsRuntimeMatrixScript.test.ts`
   - `tests/unit/windowsRuntimeMatrixWorkflow.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/runWindowsRuntimeMatrixScript.test.ts`
+  - `tests/unit/windowsRuntimeMatrixWorkflow.test.ts`
 - Change Guidance:
   - Keep the assertion key on `runtimeBlockedReason` string equality
     so the harness stays decoupled from the CLI error-code mapping. If
@@ -3720,6 +3988,10 @@ Missing numeric IDs are intentional.
   - `tests/unit/localRuntimeSettingsCli.test.ts`
   - `tests/unit/runWindowsRuntimeMatrixScript.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/comparisonReportRuntimeExecution.test.ts`
+  - `tests/unit/localRuntimeSettingsCli.test.ts`
+  - `tests/unit/runWindowsRuntimeMatrixScript.test.ts`
 - Change Guidance:
   - Treat absent `server.tcp.enabled` on Windows as enabled; do not
     flip this default without a separate requirement. The Linux
@@ -3777,6 +4049,8 @@ Missing numeric IDs are intentional.
 - Verification References:
   - `tests/unit/comparisonRuntimeDoctor.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/comparisonRuntimeDoctor.test.ts`
 - Change Guidance:
   - Keep the VI Server detection itself in the VHS-REQ-623 / VHS-REQ-156
     preflights; this requirement only owns the user-facing next-action
@@ -3832,6 +4106,8 @@ Missing numeric IDs are intentional.
 - Verification References:
   - `tests/unit/comparisonReportRuntimeExecution.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/comparisonReportRuntimeExecution.test.ts`
 - Change Guidance:
   - Scope strictly to the Linux container invalid-VI-path case; never attach the
     note to other providers or other failure signatures. Keep the remediation
@@ -3886,6 +4162,9 @@ Missing numeric IDs are intentional.
   - `tests/unit/comparisonReportRuntimeExecution.test.ts`
   - `tests/unit/comparisonRuntimeDoctor.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/comparisonReportRuntimeExecution.test.ts`
+  - `tests/unit/comparisonRuntimeDoctor.test.ts`
 - Change Guidance:
   - Keep VI Server enablement guidance pointed at the manual LabVIEW
     setting, not a `viHistorySuite.*` runtime setting or command. A
@@ -3955,6 +4234,9 @@ Missing numeric IDs are intentional.
   - `tests/unit/extensionActivationLazySideEffects.test.ts`
   - `tests/unit/runtimeAvailabilityNotice.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/extensionActivationLazySideEffects.test.ts`
+  - `tests/unit/runtimeAvailabilityNotice.test.ts`
 - Change Guidance:
   - Keep the strict explicit-`True` rule open-gate-only; the compare-time
     VHS-REQ-623 Windows default (absent key → enabled) stays so retained
@@ -4020,6 +4302,10 @@ Missing numeric IDs are intentional.
   - `tests/unit/runtimeAutoDetect.test.ts`
   - `tests/unit/comparisonRuntimeLocator.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/labviewInstallCatalog.test.ts`
+  - `tests/unit/runtimeAutoDetect.test.ts`
+  - `tests/unit/comparisonRuntimeLocator.test.ts`
 - Change Guidance:
   - Keep the catalog the single source of truth: add new documented install
     locations here, not in the detector or the locator. Preserve the
@@ -4074,6 +4360,9 @@ Missing numeric IDs are intentional.
   - `tests/unit/runtimeAvailabilityNotice.test.ts`
   - `tests/unit/packageManifest.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/comparisonReportAction.test.ts`
+  - `tests/unit/runtimeAvailabilityNotice.test.ts`
 - Change Guidance:
   - Keep the gate override trust-based: the gate checks only that the
     configured path is a non-empty string and never stats it, so existence
@@ -4130,6 +4419,10 @@ Missing numeric IDs are intentional.
   - `tests/unit/extensionActivationLazySideEffects.test.ts`
   - `tests/unit/runtimeAvailabilityNotice.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/comparisonRuntimeLocator.test.ts`
+  - `tests/unit/extensionActivationLazySideEffects.test.ts`
+  - `tests/unit/runtimeAvailabilityNotice.test.ts`
 - Change Guidance:
   - Keep the probe bounded and fail-open-safe: it must never throw out of the
     open command, and it must not add container or process probes. Activation
@@ -4181,6 +4474,12 @@ Missing numeric IDs are intentional.
   - `tests/unit/gitCli.test.ts`
   - `tests/unit/packageManifest.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/extensionActivationLazySideEffects.test.ts`
+  - `tests/unit/openViHistoryCommand.test.ts`
+  - `tests/unit/viHistoryModel.test.ts`
+  - `tests/unit/viHistoryService.test.ts`
+  - `tests/unit/gitCli.test.ts`
 - Change Guidance:
   - Prefer selected-file Git and signature checks over background repository
     inventory. If future features need repository-wide inventory, keep them
@@ -4262,6 +4561,10 @@ Missing numeric IDs are intentional.
   - `tests/unit/comparisonReportRuntimeExecution.test.ts`
   - `tests/unit/extensionActivationLazySideEffects.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/runtimeAvailabilityNotice.test.ts`
+  - `tests/unit/comparisonReportRuntimeExecution.test.ts`
+  - `tests/unit/extensionActivationLazySideEffects.test.ts`
 - Change Guidance:
   - Keep the gate window-free and keyed on the running-process bitness signal;
     richer compare-time runtime diagnostics stay with VHS-REQ-621 and
@@ -4350,6 +4653,10 @@ Missing numeric IDs are intentional.
   - `tests/unit/comparisonReportRuntimeExecution.test.ts`
   - `tests/unit/extensionActivationLazySideEffects.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/runtimeAvailabilityNotice.test.ts`
+  - `tests/unit/comparisonReportRuntimeExecution.test.ts`
+  - `tests/unit/extensionActivationLazySideEffects.test.ts`
 - Change Guidance:
   - Keep the gate window-free and keyed on the running-process year signal,
     composed strictly after the VHS-REQ-636 bitness gate so the two never
@@ -4634,6 +4941,16 @@ Missing numeric IDs are intentional.
   - `tests/unit/viPreviewDiagnostics.test.ts`
   - `tests/unit/revisionViTree.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/viPreviewEditor.test.ts`
+  - `tests/unit/viPreviewCache.test.ts`
+  - `tests/unit/viPreviewRuntimeAdapter.test.ts`
+  - `tests/unit/viPreviewWebview.test.ts`
+  - `tests/unit/viPreviewRenderSource.test.ts`
+  - `tests/unit/viPreviewFramesViewer.test.ts`
+  - `tests/unit/viPreviewSessionManager.test.ts`
+  - `tests/unit/viPreviewSessionRuntime.test.ts`
+  - 12 further cited test file(s) are omitted by the page-margin cap, see docs/testing/wiki-stub-reasons.json.
 - Change Guidance:
   - The renderer is NI's `PrintToSingleFileHtml` operation (from
     ni/labview-for-containers); it renders headless on the LabVIEW Linux
@@ -4713,6 +5030,9 @@ Missing numeric IDs are intentional.
   - `tests/unit/viSemanticDecorationProvider.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
   - `manual:source-control-semantic-change-hover`
+- Evidence Files:
+  - `tests/unit/viSemanticNarrativeCache.test.ts`
+  - `tests/unit/viSemanticDecorationProvider.test.ts`
 - Change Guidance:
   - Keep the decoration path cache-only and workspace-trust gated; never run or
     await a LabVIEW comparison from a hover. Keep the narrative text the single
@@ -4861,6 +5181,11 @@ Missing numeric IDs are intentional.
   - `tests/unit/runViSemanticPrReview.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
   - `manual:vi-semantic-pr-review-workflow-dispatch`
+- Evidence Files:
+  - `tests/unit/viSemanticPrReviewWorkflow.test.ts`
+  - `tests/unit/viSemanticReviewOnPrTemplate.test.ts`
+  - `tests/unit/viSemanticNoChangeDetection.test.ts`
+  - 1 further cited test file(s) are omitted by the page-margin cap, see docs/testing/wiki-stub-reasons.json.
 - Change Guidance:
   - Never add a `pull_request` or `push` trigger; the LabVIEW container runs
     untrusted target-repo VIs and must stay a deliberate maintainer dispatch.
@@ -4960,6 +5285,14 @@ Missing numeric IDs are intentional.
   - `tests/unit/viSemanticMcpServerDeps.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
   - `manual:vi-semantic-comparison-mcp-surface`
+- Evidence Files:
+  - `tests/unit/viSemanticModel.test.ts`
+  - `tests/unit/viSemanticSchemas.test.ts`
+  - `tests/unit/viComparisonModelCache.test.ts`
+  - `tests/unit/viSemanticHistory.test.ts`
+  - `tests/unit/viRepositoryIndex.test.ts`
+  - `tests/unit/viSemanticMcpServerProvider.test.ts`
+  - 3 further cited test file(s) are omitted by the page-margin cap, see docs/testing/wiki-stub-reasons.json.
 - Change Guidance:
   - Keep the MCP handler and model dependency-free and offline; never add VS
     Code or network imports to the read-only tools. When adding a tool, extend
@@ -5037,6 +5370,12 @@ Missing numeric IDs are intentional.
   - `tests/unit/lvkitLocator.test.ts`
   - `tests/unit/lvkitCompareViRevisions.test.ts`
   - `tests/unit/lvkitRealIntegration.test.ts`
+- Evidence Files:
+  - `tests/unit/lvkitDiffModel.test.ts`
+  - `tests/unit/lvkitSemanticAdapter.test.ts`
+  - `tests/unit/lvkitLocator.test.ts`
+  - `tests/unit/lvkitCompareViRevisions.test.ts`
+  - `tests/unit/lvkitRealIntegration.test.ts`
 - Change Guidance:
   - Evolve the parser and adapter additively (lvkit document schema id
     `vi-history-suite/lvkit-diff@v1`); keep the projected model on the shared
@@ -5101,6 +5440,10 @@ Missing numeric IDs are intentional.
   - `tests/unit/lvkitViScanModel.test.ts`
   - `tests/unit/lvkitViScanProvider.test.ts`
   - `tests/unit/lvkitViScanRealIntegration.test.ts`
+- Evidence Files:
+  - `tests/unit/lvkitViScanModel.test.ts`
+  - `tests/unit/lvkitViScanProvider.test.ts`
+  - `tests/unit/lvkitViScanRealIntegration.test.ts`
 - Change Guidance:
   - Evolve the model additively under the store schema id
     `vi-history-suite/lvkit-vi-scan@v1`; a breaking change (field removal,
@@ -5162,6 +5505,10 @@ Missing numeric IDs are intentional.
   - `src/semantic/viSemanticComparisonMcp.ts`
   - `src/mcp/viSemanticMcpServerDeps.ts`
 - Verification References:
+  - `tests/unit/lvkitViScanStore.test.ts`
+  - `tests/unit/viSemanticComparisonMcp.test.ts`
+  - `tests/unit/viSemanticMcpServerDeps.test.ts`
+- Evidence Files:
   - `tests/unit/lvkitViScanStore.test.ts`
   - `tests/unit/viSemanticComparisonMcp.test.ts`
   - `tests/unit/viSemanticMcpServerDeps.test.ts`
@@ -5234,6 +5581,8 @@ Missing numeric IDs are intentional.
   - `docs/architecture/adr/ADR-0033-agent-readable-vi-scan-lvkit-generate.md`
   - `src/semantic/lvkit/previewTimeViScanTrigger.ts`
 - Verification References:
+  - `tests/unit/previewTimeViScanTrigger.test.ts`
+- Evidence Files:
   - `tests/unit/previewTimeViScanTrigger.test.ts`
 - Change Guidance:
   - Keep the trigger best-effort and pure: a scan or store failure must resolve
@@ -5312,6 +5661,13 @@ Missing numeric IDs are intentional.
   - `tests/unit/prePushGateWiring.test.ts`
   - `tests/unit/systemCapability.test.ts`
   - `tests/unit/agentLaunchGate.test.ts`
+- Evidence Files:
+  - `tests/unit/branchFlowEnforce.test.ts`
+  - `tests/unit/collabPromote.test.ts`
+  - `tests/unit/agentGateway.test.ts`
+  - `tests/unit/prePushGateWiring.test.ts`
+  - `tests/unit/systemCapability.test.ts`
+  - `tests/unit/agentLaunchGate.test.ts`
 - Change Guidance:
   - Keep the pre-push enforcement fail-closed and enforce-only (never mutate git)
     and a strict mirror of the hosted Branch Governance rule so the local and
@@ -5376,6 +5732,10 @@ Missing numeric IDs are intentional.
   - `tests/unit/viSemanticModel.test.ts`
   - `tests/unit/viSemanticSchemas.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/viChangeClassification.test.ts`
+  - `tests/unit/viSemanticModel.test.ts`
+  - `tests/unit/viSemanticSchemas.test.ts`
 - Change Guidance:
   - Extend the keyword map from real NI comparison reports, not synthetic guesses,
     and keep `unknown` as the explicit fallback. Keep the classification fields
@@ -5601,6 +5961,17 @@ Missing numeric IDs are intentional.
   - `tests/unit/runViSemanticPrReview.test.ts`
   - `tests/unit/viSemanticSchemas.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/viPreviewComparisonCorrelation.test.ts`
+  - `tests/unit/viSemanticPrReview.test.ts`
+  - `tests/unit/viPreviewPairProvider.test.ts`
+  - `tests/unit/viSemanticPrReviewWorkflow.test.ts`
+  - `tests/unit/viPreviewCacheWarmerCli.test.ts`
+  - `tests/unit/coordinateFramesAcceptance.test.ts`
+  - `tests/unit/comparisonDetailItemGeometry.test.ts`
+  - `tests/unit/viLatentCorpusSample.test.ts`
+  - `tests/unit/viSemanticSchemas.test.ts`
+  - 3 further cited test file(s) are omitted by the page-margin cap, see docs/testing/wiki-stub-reasons.json.
 - Change Guidance:
   - Keep the correlation surface-level and deterministic until the
     coordinate-frames preview export (epic #2262 blocker iteration) unlocks
@@ -5663,6 +6034,8 @@ Missing numeric IDs are intentional.
   - `tests/unit/viChangeWarmScheduler.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
   - `manual:warm-changed-vi-caches`
+- Evidence Files:
+  - `tests/unit/viChangeWarmScheduler.test.ts`
 - Change Guidance:
   - Warming must stay Docker-only, opt-in, and best-effort: never launch host
     LabVIEW on change, never let a warm failure surface to the user, and keep
@@ -5719,6 +6092,8 @@ Missing numeric IDs are intentional.
   - `tests/unit/comparisonReportRuntimeExecution.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
   - `manual:vagrant-hostnative-x86-headless`
+- Evidence Files:
+  - `tests/unit/comparisonReportRuntimeExecution.test.ts`
 - Change Guidance:
   - Keep the headless launch technique aligned with the windows-container
     provider (prelaunch, ini connect-window tuning, single-attempt run with no
@@ -5794,6 +6169,9 @@ Missing numeric IDs are intentional.
   - `tests/unit/marketplaceReleaseWorkflow.test.ts`
   - `tests/unit/packageManifest.test.ts`
   - `manual:vagrant-validate-release`
+- Evidence Files:
+  - `tests/unit/marketplaceReleaseWorkflow.test.ts`
+  - 1 further cited test file(s) are omitted by the page-margin cap, see docs/testing/wiki-stub-reasons.json.
 - Change Guidance:
   - Keep the mandatory attestation enforced through the committed ledger and the
     readiness gate; never satisfy it by naming or invoking Vagrant inside
@@ -5843,6 +6221,9 @@ Missing numeric IDs are intentional.
   - `src/reporting/mirror/perfmonSampleSeries.ts`
   - `src/reporting/mirror/perfmonCapturePlan.ts`
 - Verification References:
+  - `tests/unit/perfmonSampleSeries.test.ts`
+  - `tests/unit/perfmonCapturePlan.test.ts`
+- Evidence Files:
   - `tests/unit/perfmonSampleSeries.test.ts`
   - `tests/unit/perfmonCapturePlan.test.ts`
 - Change Guidance:
@@ -6129,6 +6510,19 @@ Missing numeric IDs are intentional.
   - `tests/unit/crossRuntimePerfDiff.test.ts`
   - `tests/unit/labviewLaunchTiming.test.ts`
   - `tests/unit/mprrSharedContract.test.ts`
+- Evidence Files:
+  - `tests/unit/mirrorModeGovernance.test.ts`
+  - `tests/unit/mirrorCapabilityFingerprint.test.ts`
+  - `tests/unit/mirrorLeftProducer.test.ts`
+  - `tests/unit/renderFirstRunPerfmonScript.test.ts`
+  - `tests/unit/perfmonTdmsModel.test.ts`
+  - `tests/unit/firstRunPerfmonPipeline.test.ts`
+  - `tests/unit/perfmonCaptureScript.test.ts`
+  - `tests/unit/perfmonMprrSync.test.ts`
+  - `tests/unit/perStateRunAnalytics.test.ts`
+  - `tests/unit/crossRuntimePerfDiff.test.ts`
+  - `tests/unit/mprrSharedContract.test.ts`
+  - 10 further cited test file(s) are omitted by the page-margin cap, see docs/testing/wiki-stub-reasons.json.
 - Change Guidance:
   - This is a governance-foundation requirement: keep the documented invariants
     (human/Vagrant-only authorship, run-only container, Vagrant→`merge_group`
@@ -6167,6 +6561,8 @@ Missing numeric IDs are intentional.
 - Implementation References:
   - `src/reporting/mirror/mirrorMlRow.ts`
 - Verification References:
+  - `tests/unit/mirrorMlRow.test.ts`
+- Evidence Files:
   - `tests/unit/mirrorMlRow.test.ts`
 - Change Guidance:
   - Evolve the ml-row column contract additively (schema id
@@ -6303,6 +6699,17 @@ Missing numeric IDs are intentional.
   - `tests/unit/stopwatchCaptureAccuracy.test.ts`
   - `tests/unit/mprrStopwatchSurfaceRenderer.test.ts`
   - `tests/unit/mprrSharedContract.test.ts`
+- Evidence Files:
+  - `tests/unit/labviewContainerDiagnostics.test.ts`
+  - `tests/unit/diagnoseLabviewContainerScript.test.ts`
+  - `tests/unit/syncPatternFailureSignature.test.ts`
+  - `tests/unit/mprrCalibrationSurface.test.ts`
+  - `tests/unit/mprrCalibrationSurfaceRenderer.test.ts`
+  - `tests/unit/mprrAgentFeedbackCrossCheck.test.ts`
+  - `tests/unit/mprrStripImageDecoder.test.ts`
+  - `tests/unit/stopwatchCaptureAccuracy.test.ts`
+  - `tests/unit/mprrStopwatchSurfaceRenderer.test.ts`
+  - `tests/unit/mprrSharedContract.test.ts`
 - Change Guidance:
   - Evolve the diagnostics contract additively (schema id
     `vi-history-suite/labview-container-diagnostics@v1`); add new staged checks at
@@ -6363,6 +6770,8 @@ Missing numeric IDs are intentional.
   - `src/reporting/comparisonValidation/emptySwapComparisonEvidence.ts`
 - Verification References:
   - `tests/unit/emptySwapComparisonEvidence.test.ts`
+- Evidence Files:
+  - `tests/unit/emptySwapComparisonEvidence.test.ts`
 - Change Guidance:
   - Evolve the evidence contract additively (schema id
     `vi-history-suite/empty-swap-comparison@v1`); keep the verdict fail-closed so
@@ -6416,6 +6825,10 @@ Missing numeric IDs are intentional.
   - `.github/workflows/devtools-release.yml`
   - `package.json`
 - Verification References:
+  - `tests/unit/buildDevToolsReleaseScript.test.ts`
+  - `tests/unit/verifyDevToolsReleaseScript.test.ts`
+  - `tests/unit/devToolsReleaseWorkflow.test.ts`
+- Evidence Files:
   - `tests/unit/buildDevToolsReleaseScript.test.ts`
   - `tests/unit/verifyDevToolsReleaseScript.test.ts`
   - `tests/unit/devToolsReleaseWorkflow.test.ts`
@@ -6475,6 +6888,11 @@ Missing numeric IDs are intentional.
   - `tests/unit/releaseReadinessScript.test.ts`
   - `tests/unit/marketplaceReleaseWorkflow.test.ts`
   - `tests/unit/branchGovernanceWorkflow.test.ts`
+- Evidence Files:
+  - `tests/unit/supplyChainStateScript.test.ts`
+  - `tests/unit/releaseReadinessScript.test.ts`
+  - `tests/unit/marketplaceReleaseWorkflow.test.ts`
+  - `tests/unit/branchGovernanceWorkflow.test.ts`
 - Change Guidance:
   - Keep the read-model non-gating by default and its JSON packet
     schema-versioned; add new provenance streams as additional artifact records
@@ -6530,6 +6948,10 @@ Missing numeric IDs are intentional.
   - `src/reporting/runtime/cycleMeter.ts`
   - `src/reporting/viPreview/viPreviewExecution.ts`
 - Verification References:
+  - `tests/unit/localViServerAcquisitionLock.test.ts`
+  - `tests/unit/cycleMeter.test.ts`
+  - `tests/unit/viPreviewExecution.test.ts`
+- Evidence Files:
   - `tests/unit/localViServerAcquisitionLock.test.ts`
   - `tests/unit/cycleMeter.test.ts`
   - `tests/unit/viPreviewExecution.test.ts`
@@ -6649,6 +7071,12 @@ Missing numeric IDs are intentional.
   - `tests/unit/stagedViPreviewValidatorFactory.test.ts`
   - `tests/unit/windowsContainerViCompareWorkflow.test.ts`
   - `tests/unit/linuxContainerViCompareWorkflow.test.ts`
+- Evidence Files:
+  - `tests/unit/comparisonPreviewPipeline.test.ts`
+  - `tests/unit/comparisonPreviewPipelineIntegration.test.ts`
+  - `tests/unit/stagedViPreviewValidatorFactory.test.ts`
+  - `tests/unit/windowsContainerViCompareWorkflow.test.ts`
+  - `tests/unit/linuxContainerViCompareWorkflow.test.ts`
 - Change Guidance:
   - Keep each iteration a single-cycle timed loop (exactly one LabVIEW
     invocation, no retry) and keep the short-circuit so a staged VI that fails
@@ -6720,6 +7148,10 @@ Missing numeric IDs are intentional.
   - `.github/workflows/marketplace-release.yml`
   - `package.json`
 - Verification References:
+  - `tests/unit/releaseStateScript.test.ts`
+  - `tests/unit/releaseReadinessScript.test.ts`
+  - `tests/unit/marketplaceReleaseWorkflow.test.ts`
+- Evidence Files:
   - `tests/unit/releaseStateScript.test.ts`
   - `tests/unit/releaseReadinessScript.test.ts`
   - `tests/unit/marketplaceReleaseWorkflow.test.ts`
@@ -6813,6 +7245,10 @@ Missing numeric IDs are intentional.
   - `tests/unit/viPreviewWorkspaceScan.test.ts`
   - `tests/unit/viPreviewCacheWarmerCli.test.ts`
   - `tests/unit/codespacePreviewCacheTemplate.test.ts`
+- Evidence Files:
+  - `tests/unit/viPreviewWorkspaceScan.test.ts`
+  - `tests/unit/viPreviewCacheWarmerCli.test.ts`
+  - `tests/unit/codespacePreviewCacheTemplate.test.ts`
 - Change Guidance:
   - Keep the worker read-only against the workspace (it only reads VIs and writes
     into the cache directory), Docker-only, and pure/injectable. Extend the
@@ -6867,6 +7303,9 @@ Missing numeric IDs are intentional.
   - `src/reporting/viPreview/viPreviewCacheHealth.ts`
   - `package.json`
 - Verification References:
+  - `tests/unit/viPreviewCacheHealth.test.ts`
+  - `tests/unit/viPreviewCacheHealthCli.test.ts`
+- Evidence Files:
   - `tests/unit/viPreviewCacheHealth.test.ts`
   - `tests/unit/viPreviewCacheHealthCli.test.ts`
 - Change Guidance:
@@ -6925,6 +7364,9 @@ Missing numeric IDs are intentional.
 - Verification References:
   - `tests/unit/viPreviewCacheBundle.test.ts`
   - `tests/unit/viPreviewCacheBundleCli.test.ts`
+- Evidence Files:
+  - `tests/unit/viPreviewCacheBundle.test.ts`
+  - `tests/unit/viPreviewCacheBundleCli.test.ts`
 - Change Guidance:
   - Keep the bundle self-describing and content-addressed; extend the manifest
     additively (new fields, not reshaped records). Distribution (publishing and
@@ -6979,6 +7421,9 @@ Missing numeric IDs are intentional.
   - `src/reporting/viPreview/viPreviewCacheExchange.ts`
   - `package.json`
 - Verification References:
+  - `tests/unit/viPreviewCacheExchange.test.ts`
+  - `tests/unit/viPreviewCacheExchangeCli.test.ts`
+- Evidence Files:
   - `tests/unit/viPreviewCacheExchange.test.ts`
   - `tests/unit/viPreviewCacheExchangeCli.test.ts`
 - Change Guidance:
@@ -7039,6 +7484,9 @@ Missing numeric IDs are intentional.
   - `tests/unit/previewCacheFleetWorkflow.test.ts`
   - `tests/unit/viPreviewWorkspaceScan.test.ts`
   - `tests/unit/viPreviewCacheWarmerCli.test.ts`
+- Evidence Files:
+  - `tests/unit/previewCacheFleetWorkflow.test.ts`
+  - `tests/unit/viPreviewWorkspaceScan.test.ts`
 - Change Guidance:
   - Keep the fleet a thin composition of the existing worker/bundle/exchange
     CLIs; add render capacity via the shard matrix, not new render logic. Keep
@@ -7094,6 +7542,10 @@ Missing numeric IDs are intentional.
   - `scripts/buildDevToolsRelease.js`
   - `.github/workflows/devtools-release.yml`
 - Verification References:
+  - `tests/unit/semver.test.ts`
+  - `tests/unit/buildDevToolsReleaseScript.test.ts`
+  - `tests/unit/devToolsReleaseWorkflow.test.ts`
+- Evidence Files:
   - `tests/unit/semver.test.ts`
   - `tests/unit/buildDevToolsReleaseScript.test.ts`
   - `tests/unit/devToolsReleaseWorkflow.test.ts`
@@ -7159,6 +7611,10 @@ Missing numeric IDs are intentional.
   - `tests/unit/viSemanticMcpServerProvider.test.ts`
   - `tests/unit/packageManifest.test.ts`
   - `tests/unit/codespacePreviewCacheTemplate.test.ts`
+- Evidence Files:
+  - `tests/unit/devToolsResolver.test.ts`
+  - `tests/unit/viSemanticMcpServerProvider.test.ts`
+  - `tests/unit/codespacePreviewCacheTemplate.test.ts`
 - Change Guidance:
   - Preserve the fail-closed posture: an unverified or untrusted pin must fall
     back to the bundled build, never to unverified pinned code. Keep IO injected.
@@ -7208,6 +7664,8 @@ Missing numeric IDs are intentional.
 - Verification References:
   - `tests/unit/marketplaceReleaseWorkflow.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/marketplaceReleaseWorkflow.test.ts`
 - Change Guidance:
   - Keep the channel derived from version parity as the source of truth and the
     dispatch input only a fail-closed cross-check. If a future change adds a
@@ -7264,6 +7722,10 @@ Missing numeric IDs are intentional.
   - `tests/unit/devToolsRuntime.test.ts`
   - `tests/unit/packageManifest.test.ts`
   - `tests/unit/viSemanticMcpServerProvider.test.ts`
+- Evidence Files:
+  - `tests/unit/devToolsInstaller.test.ts`
+  - `tests/unit/devToolsRuntime.test.ts`
+  - `tests/unit/viSemanticMcpServerProvider.test.ts`
 - Change Guidance:
   - Preserve the fail-closed, official-source-only, trust-gated posture. Reuse the
     VHS-REQ-677 orchestrator and VHS-REQ-676 SemVer utility rather than
@@ -7306,6 +7768,8 @@ Missing numeric IDs are intentional.
 - Verification References:
   - `tests/unit/devToolsRuntime.test.ts`
   - `tests/unit/packageManifest.test.ts`
+- Evidence Files:
+  - `tests/unit/devToolsRuntime.test.ts`
 - Change Guidance:
   - Keep the status read-only; if new lifecycle state is added, extend the
     reported status additively rather than changing existing fields.
@@ -7338,6 +7802,8 @@ Missing numeric IDs are intentional.
   - `scripts/readRepoTruth.js`
   - `package.json`
 - Verification References:
+  - `tests/unit/readRepoTruthScript.test.ts`
+- Evidence Files:
   - `tests/unit/readRepoTruthScript.test.ts`
 - Change Guidance:
   - Keep read surfaces read-only and fail-closed-on-auth; introduce acting
@@ -7380,6 +7846,8 @@ Missing numeric IDs are intentional.
   - `scripts/readRepoTruth.js`
   - `package.json`
 - Verification References:
+  - `tests/unit/readRepoTruthScript.test.ts`
+- Evidence Files:
   - `tests/unit/readRepoTruthScript.test.ts`
 - Change Guidance:
   - Keep the packet schema-versioned and non-gating; add new ground-truth domains
@@ -7427,6 +7895,9 @@ Missing numeric IDs are intentional.
 - Verification References:
   - `tests/unit/checkEnvSyncScript.test.ts`
   - `tests/unit/installGitHooksScript.test.ts`
+- Evidence Files:
+  - `tests/unit/checkEnvSyncScript.test.ts`
+  - `tests/unit/installGitHooksScript.test.ts`
 - Change Guidance:
   - Keep the hard-stale set minimal (toolchain-breaking only); add new advisory
     signals rather than promoting advisory conditions to commit-blocking. The
@@ -7462,6 +7933,8 @@ Missing numeric IDs are intentional.
   - `package.json`
 - Verification References:
   - `tests/unit/repoGovernanceMcpScript.test.ts`
+- Evidence Files:
+  - `tests/unit/repoGovernanceMcpScript.test.ts`
 - Change Guidance:
   - Keep the server read-only and dependency-free; expose new ground-truth as
     additional read-only tools rather than changing the existing tool contract.
@@ -7490,6 +7963,8 @@ Missing numeric IDs are intentional.
   - `.github/workflows/repo-truth-read-model.yml`
   - `scripts/readRepoTruth.js`
 - Verification References:
+  - `tests/unit/repoTruthReadModelWorkflow.test.ts`
+- Evidence Files:
   - `tests/unit/repoTruthReadModelWorkflow.test.ts`
 - Change Guidance:
   - Keep permissions least-privilege (`contents: read`) and the workflow
@@ -7580,6 +8055,8 @@ Missing numeric IDs are intentional.
   - `control-plane-write.json`
 - Verification References:
   - `tests/unit/controlPlaneWriteScript.test.ts`
+- Evidence Files:
+  - `tests/unit/controlPlaneWriteScript.test.ts`
 - Change Guidance:
   - Never enable a tier by default; enablement is a committed, reviewed change.
     Keep Tier 1 limited to directly-verified truth and require server-verified
@@ -7613,6 +8090,8 @@ Missing numeric IDs are intentional.
 - Implementation References:
   - `scripts/controlPlaneBoardSync.js`
 - Verification References:
+  - `tests/unit/controlPlaneBoardSyncScript.test.ts`
+- Evidence Files:
   - `tests/unit/controlPlaneBoardSyncScript.test.ts`
 - Change Guidance:
   - This command must never write to the board. Keep it a read-only mirror of the
@@ -7655,6 +8134,8 @@ Missing numeric IDs are intentional.
   - `tests/unit/branchProtectionSettingsAuditScript.test.ts`
   - `tests/unit/checkDevDependencies.test.ts`
   - `tests/unit/documentationWorkbenchGate.test.ts`
+- Evidence Files:
+  - `tests/unit/checkGovernanceGatesScript.test.ts`
 - Change Guidance:
   - Keep the manifest the single source of truth for governance gate wiring; do
     not remove a gate from the manifest to make the check pass — fix the wiring.
@@ -7695,6 +8176,8 @@ Missing numeric IDs are intentional.
   - `tests/unit/generateBuildInfo.test.ts`
   - `tests/unit/devHostLoop.test.ts`
   - `tests/unit/runDevHostCli.test.ts`
+- Evidence Files:
+  - `tests/unit/checkBuildInfoIntegrityScript.test.ts`
 - Change Guidance:
   - Keep the gate driving the real generator (not a fixture) so it proves the
     shipped generator's output, and keep the validator pure/injectable.
@@ -7747,6 +8230,12 @@ Missing numeric IDs are intentional.
   - `tests/unit/preparePublicTestFixtureScript.test.ts`
   - `tests/unit/runLinuxIntegrationHost.test.ts`
   - `tests/unit/runWindowsIntegrationHost.test.ts`
+- Evidence Files:
+  - `tests/unit/bootstrapLinuxVsCodeHost.test.ts`
+  - `tests/unit/preparePublicRepoCloneScript.test.ts`
+  - `tests/unit/preparePublicTestFixtureScript.test.ts`
+  - `tests/unit/runLinuxIntegrationHost.test.ts`
+  - `tests/unit/runWindowsIntegrationHost.test.ts`
 - Change Guidance:
   - Keep the command boundaries injectable so these scripts stay unit-verifiable
     without a network, an apt host, or a display, and keep them maintainer/CI
@@ -7792,6 +8281,8 @@ Missing numeric IDs are intentional.
 - Verification References:
   - `tests/unit/integrationHostStage.test.ts`
   - `tests/integration/suite/extensionHost.test.ts`
+- Evidence Files:
+  - `tests/unit/integrationHostStage.test.ts`
 - Change Guidance:
   - Keep the payload-staging functions pure so they stay unit-verifiable, and
     never seed synthetic stub VIs into the workspace fixture — the extension-host
@@ -7842,6 +8333,13 @@ Missing numeric IDs are intentional.
   - `tests/unit/vagrantValidationProofDriver.test.ts`
   - `tests/unit/vagrantBoxProvenance.test.ts`
   - `tests/unit/vagrantDriverArgs.test.ts`
+- Evidence Files:
+  - `tests/unit/vagrantLanePreflight.test.ts`
+  - `tests/unit/verifyVagrantBox.test.ts`
+  - `tests/unit/vagrantReleaseValidate.test.ts`
+  - `tests/unit/vagrantValidationProofDriver.test.ts`
+  - `tests/unit/vagrantBoxProvenance.test.ts`
+  - `tests/unit/vagrantDriverArgs.test.ts`
 - Change Guidance:
   - Keep the helpers local-only maintainer tooling (never a hosted-CI gate) and
     keep their parse/validate/arg boundaries pure so they stay unit-verifiable
@@ -7882,6 +8380,10 @@ Missing numeric IDs are intentional.
   - `src/tooling/runtimeSettingsLiveSessionProbePacket.ts`
   - `src/tooling/runtimeSettingsLiveSessionSafeRestore.ts`
 - Verification References:
+  - `tests/unit/runtimeSettingsLiveSessionProbe.test.ts`
+  - `tests/unit/runtimeSettingsLiveSessionProbePacket.test.ts`
+  - `tests/unit/runtimeSettingsLiveSessionSafeRestore.test.ts`
+- Evidence Files:
   - `tests/unit/runtimeSettingsLiveSessionProbe.test.ts`
   - `tests/unit/runtimeSettingsLiveSessionProbePacket.test.ts`
   - `tests/unit/runtimeSettingsLiveSessionSafeRestore.test.ts`
@@ -7928,6 +8430,8 @@ Missing numeric IDs are intentional.
   - `stryker.config.mjs`
 - Verification References:
   - `tests/unit/developerEnvironmentConfig.test.ts`
+- Evidence Files:
+  - `tests/unit/developerEnvironmentConfig.test.ts`
 - Change Guidance:
   - Keep the build config scoped to `src/**/*.ts` → `out`, the workspace launch
     configurations and tasks structurally intact, and the Stryker config advisory
@@ -7962,6 +8466,8 @@ Missing numeric IDs are intentional.
 - Implementation References:
   - `src/cli/runViSemanticMcpServer.ts`
 - Verification References:
+  - `tests/unit/runViSemanticMcpServer.test.ts`
+- Evidence Files:
   - `tests/unit/runViSemanticMcpServer.test.ts`
 - Change Guidance:
   - Keep the entrypoint a thin stream-framing shell over the injected handler:
@@ -8003,6 +8509,8 @@ Missing numeric IDs are intentional.
 - Verification References:
   - `tests/unit/addToProjectWorkflow.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/addToProjectWorkflow.test.ts`
 - Change Guidance:
   - Project #4 (`vihs`) is authoritative; do not point this at the duplicate
     Project #3 (`VIHS`). Keep the add idempotent and the secret gate intact so the
@@ -8058,6 +8566,8 @@ Missing numeric IDs are intentional.
 - Verification References:
   - `tests/unit/copilotSetupStepsTemplate.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/copilotSetupStepsTemplate.test.ts`
 - Change Guidance:
   - The setup-steps template and the repo-settings MCP JSON in the runbook must
     stay consistent: the `args` path in the JSON is exactly
@@ -8117,6 +8627,8 @@ Missing numeric IDs are intentional.
 - Verification References:
   - `tests/unit/vagrantEmptySwapSpike.test.ts`
   - `tests/unit/requirementsDocs.test.ts`
+- Evidence Files:
+  - `tests/unit/vagrantEmptySwapSpike.test.ts`
 - Change Guidance:
   - This spike answers a feasibility question for the gated ML research track
     (#2295) under ADR-0027; it must not ship a model or promote ML behavior. The
@@ -8167,6 +8679,10 @@ Missing numeric IDs are intentional.
   - `tests/unit/renderControlPlaneDigestScript.test.ts`
   - `tests/unit/controlPlaneLoopWorkflow.test.ts`
   - `tests/unit/controlPlaneApplyScript.test.ts`
+- Evidence Files:
+  - `tests/unit/renderControlPlaneDigestScript.test.ts`
+  - `tests/unit/controlPlaneLoopWorkflow.test.ts`
+  - `tests/unit/controlPlaneApplyScript.test.ts`
 - Change Guidance:
   - The radar workflow token must never gain Project #4 write scope; board writes
     come only via the injected Projects secret through the Tier-1 apply. Keep the
@@ -8201,6 +8717,8 @@ Missing numeric IDs are intentional.
   - `scripts/checkIntegrationCoverageLane.js`
   - `.github/workflows/integration-coverage.yml`
 - Verification References:
+  - `tests/unit/checkIntegrationCoverageLaneScript.test.ts`
+- Evidence Files:
   - `tests/unit/checkIntegrationCoverageLaneScript.test.ts`
 - Change Guidance:
   - Never give the lane a write token or a push/PR trigger; untrusted code must
@@ -8238,6 +8756,9 @@ Missing numeric IDs are intentional.
 - Verification References:
   - `tests/unit/fileLinuxValidationGapScript.test.ts`
   - `tests/unit/issueStandardsTriageScript.test.ts`
+- Evidence Files:
+  - `tests/unit/fileLinuxValidationGapScript.test.ts`
+  - `tests/unit/issueStandardsTriageScript.test.ts`
 - Change Guidance:
   - Keep the helpers' parse/detect/compose functions pure and their fs/spawn
     boundaries injected, and never widen the executable allow-list beyond the
@@ -8266,6 +8787,8 @@ Missing numeric IDs are intentional.
 - Implementation References:
   - `scripts/auditTraceabilitySteward.js`
 - Verification References:
+  - `tests/unit/traceabilityAuditScript.test.ts`
+- Evidence Files:
   - `tests/unit/traceabilityAuditScript.test.ts`
 - Change Guidance:
   - Keep `dev-only` in the retired set so the traceability gate stays fail-closed;
@@ -8393,6 +8916,12 @@ Missing numeric IDs are intentional.
   - `tests/unit/requirementsDocs.test.ts`
   - `manual:windows-hardening-host-matrix`
   - `manual:windows-perfmon-mprr-pipeline`
+- Evidence Files:
+  - `tests/unit/runWindowsRuntimeMatrixScript.test.ts`
+  - `tests/unit/windowsPerfmonMprrPipeline.test.ts`
+  - `tests/unit/timingStopwatchSurface.test.ts`
+  - `tests/unit/timingCorrelationModel.test.ts`
+  - `tests/unit/timingCorrelationSignature.test.ts`
 - Change Guidance:
   - Evolve the scenario manifest additively and keep every legacy alias resolving
     to its canonical row so existing dispatch keeps working; when a new LabVIEW

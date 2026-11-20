@@ -1,0 +1,119 @@
+{
+  "schema": "vi-history-suite/wiki-stub-reasons@1",
+  "reasonCodes": {
+    "generic-evidence-only": "Only the generic requirementsDocs.test.ts or packageManifest.test.ts cites the requirement; neither is evidence for a specific requirement."
+  },
+  "expectedCounts": {
+    "perCaseCanonical": 22,
+    "fileLevelCanonical": 115,
+    "stub": 4
+  },
+  "stubs": [
+    {
+      "requirement": "VHS-REQ-004",
+      "test": "TEST-004",
+      "reason": "generic-evidence-only",
+      "genericFilesCited": [
+        "tests/unit/packageManifest.test.ts"
+      ]
+    },
+    {
+      "requirement": "VHS-REQ-084",
+      "test": "TEST-084",
+      "reason": "generic-evidence-only",
+      "genericFilesCited": [
+        "tests/unit/packageManifest.test.ts"
+      ]
+    },
+    {
+      "requirement": "VHS-REQ-599",
+      "test": "TEST-599",
+      "reason": "generic-evidence-only",
+      "genericFilesCited": [
+        "tests/unit/packageManifest.test.ts"
+      ]
+    },
+    {
+      "requirement": "VHS-REQ-607",
+      "test": "TEST-607",
+      "reason": "generic-evidence-only",
+      "genericFilesCited": [
+        "tests/unit/requirementsDocs.test.ts"
+      ]
+    }
+  ],
+  "pageMarginCap": {
+    "minimumMarginBytes": 2048,
+    "omittedFiles": {
+      "VHS-REQ-601": [
+        "tests/unit/closeoutEvidenceScript.test.ts",
+        "tests/unit/riskLedgerScript.test.ts",
+        "tests/unit/traceabilityAuditScript.test.ts",
+        "tests/unit/verifyRequirementsHealth.test.ts"
+      ],
+      "VHS-REQ-641": [
+        "tests/unit/comparisonReportAction.test.ts",
+        "tests/unit/comparisonReportPreflight.test.ts",
+        "tests/unit/comparisonReportRuntimeExecution.test.ts",
+        "tests/unit/gitCli.test.ts",
+        "tests/unit/openViHistoryCommand.test.ts"
+      ],
+      "VHS-REQ-645": [
+        "tests/unit/comparisonReportAction.test.ts",
+        "tests/unit/openRuntimeReportPanelCommand.test.ts"
+      ],
+      "VHS-REQ-649": [
+        "tests/unit/pickContainerImageVersionCommand.test.ts"
+      ],
+      "VHS-REQ-657": [
+        "tests/unit/comparisonReportRuntimeExecution.test.ts",
+        "tests/unit/comparisonRuntimeDoctor.test.ts",
+        "tests/unit/comparisonRuntimeLocator.test.ts",
+        "tests/unit/openRuntimeReportPanelCommand.test.ts",
+        "tests/unit/runtimeAvailabilityNotice.test.ts"
+      ],
+      "VHS-REQ-659": [
+        "tests/unit/revisionViTree.test.ts",
+        "tests/unit/viPreviewCacheInspection.test.ts",
+        "tests/unit/viPreviewCacheWarmer.test.ts",
+        "tests/unit/viPreviewCommandPlan.test.ts",
+        "tests/unit/viPreviewDiagnostics.test.ts",
+        "tests/unit/viPreviewExecution.test.ts",
+        "tests/unit/viPreviewFileRender.test.ts",
+        "tests/unit/viPreviewFlatFrames.test.ts",
+        "tests/unit/viPreviewFramesModel.test.ts",
+        "tests/unit/viPreviewRenderMode.test.ts",
+        "tests/unit/viPreviewStaging.test.ts",
+        "tests/unit/viPreviewVerifyCli.test.ts"
+      ],
+      "VHS-REQ-661": [
+        "tests/unit/viSemanticPrReview.test.ts"
+      ],
+      "VHS-REQ-662": [
+        "tests/unit/compareViRevisions.test.ts",
+        "tests/unit/viSemanticComparisonMcp.test.ts",
+        "tests/unit/viSemanticMcpServerDeps.test.ts"
+      ],
+      "VHS-REQ-666": [
+        "tests/unit/releaseReadinessScript.test.ts"
+      ],
+      "VHS-REQ-703": [
+        "tests/unit/runViSemanticPrReview.test.ts",
+        "tests/unit/viPreviewRegionCorrelation.test.ts",
+        "tests/unit/viSemanticComparisonMcp.test.ts"
+      ],
+      "VHS-REQ-707": [
+        "tests/unit/deterministicRollingBlockRing.test.ts",
+        "tests/unit/frameTimingAlignment.test.ts",
+        "tests/unit/labviewLaunchTiming.test.ts",
+        "tests/unit/mirrorParityDigest.test.ts",
+        "tests/unit/mirrorParityReconciler.test.ts",
+        "tests/unit/perfmonCapturePlan.test.ts",
+        "tests/unit/perfmonSampleSeries.test.ts",
+        "tests/unit/perfmonSessionPattern.test.ts",
+        "tests/unit/reconcileMirrorParityScript.test.ts",
+        "tests/unit/recordMirrorBenchmarkScript.test.ts"
+      ]
+    }
+  }
+}
