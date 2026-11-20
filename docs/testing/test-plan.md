@@ -560,7 +560,8 @@ holds their reason codes, the expected counts and every file omitted by the page
 `scripts/generate_wiki_test_plan.py` writes the file-level and stub rows of the table above, the `Evidence Files`
 block of each requirement in `docs/requirements/srs.md` (the section the test pages read) and the JSON file from the
 SRS Verification References, the test files' text and the evidence; rerun it with `wiki-evidence.json` present after
-changing a cited test file. Every test page keeps at least 2,048 bytes below the 16,384-byte page budget: the script
+changing a cited test file. Every test page (not every wiki page) keeps at least 2,048 bytes below the 16,384-byte page budget: the script
 omits the file with the most test cases from a requirement's block until it does, records each omission in the JSON
 file and counts it in the block, and the checker fails below that margin (`--self-test` is its negative control).
-The generator's own split of long non-test pages leaves them closer to the budget; that needs a kit change.
+Only test pages are held to that margin. Hub, index and requirement pages are split by the kit above 16,384 bytes
+(split target 14,800), so the checker asserts only that each stays within 16,384 bytes.

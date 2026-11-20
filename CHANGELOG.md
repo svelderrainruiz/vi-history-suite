@@ -12,7 +12,8 @@ This changelog records user-facing release history for `vi-history-suite`.
   `requirementsDocs.test.ts` and `packageManifest.test.ts` are never evidence, so VHS-REQ-004, 084, 599 and 607 stay stubs
   with reason codes in `docs/testing/wiki-stub-reasons.json`. `scripts/generate_wiki_test_plan.py` generates the rows and
   the SRS `Evidence Files` blocks, and `scripts/check_wiki_canonical.py` now fails when a test page is within 2 KB of the
-  16,384-byte page budget or when the counts differ.
+  16,384-byte page budget, when any wiki page exceeds that budget, or when the counts differ (hub, index and requirement pages
+  are split by the kit and are held to the budget only, not to a 2 KB margin).
 - Move the RSR consumer kit and governance pin to v0.14.0 (VITechnologies/projectbuddy#408) and configure canonical wiki test
   pages: `.wiki-generator.json` adds a test scope, `TestID` links from the test plan, and the evidence file; the
   `Wiki Canonical Test Pages` CI job turns `vitest run --reporter=json` into evidence and checks that the wiki

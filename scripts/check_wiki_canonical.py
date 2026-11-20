@@ -7,6 +7,11 @@ Needs only Python 3.9+ and Git. Run it at the repository root, in a clean checko
 stimulus` and `generate`), requires the two builds to be byte-identical, requires at least one canonical page and
 no `Pending:` placeholder, and runs `observations.py check --member-commit` on the committed result. A test stays a
 stub, with a note printed, when a linked file has a skipped or failing case. Exit 0 when all hold.
+
+Page size: every generated page must be at most 16,384 bytes (the generator's limit). Only the test pages (`tests/`),
+which the kit does not split, must also keep MARGIN (2,048) bytes below it, and the check fails below that. Hub, index and
+requirement pages are split or spilled by the kit above 16,384 bytes, with a split target of 14,800 bytes, so they can
+sit closer to the limit and are not claimed to keep 2 KB.
 """
 
 from __future__ import annotations
@@ -147,9 +152,12 @@ def main() -> int:
                      + ", ".join(f"{p} ({sizes[p][0]} bytes, margin {sizes[p][1]})" for p in tight))
         largest = max(sizes, key=lambda p: sizes[p][0])
         others = {p: len(d) for p, d in files.items() if p.endswith(".md") and not p.startswith("tests/")}
+        over = sorted(p for p, n in others.items() if n > BUDGET)
+        if over:
+            sys.exit(f"FAIL: pages over the {BUDGET}-byte page budget: {', '.join(over)}")
         widest = max(others, key=others.get)
         print(f"NOTE: largest test page {largest}: {sizes[largest][0]} bytes, margin {sizes[largest][1]}; "
-              f"largest other page {widest}: {others[widest]} bytes, margin {BUDGET - others[widest]} (kit split target)")
+              f"largest other page {widest}: {others[widest]} bytes, margin {BUDGET - others[widest]} (split-capable; only the page budget applies)")
         for warning in summary["warnings"]:
             print(f"NOTE: {warning}")
         run("git", "-C", str(first), "add", "-A")
