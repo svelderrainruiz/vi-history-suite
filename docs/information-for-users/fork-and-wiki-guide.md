@@ -32,11 +32,19 @@ upstream wiki.
 
 ## What breaks on a fork
 
-- **Marketplace and publisher secrets.** The release workflows publish the
-  extension and need secrets that exist only on the upstream. They fail or skip on
-  a fork. Do not add publisher credentials to a fork to make them pass.
-- **Self-hosted runners.** Workflows that target self-hosted or LabVIEW-equipped
-  runners stay queued on a fork until you register your own runners.
+- **Marketplace publishing.** `marketplace-release.yml` is manual (dispatch) and
+  runs in the protected `marketplace-release` environment, which reads the
+  `VSCE_PAT` secret. A fork has neither the environment nor the secret, so the
+  release fails closed at its authority guard. A fork that wants to publish needs
+  its own publisher and secret.
+- **Self-hosted runners.** The LabVIEW maintainer, runtime-matrix and integration
+  coverage workflows (`linux-labview-maintainer.yml`, `windows-labview-maintainer.yml`,
+  `windows-runtime-matrix.yml`, `integration-coverage.yml`) target self-hosted
+  runners with specific labels. On a fork they stay queued until you register your
+  own runners with those labels. The main `ci.yml` jobs use GitHub-hosted runners.
+- **Project tokens.** Workflows that use `CONTROL_PLANE_PROJECT_TOKEN`,
+  `PREVIEW_CACHE_TARGET_TOKEN` or `VI_REVIEW_TARGET_TOKEN` need those secrets and
+  cannot act on the upstream's projects or repositories from a fork.
 - **Test pages.** The wiki test pages show the evidence the job produced on your
   fork at your commit. Tests that need a VS Code extension host are not run by the
   job, so their pages say *not run*; they are never shown as passed.

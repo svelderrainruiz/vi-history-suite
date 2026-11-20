@@ -6,6 +6,9 @@ This changelog records user-facing release history for `vi-history-suite`.
 
 ### Added
 
+- Add a `wiki-publish` workflow that publishes the generated wiki on the upstream, or on a fork whose owner sets the
+  repository variable `WIKI_PUBLISH_ENABLED` to `true`, and a fork and wiki guide
+  (`docs/information-for-users/fork-and-wiki-guide.md`) with the fork bootstrap checklist.
 - Link the requirements that cite a specific test file to canonical wiki test pages (svelderrainruiz/vi-history-suite#20,
   VITechnologies/projectbuddy#318): 22 per-case plus 115 file-level canonical, 4 stub. A file-level page says
   `evidence granularity: file` and names the test files that passed at the commit and cite the requirement; the generic

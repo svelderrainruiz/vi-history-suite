@@ -456,6 +456,7 @@ docs/information-for-users/plan.md,asset-doc,No,Governed external user-informati
 docs/information-for-users/audience-and-task-model.md,asset-doc,No,Governed external user-information audience and task model; reference documentation not directly mapped in RTM.
 docs/information-for-users/delivery-profile.md,asset-doc,No,Governed external user-information delivery profile; reference documentation not directly mapped in RTM.
 docs/information-for-users/navigation-and-search.md,asset-doc,No,Governed external user-information navigation and search policy; reference documentation not directly mapped in RTM.
+docs/information-for-users/fork-and-wiki-guide.md,asset-doc,No,Governed external user-information fork and wiki guide; reference documentation not directly mapped in RTM.
 docs/information-for-users/style-guide.md,asset-doc,No,Governed external user-information style and accessibility baseline; reference documentation not directly mapped in RTM.
 resources/bundled-docs/manifest.json,mapped,Yes,Bundled documentation manifest asset delivered with the extension package; mapped to VHS-REQ-611.
 resources/bundled-docs/pages/comparison-reports-and-dashboard-review.html,mapped,Yes,Bundled comparison/dashboard documentation page asset; mapped to VHS-REQ-611.

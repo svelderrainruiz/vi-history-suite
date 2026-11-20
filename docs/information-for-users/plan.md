@@ -17,6 +17,7 @@ See also:
 - `docs/information-for-users/delivery-profile.md`
 - `docs/information-for-users/navigation-and-search.md`
 - `docs/information-for-users/style-guide.md`
+- `docs/information-for-users/fork-and-wiki-guide.md`
 - `docs/faq.md`
 - `docs/glossary.md`
 - `docs/quick-reference.md`
@@ -41,6 +42,7 @@ See also:
 | `docs/information-for-users/delivery-profile.md` | Surface selection and fallback | docs owner | delivery path, hosting, or access-route change |
 | `docs/information-for-users/navigation-and-search.md` | Navigation, metadata, and search policy | docs owner | route, heading, or metadata change |
 | `docs/information-for-users/style-guide.md` | Writing, terminology, and accessibility rules | docs owner | style, term, or accessibility rule change |
+| `docs/information-for-users/fork-and-wiki-guide.md` | Fork bootstrap and wiki publishing | forker or maintainer | wiki-publish workflow, fork-enable variable, or fork-breakage change |
 | `docs/information-item-map.md` | Information-item ownership and evidence map | maintainer or QA | assurance-pack, traceability, or release evidence change |
 
 ## Quality Goals

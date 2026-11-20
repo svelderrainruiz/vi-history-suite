@@ -23,6 +23,7 @@ See also:
 | Install or first run | `INSTALL.md` and `FIRST-RUN.md` | `README.md` | keep first-use guidance close to the overview |
 | Short support answer | `docs/faq.md` | `docs/user-guide.md` | use FAQ for repeated questions or temporary answers |
 | Shared terminology | `docs/glossary.md` | `docs/information-for-users/style-guide.md` | keep user-facing terms aligned |
+| Fork the repository and publish its wiki | `docs/information-for-users/fork-and-wiki-guide.md` | `.github/workflows/wiki-publish.yml` | keep the fork bootstrap checklist current |
 | Repeat-find lookup | `docs/quick-reference.md` | local or hosted search | keep compact routes stable |
 | Runtime or validation failure | `TROUBLESHOOTING.md` | `SUPPORT.md` | route failures to a safe next action |
 
