@@ -6,6 +6,10 @@ This changelog records user-facing release history for `vi-history-suite`.
 
 ### Added
 
+- Move the RSR consumer kit and governance pin to v0.14.0 (VITechnologies/projectbuddy#408) and configure canonical wiki test
+  pages: `.wiki-generator.json` adds a test scope, `TestID` links from the test plan, and the evidence file; the
+  `Wiki Canonical Test Pages` CI job turns `vitest run --reporter=json` into evidence and checks that the wiki
+  regenerates with canonical test pages (`scripts/check_wiki_canonical.py`).
 - Adopt the repo-standards-review consumer kit at RSR v0.6.0 (VITechnologies/projectbuddy#332). Executable
   scripts under `scripts`, `src/cli`, `vagrant`, `.tools/bin`, the testing-automation skill and the vendored
   VIDiff reference check out with LF on every platform, and the vendored mprr contract stays byte-exact. A new

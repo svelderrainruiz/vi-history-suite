@@ -416,3 +416,15 @@ vagrant up
 
 Vagrant evidence is useful local confidence only. It is not required for a
 release.
+
+## Wiki Canonical Test Pages
+
+The `Wiki Canonical Test Pages` CI job turns the vitest run into execution evidence and
+checks that the wiki's test pages regenerate from `docs/` with a stimulus and required
+observation items. It runs `npx vitest run --reporter=json --outputFile=vitest-report.json`,
+`python3 .repo-standards-review/observations.py evidence --format jest-json`, and
+`python3 scripts/check_wiki_canonical.py`, which builds the wiki twice, requires identical
+output, and runs `observations.py check --member-commit`. A test page is canonical only when
+the test files its requirements' Verification References name ran and passed at the same
+commit; otherwise it stays a stub. The extension-host suite is not part of this evidence, so a
+page that names it says `Not verified here`.

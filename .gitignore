@@ -44,3 +44,5 @@ tools/**/obj/
 
 # Local lvkit/preview runtime cache (never commit)
 .vihs/
+wiki-evidence.json
+vitest-report.json

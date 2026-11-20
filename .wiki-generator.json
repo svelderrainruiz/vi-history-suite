@@ -7,7 +7,16 @@
   "srs": { "path": "requirements/srs.md", "style": "blocks" },
   "rtm": { "path": "requirements/rtm.csv", "idColumn": "ReqID", "columns": ["Status", "Area"] },
   "architecture": { "overview": "architecture/overview.md", "adrDir": "architecture/adr", "adrIndex": "architecture/adr/README.md" },
-  "testPlan": { "path": "testing/test-plan.md" },
+  "testPlan": {
+    "path": "testing/test-plan.md",
+    "idColumn": "Test Evidence",
+    "canonical": {
+      "evidence": ["wiki-evidence.json"],
+      "artifactSection": "Verification References",
+      "testFiles": ["\\.test\\.ts$"],
+      "notRunReason": "it needs a VS Code extension host, which the evidence does not run"
+    }
+  },
   "names": { "requirements/syrs.md": "System-Requirements-Specification" },
   "words": { "vhs": "VHS", "req": "REQ", "syrs": "SyRS" },
   "assetDirs": ["images"],
@@ -31,8 +40,10 @@
         { "name": "Agent Work Scope", "from": "block:Agent Work Scope" },
         { "name": "Implementation References", "from": "block:Implementation References" },
         { "name": "Verification References", "from": "block:Verification References" },
-        { "name": "Change Guidance", "from": "block:Change Guidance" }
+        { "name": "Change Guidance", "from": "block:Change Guidance" },
+        { "name": "TestID", "from": "plan:tests" }
       ]
-    }
+    },
+    "test": { "directory": "tests", "idPrefix": "TEST" }
   }
 }
