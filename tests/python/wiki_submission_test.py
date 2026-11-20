@@ -193,7 +193,7 @@ class Authorization(unittest.TestCase):
             dirs[:] = [d for d in dirs if d not in (".git", "node_modules", "coverage")]
             for name in names:
                 path = Path(root) / name
-                if path != Path(__file__).resolve():
+                if path != Path(__file__).resolve() and path.is_file():
                     self.assertNotIn(CANARY.encode(), path.read_bytes(), str(path.relative_to(ROOT)))
 
     def test_no_oracle_all_authorization_failures_look_the_same(self):
@@ -265,6 +265,7 @@ class Hardening(unittest.TestCase):
         self.assertIn("needs.gate.outputs.authorized != 'yes'", condition)
         self.assertIn("needs.gate.outputs.authorized != 'yes' && 'not-authorized'", workflow)
 
+    @unittest.skipIf(os.name == "nt", "runs the report shell with a stub gh; the hosted report job is ubuntu")
     def test_the_report_script_refuses_anything_outside_the_fixed_vocabulary(self):
         workflow = (ROOT / ".github" / "workflows" / "wiki-submission-ingest.yml").read_text(encoding="utf-8")
         script = "\n".join(line[10:] for line in workflow.split("        run: |\n")[-1].splitlines())
