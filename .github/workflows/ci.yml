@@ -367,7 +367,8 @@ jobs:
       # suite as a JSON report, turns it into execution evidence at this commit, and
       # checks that the wiki regenerates from docs/ with canonical test pages: two
       # byte-identical builds, no placeholder, and observations.py check passing.
-      # A test whose linked test files are not all passing stays a stub. The
+      # The lvkit steps are the ones the Build, Test, Package job runs before npm test, because the
+      # vitest suite needs them to pass. A test whose linked test files are not all passing stays a stub. The
       # extension-host suite is not run here, so pages that name it say so.
       - name: Checkout
         uses: actions/checkout@v7
@@ -381,6 +382,30 @@ jobs:
       - name: Install
         run: npm ci
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+      - name: Prepare lvkit + icon-editor corpus (VHS-REQ-712)
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Pin lvkit to an exact version and put it on PATH so the compare
+          # provider resolves exactly this build (locator priority: `lvkit` on
+          # PATH) rather than the unpinned `uvx --from lvkit lvkit` fallback,
+          # keeping the committed lvkitRealIntegration snapshots stable across
+          # upstream releases. `uv tool dir --bin` is cross-platform (resolves
+          # the Linux and Windows executable dirs), so this works on both legs.
+          uv tool install 'lvkit==0.5.0'
+          uv tool list
+          echo "$(uv tool dir --bin)" >> "$GITHUB_PATH"
+          # Minimal corpus: the two pinned icon-editor commits' VI blobs (the lvkit
+          # diff is search-path independent, so no working-tree checkout is needed).
+          corpus="$RUNNER_TEMP/lvkit-corpus"
+          rm -rf "$corpus"
+          git init -q "$corpus"
+          git -C "$corpus" remote add origin https://github.com/ni/labview-icon-editor
+          git -C "$corpus" fetch --depth 1 origin 537683398d8c5cb73533603b5c06b6eef62a6ac8
+          git -C "$corpus" fetch --depth 1 origin fc09736ae5e38c2016de081a9c8686256c9f2f9c
+          echo "VIHS_LVKIT_CORPUS_DIR=$corpus" >> "$GITHUB_ENV"
       - name: Run the unit tests as a JSON report
         run: npx vitest run --reporter=json --outputFile=vitest-report.json
 
