@@ -163,10 +163,10 @@ npm run package
    through the selected standards runner against the tracked-worktree snapshot:
 
 ```shell
-python3 C:\Users\sveld\.codex\skills\repo-standards-review\scripts\preflight_local_dependencies.py --json
-python3 C:\Users\sveld\.codex\skills\repo-standards-review\scripts\requirements_quality_check.py <repo-root> --requirements-spec-scope system --json
-python3 C:\Users\sveld\.codex\skills\repo-standards-review\scripts\repo_evidence_scan.py <repo-root> --format json --profile quick-triage --include-snippets
-python3 C:\Users\sveld\.codex\skills\repo-standards-review\scripts\run_assurance.py <repo-root> --profile quick-triage
+python3 <user-profile>\.codex\skills\repo-standards-review\scripts\preflight_local_dependencies.py --json
+python3 <user-profile>\.codex\skills\repo-standards-review\scripts\requirements_quality_check.py <repo-root> --requirements-spec-scope system --json
+python3 <user-profile>\.codex\skills\repo-standards-review\scripts\repo_evidence_scan.py <repo-root> --format json --profile quick-triage --include-snippets
+python3 <user-profile>\.codex\skills\repo-standards-review\scripts\run_assurance.py <repo-root> --profile quick-triage
 ```
 
    Closeout parsing reports the Definition-of-Done gate as explicit `PASS`,

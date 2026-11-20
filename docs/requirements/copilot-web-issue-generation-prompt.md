@@ -65,21 +65,21 @@ requirement adequately covers the intended work. In that case:
 
 - When available, use the local `repo-standards-review` skill as an advisory
   compliance aid at:
-  `C:\Users\sveld\.codex\skills\repo-standards-review\SKILL.md`
+  `<user-profile>\.codex\skills\repo-standards-review\SKILL.md`
 - For local-managed requirement waves, run the local dependency preflight and
   system-scope requirements quality check before treating the wave as
   review-ready:
 
 ```powershell
-python C:\Users\sveld\.codex\skills\repo-standards-review\scripts\preflight_local_dependencies.py --json
-python C:\Users\sveld\.codex\skills\repo-standards-review\scripts\requirements_quality_check.py <repo-root> --requirements-spec-scope system --json
+python <user-profile>\.codex\skills\repo-standards-review\scripts\preflight_local_dependencies.py --json
+python <user-profile>\.codex\skills\repo-standards-review\scripts\requirements_quality_check.py <repo-root> --requirements-spec-scope system --json
 ```
 
 - For Copilot Web or remote agents that cannot access maintainer-local skills,
   keep repo-local validation commands required and mark maintainer-local checks
   as advisory evidence to be supplied by a maintainer.
 - Do not make a Copilot Web issue fail solely because
-  `C:\Users\sveld\.codex\skills\repo-standards-review` is unavailable in the
+  `<user-profile>\.codex\skills\repo-standards-review` is unavailable in the
   remote environment.
 
 ## Required Fail-Closed Gates

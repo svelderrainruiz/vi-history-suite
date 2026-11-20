@@ -1436,7 +1436,7 @@ describe('requirements documentation coherence', () => {
     expect(issueWaveGuidance).toContain('Local Evidence And Validation');
     expect(issueWaveGuidance).toContain('Fail Closed If Missing');
     expect(issueWaveGuidance).toContain('repo-standards-review');
-    expect(issueWaveGuidance).toContain('C:\\Users\\sveld\\.codex\\skills\\repo-standards-review\\SKILL.md');
+    expect(issueWaveGuidance).toContain('<user-profile>\\.codex\\skills\\repo-standards-review\\SKILL.md');
     expect(issueWaveGuidance).toContain('preflight_local_dependencies.py --json');
     expect(issueWaveGuidance).toContain('--requirements-spec-scope system --json');
     expect(issueWaveGuidance).toContain('target `VHS-REQ-601`');
