@@ -439,6 +439,65 @@ class WikiSubmission(unittest.TestCase):
             self.assertNotIn(forbidden, source)
 
 
+class Gaps(unittest.TestCase):
+    def test_a_wiki_generator_config_without_a_canonical_dict_is_config_invalid(self):
+        for config in ({}, {"testPlan": {}}, {"testPlan": {"canonical": []}}, {"testPlan": {"canonical": "x"}}):
+            with tempfile.TemporaryDirectory() as temp:
+                root = Path(temp)
+                (root / "scripts").mkdir()
+                (root / "scripts" / "wiki-submission.schema.json").write_text(json.dumps(SCHEMA))
+                (root / ".wiki-generator.json").write_text(json.dumps(config))
+                with mock.patch.object(ws, "ROOT", root):
+                    code, out, err, output = cli("verify", event_for(), None, FakeNet({"wiki-evidence.json": evidence()}))
+                self.assertEqual(json.loads(out)["reason"], "config-invalid", config)
+
+    def test_workflow_permissions_concurrency_and_triggers(self):
+        workflow = (ROOT / ".github" / "workflows" / "wiki-submission-ingest.yml").read_text(encoding="utf-8")
+        lines = workflow.splitlines()
+        self.assertEqual([line for line in lines if line.startswith("permissions:")], ["permissions: {}"])
+        block = workflow[workflow.index("\nconcurrency:"):workflow.index("\npermissions:")]
+        self.assertIn("cancel-in-progress: true", block)
+        code = "\n".join(line for line in lines if not line.lstrip().startswith("#"))
+        self.assertNotIn("pull_request_target", code)
+        self.assertNotIn("pull_request:", code)
+
+    def test_a_repeated_test_id_is_rejected(self):
+        twice = [{"id": "tests/unit/alpha.test.ts", "result": "passed"}] * 2
+        self.assertEqual(run(submission(evidence(), tests=twice))[0], "test-unknown")
+
+    def test_an_author_login_with_illegal_characters_is_not_authorized(self):
+        for login in ("bad_login!", "bad login", "-" * 40, ""):
+            self.assertFalse(auth("example-partner", event_for(user={"id": 4242, "login": login}))[0], login)
+        self.assertTrue(auth("example-partner", event_for(user={"id": 4242, "login": "ok-login"}))[0])
+
+    def test_a_boolean_is_not_an_account_id(self):
+        info = {"fork": True, "parents": [UPSTREAM], "owner_id": 1, "owner_login": "Example-Partner"}
+        self.assertFalse(auth("example-partner", event_for(user={"id": True, "login": "example-partner"}), FakeNet({}, info=info))[0])
+        info = {**info, "owner_id": True}
+        self.assertFalse(auth("example-partner", event_for(user={"id": 1, "login": "example-partner"}), FakeNet({}, info=info))[0])
+        self.assertFalse(ws.is_id(True) or ws.is_id("1") or ws.is_id(None))
+
+    def test_a_backslash_or_dot_segment_path_is_refused_before_any_fetch(self):
+        for path in ("a\\b", "..\\x", "/abs", "a/./b", "a//b", "a/../b"):
+            net = FakeNet({})
+            with self.assertRaises(ws.Reject) as caught:
+                ws.fetch_evidence(net, FORK, EVID_SHA, [{"path": path, "sha256": "0" * 64}], SCHEMA["x-limits"])
+            self.assertEqual(caught.exception.code, "path-invalid", path)
+            self.assertFalse(net.calls, path)
+
+    def test_the_verifiers_own_platform_check_backs_up_the_schema(self):
+        # The schema's platform pattern is stricter than the kit's PLATFORM, so no conforming value fails PLATFORM;
+        # with the schema loosened, the verifier's own check still refuses a value the kit would not accept.
+        loose = copy.deepcopy(SCHEMA)
+        loose["properties"]["platform"]["pattern"] = "^[A-Za-z]+$"
+        blob = evidence(platform="Linux")
+        event = {"issue": {"title": "[wiki-submission] x", "body": json.dumps(submission(blob, platform="Linux"))}}
+        with self.assertRaises(ws.Reject) as caught:
+            ws.verify(event, upstream=UPSTREAM, schema=loose, canonical=CANONICAL, tracked=TRACKED,
+                      net=FakeNet({"wiki-evidence.json": blob}), observations=OBSERVATIONS)
+        self.assertEqual(caught.exception.code, "schema-invalid")
+
+
 class Cli(unittest.TestCase):
     def test_unset_allow_list_gives_unauthorized_in_a_real_process(self):
         import subprocess
