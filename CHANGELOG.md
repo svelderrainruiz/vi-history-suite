@@ -6,6 +6,9 @@ This changelog records user-facing release history for `vi-history-suite`.
 
 ### Added
 
+- Add a `wiki-submission-ingest` workflow and verifier that check a fork's wiki submission issue as data against this
+  repository's own test definitions and label it `wiki-attested` or `wiki-not-attested` (VHS-REQ-720, ADR-0036); an
+  unset or empty `SUBMISSION_ALLOWLIST` secret authorizes nobody.
 - Fork and wiki guide: say how to enable Actions on a fork through the API, that the job succeeds without the
   `repoUrl` edit but links to the upstream, and that the generated Home page replaces the first page.
 - Add a `wiki-publish` workflow that publishes the generated wiki on the upstream, or on a fork whose owner sets the

@@ -58,3 +58,4 @@ The index and the required structure are enforced by `npm run adr:check`
 | [ADR-0033](./ADR-0033-agent-readable-vi-scan-lvkit-generate.md) | Agent-Readable VI Scan (lvkit Generate) | Accepted |
 | [ADR-0034](./ADR-0034-full-perfmon-metadata-generic-channels.md) | Full Perfmon Metadata via Additive Generic Channels | Accepted |
 | [ADR-0035](./ADR-0035-local-branch-flow-enforcement-and-prototype-promotion.md) | Local Branch-Flow Enforcement And Explicit Prototype Promotion | Accepted |
+| [ADR-0036](./ADR-0036-verify-fork-wiki-submissions-as-data.md) | Verify Fork Wiki Submissions As Data | Accepted |
